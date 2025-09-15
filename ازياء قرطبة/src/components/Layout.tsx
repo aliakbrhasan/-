@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, FileText, Receipt, Users, Menu, Settings, User, LogOut } from 'lucide-react';
+import { Home, FileText, Receipt, Users, Menu, Settings, User, LogOut, DollarSign } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
 
@@ -17,6 +17,7 @@ export function Layout({ children, currentPage, onNavigate, isLoggedIn, onLogout
     { id: 'orders', label: 'الطلبات', icon: FileText },
     { id: 'invoices', label: 'الفواتير', icon: Receipt },
     { id: 'customers', label: 'الزبائن', icon: Users },
+    { id: 'financial', label: 'المالية', icon: DollarSign },
   ];
 
   const MobileNavigation = () => (

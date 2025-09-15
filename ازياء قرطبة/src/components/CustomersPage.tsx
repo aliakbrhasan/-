@@ -274,33 +274,6 @@ export function CustomersPage() {
         ))}
       </div>
 
-      {/* Summary */}
-      <Card className="bg-white border-[#C69A72]">
-        <CardHeader>
-          <CardTitle className="text-[#13312A] arabic-text">ملخص الزبائن</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <p className="text-3xl text-[#13312A] mb-2">{customers.length}</p>
-              <p className="text-[#155446] arabic-text">إجمالي الزبائن</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl text-[#13312A] mb-2">
-                {customers.reduce((sum, customer) => sum + customer.totalSpent, 0)} دينار عراقي
-              </p>
-              <p className="text-[#155446] arabic-text">إجمالي المبيعات</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl text-[#13312A] mb-2">
-                {(customers.reduce((sum, customer) => sum + customer.totalSpent, 0) / customers.length).toFixed(0)} دينار عراقي
-              </p>
-              <p className="text-[#155446] arabic-text">متوسط الإنفاق</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       <NewCustomerDialog />
     </div>
   );

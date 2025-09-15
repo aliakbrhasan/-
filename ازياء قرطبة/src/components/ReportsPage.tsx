@@ -97,33 +97,6 @@ export function ReportsPage() {
         </div>
       </div>
 
-      {/* Current Stats Preview */}
-      <Card className="bg-white border-[#C69A72]">
-        <CardHeader>
-          <CardTitle className="text-[#13312A] arabic-text text-center">نظرة سريعة على الإحصائيات الحالية</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]">
-              <p className="text-2xl text-[#13312A] mb-2">28</p>
-              <p className="text-[#155446] arabic-text">طلبات هذا الشهر</p>
-            </div>
-            <div className="text-center p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]">
-              <p className="text-2xl text-[#13312A] mb-2">15,750 دينار</p>
-              <p className="text-[#155446] arabic-text">مبيعات الشهر</p>
-            </div>
-            <div className="text-center p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]">
-              <p className="text-2xl text-[#13312A] mb-2">156</p>
-              <p className="text-[#155446] arabic-text">إجمالي الزبائن</p>
-            </div>
-            <div className="text-center p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]">
-              <p className="text-2xl text-[#13312A] mb-2">92%</p>
-              <p className="text-[#155446] arabic-text">معدل الرضا</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Progress Indicator */}
       <Card className="bg-white border-[#C69A72]">
         <CardContent className="p-6">

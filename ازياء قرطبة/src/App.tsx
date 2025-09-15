@@ -6,6 +6,7 @@ import { OrdersPage } from './components/OrdersPage';
 import { InvoicesPage } from './components/InvoicesPage';
 import { CustomersPage } from './components/CustomersPage';
 import { ReportsPage } from './components/ReportsPage';
+import { FinancialPage } from './components/FinancialPage';
 import { Toaster } from './components/ui/sonner';
 
 export default function App() {
@@ -38,6 +39,8 @@ export default function App() {
         return <CustomersPage />;
       case 'reports':
         return <ReportsPage />;
+      case 'financial':
+        return <FinancialPage />;
       default:
         return <Dashboard onNavigate={handleNavigate} />;
     }
