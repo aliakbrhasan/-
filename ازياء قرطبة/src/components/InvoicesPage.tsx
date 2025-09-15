@@ -288,31 +288,6 @@ export function InvoicesPage() {
         ))}
       </div>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-white border-[#C69A72]">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl text-[#13312A] mb-1">{invoices.length}</p>
-            <p className="text-[#155446] arabic-text">إجمالي الفواتير</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-white border-[#C69A72]">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl text-[#13312A] mb-1">
-              {invoices.reduce((sum, inv) => sum + inv.total, 0)} دينار عراقي
-            </p>
-            <p className="text-[#155446] arabic-text">إجمالي المبيعات</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-white border-[#C69A72]">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl text-[#13312A] mb-1">
-              {invoices.filter(inv => inv.status === 'معلق').length}
-            </p>
-            <p className="text-[#155446] arabic-text">فواتير معلقة</p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }

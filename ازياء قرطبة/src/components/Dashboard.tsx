@@ -1,16 +1,13 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
-import { 
-  Scissors, 
-  Ruler, 
-  FileText, 
-  Receipt, 
-  Users, 
-  TrendingUp,
+import {
+  Scissors,
+  FileText,
+  Receipt,
+  Users,
   Calendar,
-  Bell,
-  Package
+  Bell
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -25,12 +22,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     { label: 'زبون جديد', icon: Users, action: () => onNavigate('customers'), color: 'bg-[#13312A]' },
   ];
   
-  const stats = [
-    { label: 'الطلبات الجديدة', value: '12', icon: FileText, color: 'bg-[#155446]' },
-    { label: 'الفواتير المعلقة', value: '8', icon: Receipt, color: 'bg-[#C69A72]' },
-    { label: 'إجمالي الزبائن', value: '156', icon: Users, color: 'bg-[#13312A]' },
-    { label: 'المبيعات اليوم', value: '2,450 دينار عراقي', icon: TrendingUp, color: 'bg-[#155446]' },
-  ];
 
   
   const upcomingTasks = [
@@ -44,33 +35,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-[#13312A] arabic-text mb-2">أهلاً وسهلاً</h1>
-          <p className="text-[#155446] arabic-text">نظرة عامة على المبيعات اليوم</p>
+          <p className="text-[#155446] arabic-text">نظرة عامة على العمل اليوم</p>
         </div>
         <Button className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target">
           <Bell className="w-4 h-4 ml-2" />
           <span className="arabic-text">الإشعارات</span>
         </Button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            
-            <Card key={index} className="bg-white border-[#C69A72] hover:shadow-lg transition-shadow">
-              <CardContent className="flex items-center p-4">
-                <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center ml-4`}>
-                  <Icon className="w-6 h-6 text-[#F6E9CA]" />
-                </div>
-                <div>
-                  <p className="text-2xl text-[#13312A] mb-1">{stat.value}</p>
-                  <p className="text-sm text-[#155446] arabic-text">{stat.label}</p>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
       </div>
 
       {/* Quick Actions */}
