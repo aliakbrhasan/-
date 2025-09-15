@@ -4,12 +4,11 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
+import {
+  Plus,
+  Search,
   Edit,
   Phone,
   MapPin,
@@ -17,64 +16,17 @@ import {
   CreditCard,
   Star
 } from 'lucide-react';
+import { Customer } from '../types/customer';
 
-export function CustomersPage() {
+interface CustomersPageProps {
+  customers: Customer[];
+  onCustomerSelect: (customer: Customer) => void;
+}
+
+export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLabel, setFilterLabel] = useState('all');
   const [isNewCustomerOpen, setIsNewCustomerOpen] = useState(false);
-
-  const customers = [
-    {
-      id: 1,
-      name: 'أحمد محمد العراقي',
-      phone: '07701234567',
-      address: 'بغداد، منطقة الكرخ',
-      totalSpent: 1250,
-      lastOrder: '2024-01-15',
-      label: 'ذهبي',
-      ordersCount: 8
-    },
-    {
-      id: 2,
-      name: 'صالح علي الأحمد',
-      phone: '07807654321',
-      address: 'البصرة، حي العشار',
-      totalSpent: 680,
-      lastOrder: '2024-01-14',
-      label: 'وفي',
-      ordersCount: 4
-    },
-    {
-      id: 3,
-      name: 'محمد خالد ',
-      phone: '07909876543',
-      address: 'الموصل، حي الزراعة',
-      totalSpent: 420,
-      lastOrder: '2024-01-10',
-      label: 'منتظم',
-      ordersCount: 2
-    },
-    {
-      id: 4,
-      name: 'علي حسن ',
-      phone: '07512345678',
-      address: 'أربيل، حي أنكاوا',
-      totalSpent: 150,
-      lastOrder: '2024-01-12',
-      label: 'جديد',
-      ordersCount: 1
-    },
-    {
-      id: 5,
-      name: 'عبدالله أحمد ',
-      phone: '07605678901',
-      address: 'النجف، حي الاسرة',
-      totalSpent: 890,
-      lastOrder: '2024-01-08',
-      label: 'وفي',
-      ordersCount: 5
-    }
-  ];
 
   const getLabelColor = (label: string) => {
     switch (label) {
@@ -224,54 +176,78 @@ export function CustomersPage() {
 
       {/* Customers List */}
       <div className="grid gap-4">
-        {filteredCustomers.map((customer) => (
-          <Card key={customer.id} className="bg-white border-[#C69A72] hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h3 className="text-lg text-[#13312A] arabic-text">{customer.name}</h3>
-                    <Badge className={`${getLabelColor(customer.label)} flex items-center gap-1`}>
-                      {getLabelIcon(customer.label)}
-                      {customer.label}
-                    </Badge>
+        {filteredCustomers.map((customer) => {
+          const ordersCount = customer.orders.length;
+          return (
+            <Card
+              key={customer.id}
+              onClick={() => onCustomerSelect(customer)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  onCustomerSelect(customer);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`عرض تفاصيل ${customer.name}`}
+              className="bg-white border-[#C69A72] hover:shadow-lg transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#C69A72]"
+            >
+              <CardContent className="p-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <h3 className="text-lg text-[#13312A] arabic-text">{customer.name}</h3>
+                      <Badge className={`${getLabelColor(customer.label)} flex items-center gap-1`}>
+                        {getLabelIcon(customer.label)}
+                        {customer.label}
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                      <div className="flex items-center gap-2 text-[#155446]">
+                        <Phone className="w-4 h-4" />
+                        <span>{customer.phone}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#155446]">
+                        <MapPin className="w-4 h-4" />
+                        <span className="arabic-text">{customer.address}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#155446]">
+                        <CreditCard className="w-4 h-4" />
+                        <span className="arabic-text">{customer.totalSpent} دينار عراقي</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#155446]">
+                        <Calendar className="w-4 h-4" />
+                        <span className="arabic-text">آخر طلب: {customer.lastOrder}</span>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-                    <div className="flex items-center gap-2 text-[#155446]">
-                      <Phone className="w-4 h-4" />
-                      <span>{customer.phone}</span>
+
+                  <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                    <div className="text-center">
+                      <p className="text-2xl text-[#13312A]">{ordersCount}</p>
+                      <p className="text-sm text-[#155446] arabic-text">طلب</p>
                     </div>
-                    <div className="flex items-center gap-2 text-[#155446]">
-                      <MapPin className="w-4 h-4" />
-                      <span className="arabic-text">{customer.address}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#155446]">
-                      <CreditCard className="w-4 h-4" />
-                      <span className="arabic-text">{customer.totalSpent} دينار عراقي</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#155446]">
-                      <Calendar className="w-4 h-4" />
-                      <span className="arabic-text">آخر طلب: {customer.lastOrder}</span>
-                    </div>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        event.preventDefault();
+                      }}
+                    >
+                      <Edit className="w-4 h-4 ml-1" />
+                      <span className="arabic-text">تعديل</span>
+                    </Button>
                   </div>
                 </div>
-                
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                  <div className="text-center">
-                    <p className="text-2xl text-[#13312A]">{customer.ordersCount}</p>
-                    <p className="text-sm text-[#155446] arabic-text">طلب</p>
-                  </div>
-                  
-                  <Button size="sm" variant="outline" className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target">
-                    <Edit className="w-4 h-4 ml-1" />
-                    <span className="arabic-text">تعديل</span>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <NewCustomerDialog />

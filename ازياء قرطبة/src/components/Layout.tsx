@@ -19,6 +19,7 @@ export function Layout({ children, currentPage, onNavigate, isLoggedIn, onLogout
     { id: 'customers', label: 'الزبائن', icon: Users },
     { id: 'financial', label: 'المالية', icon: DollarSign },
   ];
+  const activePage = currentPage === 'customerDetails' ? 'customers' : currentPage;
 
   const MobileNavigation = () => (
     <div className="fixed bottom-0 left-0 right-0 bg-[#13312A] border-t border-[#155446] z-50 md:hidden">
@@ -32,8 +33,8 @@ export function Layout({ children, currentPage, onNavigate, isLoggedIn, onLogout
               size="sm"
               onClick={() => onNavigate(item.id)}
               className={`flex flex-col items-center gap-1 p-2 touch-target ${
-                currentPage === item.id 
-                  ? 'text-[#F6E9CA] bg-[#155446]' 
+                activePage === item.id
+                  ? 'text-[#F6E9CA] bg-[#155446]'
                   : 'text-[#C69A72] hover:text-[#F6E9CA] hover:bg-[#155446]'
               }`}
             >
@@ -108,8 +109,8 @@ export function Layout({ children, currentPage, onNavigate, isLoggedIn, onLogout
                     variant="ghost"
                     onClick={() => onNavigate(item.id)}
                     className={`flex items-center gap-2 px-4 py-2 touch-target ${
-                      currentPage === item.id 
-                        ? 'text-[#F6E9CA] bg-[#155446]' 
+                      activePage === item.id
+                        ? 'text-[#F6E9CA] bg-[#155446]'
                         : 'text-[#C69A72] hover:text-[#F6E9CA] hover:bg-[#155446]'
                     }`}
                   >
@@ -121,11 +122,11 @@ export function Layout({ children, currentPage, onNavigate, isLoggedIn, onLogout
               <Button
                 variant="ghost"
                 onClick={() => onNavigate('reports')}
-                className={`flex items-center gap-2 px-4 py-2 touch-target ${
-                  currentPage === 'reports' 
-                    ? 'text-[#F6E9CA] bg-[#155446]' 
-                    : 'text-[#C69A72] hover:text-[#F6E9CA] hover:bg-[#155446]'
-                }`}
+              className={`flex items-center gap-2 px-4 py-2 touch-target ${
+                activePage === 'reports'
+                  ? 'text-[#F6E9CA] bg-[#155446]'
+                  : 'text-[#C69A72] hover:text-[#F6E9CA] hover:bg-[#155446]'
+              }`}
               >
                 <FileText size={18} />
                 <span className="arabic-text">التقارير</span>
