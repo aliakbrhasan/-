@@ -6,6 +6,8 @@ import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Badge } from './ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import { Label } from './ui/label';
 import {
   Plus,
   Search,
@@ -27,6 +29,78 @@ import {
   PrintableInvoiceData,
 } from './PrintableInvoice';
 import { openPrintWindow, formatPrintDateTime } from './print/PrintUtils';
+
+type DateParts = {
+  year: string;
+  month: string;
+  day: string;
+};
+
+const monthOptions = [
+  { value: '1', label: 'كانون الثاني (يناير)' },
+  { value: '2', label: 'شباط (فبراير)' },
+  { value: '3', label: 'آذار (مارس)' },
+  { value: '4', label: 'نيسان (أبريل)' },
+  { value: '5', label: 'أيار (مايو)' },
+  { value: '6', label: 'حزيران (يونيو)' },
+  { value: '7', label: 'تموز (يوليو)' },
+  { value: '8', label: 'آب (أغسطس)' },
+  { value: '9', label: 'أيلول (سبتمبر)' },
+  { value: '10', label: 'تشرين الأول (أكتوبر)' },
+  { value: '11', label: 'تشرين الثاني (نوفمبر)' },
+  { value: '12', label: 'كانون الأول (ديسمبر)' },
+];
+
+const dayOptions = Array.from({ length: 31 }, (_, index) => (index + 1).toString());
+
+const getLastDayOfMonth = (year: number, month: number) => new Date(year, month, 0).getDate();
+
+const formatRangeDate = (date: Date) =>
+  new Intl.DateTimeFormat('ar-IQ', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(date);
+
+const buildBoundaryDate = (parts: DateParts, isStart: boolean): Date | null => {
+  const year = parseInt(parts.year, 10);
+
+  if (Number.isNaN(year)) {
+    return null;
+  }
+
+  const month = parts.month ? parseInt(parts.month, 10) : isStart ? 1 : 12;
+
+  if (Number.isNaN(month) || month < 1 || month > 12) {
+    return null;
+  }
+
+  const lastDay = getLastDayOfMonth(year, month);
+
+  let day: number;
+
+  if (parts.day) {
+    const parsedDay = parseInt(parts.day, 10);
+
+    if (Number.isNaN(parsedDay) || parsedDay < 1) {
+      return null;
+    }
+
+    day = Math.min(parsedDay, lastDay);
+  } else {
+    day = isStart ? 1 : lastDay;
+  }
+
+  const boundary = new Date(year, month - 1, day);
+
+  if (isStart) {
+    boundary.setHours(0, 0, 0, 0);
+  } else {
+    boundary.setHours(23, 59, 59, 999);
+  }
+
+  return boundary;
+};
 
 interface InvoicesPageProps {
   onCreateInvoice: () => void;
@@ -98,6 +172,86 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
     }
   ];
 
+  const receivedTimes = invoices.map((invoice) => new Date(invoice.receivedDate).getTime());
+  const fallbackYear = new Date().getFullYear().toString();
+  const initialFromYear = receivedTimes.length ? new Date(Math.min(...receivedTimes)).getFullYear().toString() : fallbackYear;
+  const initialToYear = receivedTimes.length ? new Date(Math.max(...receivedTimes)).getFullYear().toString() : fallbackYear;
+
+  const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
+  const [fromDateParts, setFromDateParts] = useState<DateParts>(() => ({
+    year: initialFromYear,
+    month: '',
+    day: '',
+  }));
+  const [toDateParts, setToDateParts] = useState<DateParts>(() => ({
+    year: initialToYear,
+    month: '',
+    day: '',
+  }));
+  const [printError, setPrintError] = useState<string | null>(null);
+
+  const openPrintDialog = () => {
+    setPrintError(null);
+    setIsPrintDialogOpen(true);
+  };
+
+  const handlePrintDialogOpenChange = (open: boolean) => {
+    setIsPrintDialogOpen(open);
+    if (!open) {
+      setPrintError(null);
+    }
+  };
+
+  const handleFromYearChange = (value: string) => {
+    setFromDateParts((prev) => ({
+      ...prev,
+      year: value,
+    }));
+    setPrintError(null);
+  };
+
+  const handleToYearChange = (value: string) => {
+    setToDateParts((prev) => ({
+      ...prev,
+      year: value,
+    }));
+    setPrintError(null);
+  };
+
+  const handleFromMonthChange = (value: string) => {
+    setFromDateParts((prev) => ({
+      ...prev,
+      month: value,
+      day: '',
+    }));
+    setPrintError(null);
+  };
+
+  const handleToMonthChange = (value: string) => {
+    setToDateParts((prev) => ({
+      ...prev,
+      month: value,
+      day: '',
+    }));
+    setPrintError(null);
+  };
+
+  const handleFromDayChange = (value: string) => {
+    setFromDateParts((prev) => ({
+      ...prev,
+      day: value,
+    }));
+    setPrintError(null);
+  };
+
+  const handleToDayChange = (value: string) => {
+    setToDateParts((prev) => ({
+      ...prev,
+      day: value,
+    }));
+    setPrintError(null);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'مدفوع': return 'bg-green-100 text-green-800';
@@ -156,15 +310,21 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
     }
   });
 
-  const handlePrintInvoices = () => {
-    const totalAmount = sortedInvoices.reduce((sum, invoice) => sum + invoice.total, 0);
-    const totalPaid = sortedInvoices.reduce((sum, invoice) => sum + invoice.paid, 0);
-    const totalRemaining = sortedInvoices.reduce((sum, invoice) => sum + Math.max(invoice.total - invoice.paid, 0), 0);
-    const statusCounts = sortedInvoices.reduce<Record<string, number>>((acc, invoice) => {
+  const handlePrintInvoices = (rangeStart: Date, rangeEnd: Date) => {
+    const invoicesInRange = sortedInvoices.filter((invoice) => {
+      const invoiceDate = new Date(invoice.receivedDate);
+      return invoiceDate >= rangeStart && invoiceDate <= rangeEnd;
+    });
+
+    const totalAmount = invoicesInRange.reduce((sum, invoice) => sum + invoice.total, 0);
+    const totalPaid = invoicesInRange.reduce((sum, invoice) => sum + invoice.paid, 0);
+    const totalRemaining = invoicesInRange.reduce((sum, invoice) => sum + Math.max(invoice.total - invoice.paid, 0), 0);
+    const statusCounts = invoicesInRange.reduce<Record<string, number>>((acc, invoice) => {
       acc[invoice.status] = (acc[invoice.status] || 0) + 1;
       return acc;
     }, {});
     const now = new Date();
+    const rangeLabel = `${formatRangeDate(rangeStart)} إلى ${formatRangeDate(rangeEnd)}`;
 
     openPrintWindow('قائمة الفواتير', (
       <>
@@ -173,7 +333,8 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
           <p className="print-subtitle">قائمة تفصيلية بالفواتير المسجلة في نظام أزياء قرطبة</p>
           <div className="print-meta">
             <span>تاريخ الطباعة: {formatPrintDateTime(now)}</span>
-            <span>عدد الفواتير: {sortedInvoices.length}</span>
+            <span>عدد الفواتير: {invoicesInRange.length}</span>
+            <span>الفترة المختارة: {rangeLabel}</span>
           </div>
         </header>
 
@@ -203,7 +364,10 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
 
         <section className="print-section">
           <h2 className="section-title">جدول الفواتير</h2>
-          <p className="section-description">يتضمن الجدول التفاصيل الأساسية لكل فاتورة بما في ذلك حالة السداد ومواعيد التسليم.</p>
+          <p className="section-description">
+            يتضمن الجدول التفاصيل الأساسية لكل فاتورة بما في ذلك حالة السداد ومواعيد التسليم.
+            {invoicesInRange.length === 0 && ' لا توجد فواتير ضمن الفترة المحددة حالياً.'}
+          </p>
           <div className="print-table-wrapper">
             <table className="print-table">
               <thead>
@@ -220,7 +384,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                 </tr>
               </thead>
               <tbody>
-                {sortedInvoices.map((invoice) => {
+                {invoicesInRange.map((invoice) => {
                   const remaining = Math.max(invoice.total - invoice.paid, 0);
                   return (
                     <tr key={invoice.id}>
@@ -247,9 +411,12 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
 
         <section className="print-section">
           <h2 className="section-title">تفاصيل الفواتير</h2>
-          <p className="section-description">تم تجهيز هذه البطاقات لتعرض بيانات الزبون والملاحظات المرتبطة بكل فاتورة.</p>
+          <p className="section-description">
+            تم تجهيز هذه البطاقات لتعرض بيانات الزبون والملاحظات المرتبطة بكل فاتورة.
+            {invoicesInRange.length === 0 && ' لا توجد فواتير ضمن الفترة المحددة حالياً.'}
+          </p>
           <div className="detail-cards">
-            {sortedInvoices.map((invoice) => {
+            {invoicesInRange.map((invoice) => {
               const remaining = Math.max(invoice.total - invoice.paid, 0);
               return (
                 <article className="detail-card" key={`${invoice.id}-details`}>
@@ -316,6 +483,26 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
     ));
   };
 
+  const handleConfirmPrintRange = () => {
+    setPrintError(null);
+
+    const startDate = buildBoundaryDate(fromDateParts, true);
+    const endDate = buildBoundaryDate(toDateParts, false);
+
+    if (!startDate || !endDate) {
+      setPrintError('يرجى تحديد سنة صالحة لكل من تاريخ البداية والنهاية.');
+      return;
+    }
+
+    if (startDate.getTime() > endDate.getTime()) {
+      setPrintError('تاريخ البداية يجب أن يكون قبل أو يساوي تاريخ النهاية.');
+      return;
+    }
+
+    setIsPrintDialogOpen(false);
+    handlePrintInvoices(startDate, endDate);
+  };
+
   const handleExportPDF = (invoice: Invoice) => {
     const receiptWindow = window.open('', '_blank', 'width=900,height=700');
 
@@ -378,7 +565,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
             variant="outline"
-            onClick={handlePrintInvoices}
+            onClick={openPrintDialog}
             className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target"
           >
             <Printer className="w-4 h-4 ml-2" />
@@ -559,6 +746,145 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
           </Card>
         ))}
       </div>
+
+      <Dialog open={isPrintDialogOpen} onOpenChange={handlePrintDialogOpenChange}>
+        <DialogContent className="max-w-3xl bg-[#F6E9CA] border-[#C69A72]">
+          <DialogHeader>
+            <DialogTitle className="text-[#13312A] arabic-text">تحديد فترة الطباعة</DialogTitle>
+            <DialogDescription className="text-[#155446] arabic-text">
+              اختر تاريخ البداية والنهاية قبل طباعة قائمة الفواتير، ويمكنك توسيع الفترة أو تقليصها حسب الحاجة.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-4 rounded-xl border border-[#C69A72] bg-[#FDFBF7] p-4">
+                <h3 className="text-lg font-semibold text-[#13312A] arabic-text">بداية الفترة (من)</h3>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-[#13312A] arabic-text">السنة</Label>
+                    <Input
+                      type="number"
+                      min={2000}
+                      max={2100}
+                      value={fromDateParts.year}
+                      onChange={(e) => handleFromYearChange(e.target.value)}
+                      placeholder="مثال: 2024"
+                      className="border-[#C69A72] text-right arabic-text touch-target"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-[#13312A] arabic-text">الشهر</Label>
+                    <select
+                      value={fromDateParts.month}
+                      onChange={(e) => handleFromMonthChange(e.target.value)}
+                      className="px-3 py-2 border border-[#C69A72] rounded-md bg-white text-[#13312A] arabic-text touch-target focus:border-[#155446] focus:ring-1 focus:ring-[#155446]"
+                    >
+                      <option value="">من بداية السنة</option>
+                      {monthOptions.map((month) => (
+                        <option key={`from-month-${month.value}`} value={month.value}>
+                          {month.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-[#13312A] arabic-text">اليوم</Label>
+                    <select
+                      value={fromDateParts.day}
+                      onChange={(e) => handleFromDayChange(e.target.value)}
+                      disabled={!fromDateParts.month}
+                      className="px-3 py-2 border border-[#C69A72] rounded-md bg-white text-[#13312A] arabic-text touch-target focus:border-[#155446] focus:ring-1 focus:ring-[#155446] disabled:cursor-not-allowed disabled:bg-[#E2D4BD] disabled:text-[#7A6A58]"
+                    >
+                      <option value="">من بداية الشهر</option>
+                      {dayOptions.map((day) => (
+                        <option key={`from-day-${day}`} value={day}>
+                          {day}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 rounded-xl border border-[#C69A72] bg-[#FDFBF7] p-4">
+                <h3 className="text-lg font-semibold text-[#13312A] arabic-text">نهاية الفترة (إلى)</h3>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-[#13312A] arabic-text">السنة</Label>
+                    <Input
+                      type="number"
+                      min={2000}
+                      max={2100}
+                      value={toDateParts.year}
+                      onChange={(e) => handleToYearChange(e.target.value)}
+                      placeholder="مثال: 2024"
+                      className="border-[#C69A72] text-right arabic-text touch-target"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-[#13312A] arabic-text">الشهر</Label>
+                    <select
+                      value={toDateParts.month}
+                      onChange={(e) => handleToMonthChange(e.target.value)}
+                      className="px-3 py-2 border border-[#C69A72] rounded-md bg-white text-[#13312A] arabic-text touch-target focus:border-[#155446] focus:ring-1 focus:ring-[#155446]"
+                    >
+                      <option value="">حتى نهاية السنة</option>
+                      {monthOptions.map((month) => (
+                        <option key={`to-month-${month.value}`} value={month.value}>
+                          {month.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-[#13312A] arabic-text">اليوم</Label>
+                    <select
+                      value={toDateParts.day}
+                      onChange={(e) => handleToDayChange(e.target.value)}
+                      disabled={!toDateParts.month}
+                      className="px-3 py-2 border border-[#C69A72] rounded-md bg-white text-[#13312A] arabic-text touch-target focus:border-[#155446] focus:ring-1 focus:ring-[#155446] disabled:cursor-not-allowed disabled:bg-[#E2D4BD] disabled:text-[#7A6A58]"
+                    >
+                      <option value="">حتى نهاية الشهر</option>
+                      {dayOptions.map((day) => (
+                        <option key={`to-day-${day}`} value={day}>
+                          {day}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-sm text-[#155446] arabic-text">
+              ترك حقل الشهر أو اليوم فارغاً يعني طباعة الفترة الكاملة للسنة أو الشهر المحدد. سيتم استخدام تاريخ الاستلام لكل فاتورة لتحديد مدى الطباعة.
+            </p>
+
+            {printError && (
+              <p className="text-sm text-red-600 arabic-text">{printError}</p>
+            )}
+          </div>
+
+          <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handlePrintDialogOpenChange(false)}
+              className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target"
+            >
+              إلغاء
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmPrintRange}
+              className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target"
+            >
+              بدء الطباعة
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
