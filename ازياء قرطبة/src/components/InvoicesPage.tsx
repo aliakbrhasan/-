@@ -16,6 +16,7 @@ import {
   MoreVertical,
   FileImage,
   MessageCircle,
+  Printer,
 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import {
@@ -25,6 +26,7 @@ import {
   formatDate,
   PrintableInvoiceData,
 } from './PrintableInvoice';
+import { openPrintWindow, formatPrintDateTime } from './print/PrintUtils';
 
 interface InvoicesPageProps {
   onCreateInvoice: () => void;
@@ -105,6 +107,35 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
     }
   };
 
+  const getStatusPrintStyle = (status: string): React.CSSProperties => {
+    switch (status) {
+      case 'مدفوع':
+        return {
+          backgroundColor: 'rgba(21, 84, 70, 0.12)',
+          color: '#155446',
+          border: '1px solid rgba(21, 84, 70, 0.35)',
+        };
+      case 'معلق':
+        return {
+          backgroundColor: 'rgba(190, 49, 68, 0.12)',
+          color: '#8f1d2c',
+          border: '1px solid rgba(190, 49, 68, 0.35)',
+        };
+      case 'جزئي':
+        return {
+          backgroundColor: 'rgba(246, 196, 120, 0.2)',
+          color: '#8a5a00',
+          border: '1px solid rgba(246, 196, 120, 0.45)',
+        };
+      default:
+        return {
+          backgroundColor: 'rgba(198, 154, 114, 0.2)',
+          color: '#13312A',
+          border: '1px solid rgba(198, 154, 114, 0.4)',
+        };
+    }
+  };
+
   const filteredInvoices = invoices.filter(invoice =>
     invoice.customerName.includes(searchTerm) ||
     invoice.phone.includes(searchTerm) ||
@@ -124,6 +155,166 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
         return 0;
     }
   });
+
+  const handlePrintInvoices = () => {
+    const totalAmount = sortedInvoices.reduce((sum, invoice) => sum + invoice.total, 0);
+    const totalPaid = sortedInvoices.reduce((sum, invoice) => sum + invoice.paid, 0);
+    const totalRemaining = sortedInvoices.reduce((sum, invoice) => sum + Math.max(invoice.total - invoice.paid, 0), 0);
+    const statusCounts = sortedInvoices.reduce<Record<string, number>>((acc, invoice) => {
+      acc[invoice.status] = (acc[invoice.status] || 0) + 1;
+      return acc;
+    }, {});
+    const now = new Date();
+
+    openPrintWindow('قائمة الفواتير', (
+      <>
+        <header className="print-header">
+          <h1 className="print-title">سجل الفواتير</h1>
+          <p className="print-subtitle">قائمة تفصيلية بالفواتير المسجلة في نظام أزياء قرطبة</p>
+          <div className="print-meta">
+            <span>تاريخ الطباعة: {formatPrintDateTime(now)}</span>
+            <span>عدد الفواتير: {sortedInvoices.length}</span>
+          </div>
+        </header>
+
+        <section className="print-section">
+          <h2 className="section-title">ملخص الأرقام</h2>
+          <div className="metrics-grid">
+            <div className="metric-card accent">
+              <span className="metric-label">إجمالي قيمة الفواتير</span>
+              <span className="metric-value">{formatCurrency(totalAmount)}</span>
+            </div>
+            <div className="metric-card">
+              <span className="metric-label">المبالغ المستلمة</span>
+              <span className="metric-value">{formatCurrency(totalPaid)}</span>
+            </div>
+            <div className="metric-card">
+              <span className="metric-label">المبالغ المتبقية</span>
+              <span className="metric-value">{formatCurrency(totalRemaining)}</span>
+            </div>
+            {Object.entries(statusCounts).map(([status, count]) => (
+              <div className="metric-card" key={status}>
+                <span className="metric-label">فواتير {status}</span>
+                <span className="metric-value">{count}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="print-section">
+          <h2 className="section-title">جدول الفواتير</h2>
+          <p className="section-description">يتضمن الجدول التفاصيل الأساسية لكل فاتورة بما في ذلك حالة السداد ومواعيد التسليم.</p>
+          <div className="print-table-wrapper">
+            <table className="print-table">
+              <thead>
+                <tr>
+                  <th>رقم الفاتورة</th>
+                  <th>الزبون</th>
+                  <th>الهاتف</th>
+                  <th>تاريخ الاستلام</th>
+                  <th>تاريخ التسليم</th>
+                  <th>المبلغ الكلي</th>
+                  <th>المبلغ الواصل</th>
+                  <th>المتبقي</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedInvoices.map((invoice) => {
+                  const remaining = Math.max(invoice.total - invoice.paid, 0);
+                  return (
+                    <tr key={invoice.id}>
+                      <td>{invoice.id}</td>
+                      <td>{invoice.customerName}</td>
+                      <td>{invoice.phone}</td>
+                      <td>{formatDate(invoice.receivedDate)}</td>
+                      <td>{formatDate(invoice.deliveryDate)}</td>
+                      <td>{formatCurrency(invoice.total)}</td>
+                      <td>{formatCurrency(invoice.paid)}</td>
+                      <td>{formatCurrency(remaining)}</td>
+                      <td>
+                        <span className="status-pill" style={getStatusPrintStyle(invoice.status)}>
+                          {invoice.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="print-section">
+          <h2 className="section-title">تفاصيل الفواتير</h2>
+          <p className="section-description">تم تجهيز هذه البطاقات لتعرض بيانات الزبون والملاحظات المرتبطة بكل فاتورة.</p>
+          <div className="detail-cards">
+            {sortedInvoices.map((invoice) => {
+              const remaining = Math.max(invoice.total - invoice.paid, 0);
+              return (
+                <article className="detail-card" key={`${invoice.id}-details`}>
+                  <div className="detail-card-header">
+                    <h3 className="detail-title">{invoice.customerName}</h3>
+                    <span className="status-pill" style={getStatusPrintStyle(invoice.status)}>
+                      {invoice.status}
+                    </span>
+                  </div>
+                  <div className="detail-grid two-column">
+                    <div className="detail-item">
+                      <span className="item-label">رقم الفاتورة</span>
+                      <span className="item-value">{invoice.id}</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="item-label">الهاتف</span>
+                      <span className="item-value">{invoice.phone}</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="item-label">تاريخ الاستلام</span>
+                      <span className="item-value">{formatDate(invoice.receivedDate)}</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="item-label">تاريخ التسليم</span>
+                      <span className="item-value">{formatDate(invoice.deliveryDate)}</span>
+                    </div>
+                  </div>
+                  <div className="detail-grid two-column">
+                    <div className="detail-item">
+                      <span className="item-label">المبلغ الكلي</span>
+                      <span className="item-value">{formatCurrency(invoice.total)}</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="item-label">المبلغ الواصل</span>
+                      <span className="item-value">{formatCurrency(invoice.paid)}</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="item-label">المبلغ المتبقي</span>
+                      <span className="item-value">{formatCurrency(remaining)}</span>
+                    </div>
+                  </div>
+                  {invoice.address && (
+                    <div className="detail-grid">
+                      <div className="detail-item">
+                        <span className="item-label">العنوان</span>
+                        <span className="item-value">{invoice.address}</span>
+                      </div>
+                    </div>
+                  )}
+                  {invoice.notes && (
+                    <div className="detail-grid">
+                      <div className="detail-item">
+                        <span className="item-label">ملاحظات</span>
+                        <span className="item-value">{invoice.notes}</span>
+                      </div>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      </>
+    ));
+  };
 
   const handleExportPDF = (invoice: Invoice) => {
     const receiptWindow = window.open('', '_blank', 'width=900,height=700');
@@ -184,13 +375,23 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="text-2xl text-[#13312A] arabic-text">إدارة الفواتير</h1>
-        <Button
-          onClick={onCreateInvoice}
-          className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target"
-        >
-          <Plus className="w-4 h-4 ml-2" />
-          <span className="arabic-text">فاتورة جديدة</span>
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            onClick={handlePrintInvoices}
+            className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target"
+          >
+            <Printer className="w-4 h-4 ml-2" />
+            <span className="arabic-text">طباعة القائمة</span>
+          </Button>
+          <Button
+            onClick={onCreateInvoice}
+            className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target"
+          >
+            <Plus className="w-4 h-4 ml-2" />
+            <span className="arabic-text">فاتورة جديدة</span>
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filters */}
