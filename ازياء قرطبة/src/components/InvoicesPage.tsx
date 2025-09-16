@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -14,57 +15,83 @@ import {
   Edit,
   MoreVertical,
   FileImage,
-  MessageCircle
+  MessageCircle,
 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import {
+  PrintableInvoice,
+  receiptStyles,
+  formatCurrency,
+  formatDate,
+  PrintableInvoiceData,
+} from './PrintableInvoice';
 
 interface InvoicesPageProps {
   onCreateInvoice: () => void;
 }
 
+type InvoiceStatus = 'مدفوع' | 'معلق' | 'جزئي' | string;
+
+type Invoice = PrintableInvoiceData & {
+  status: InvoiceStatus;
+  fabricImage: string;
+};
+
 export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
 
-  const invoices = [
+  const invoices: Invoice[] = [
     {
       id: 'INV-001',
       customerName: 'أحمد محمد',
       phone: '07701234567',
+      address: 'بغداد، منطقة الكرخ',
       total: 250,
-      createdDate: '2024-01-15',
+      paid: 250,
+      receivedDate: '2024-01-15',
       deliveryDate: '2024-01-25',
       status: 'مدفوع',
+      notes: 'تم الدفع بالكامل مع طلب تجهيز خاص بالياقة.',
       fabricImage: 'https://images.unsplash.com/photo-1642683497706-77a72ea549bb?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&fit=crop'
     },
     {
       id: 'INV-002',
       customerName: 'محمد تقي',
       phone: '07807654321',
+      address: 'البصرة، حي العشار',
       total: 180,
-      createdDate: '2024-01-14',
+      paid: 90,
+      receivedDate: '2024-01-14',
       deliveryDate: '2024-01-22',
       status: 'معلق',
+      notes: 'المتبقي يستلم عند التسليم النهائي بعد المعاينة.',
       fabricImage: 'https://images.unsplash.com/photo-1716541424785-f9746ae08cad?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop'
     },
     {
       id: 'INV-003',
       customerName: 'محمد خالد',
       phone: '07909876543',
+      address: 'الموصل، حي الزراعة',
       total: 420,
-      createdDate: '2024-01-10',
+      paid: 220,
+      receivedDate: '2024-01-10',
       deliveryDate: '2024-01-20',
       status: 'جزئي',
+      notes: 'إضافة تطريز يدوي في الأكمام.',
       fabricImage: 'https://images.unsplash.com/photo-1564322955387-0d2def79fb5c?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop'
     },
     {
       id: 'INV-004',
       customerName: 'صالح محمد',
       phone: '07512345678',
+      address: 'أربيل، حي عينكاوة',
       total: 320,
-      createdDate: '2024-01-12',
+      paid: 320,
+      receivedDate: '2024-01-12',
       deliveryDate: '2024-01-28',
       status: 'مدفوع',
+      notes: 'طلب تغليف خاص بالهدية.',
       fabricImage: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=100&h=100&fit=crop'
     }
   ];
@@ -81,13 +108,14 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
   const filteredInvoices = invoices.filter(invoice =>
     invoice.customerName.includes(searchTerm) ||
     invoice.phone.includes(searchTerm) ||
-    invoice.id.includes(searchTerm)
+    invoice.id.includes(searchTerm) ||
+    (invoice.address?.includes(searchTerm) ?? false)
   );
 
   const sortedInvoices = [...filteredInvoices].sort((a, b) => {
     switch (sortBy) {
       case 'date':
-        return new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime();
+        return new Date(b.receivedDate).getTime() - new Date(a.receivedDate).getTime();
       case 'customer':
         return a.customerName.localeCompare(b.customerName);
       case 'total':
@@ -97,13 +125,51 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
     }
   });
 
-  const handleExportPDF = (invoiceId: string) => {
-    console.log('Exporting PDF for:', invoiceId);
-    // PDF export logic would go here
+  const handleExportPDF = (invoice: Invoice) => {
+    const receiptWindow = window.open('', '_blank', 'width=900,height=700');
+
+    if (!receiptWindow) {
+      return;
+    }
+
+    const markup = renderToStaticMarkup(<PrintableInvoice invoice={invoice} />);
+
+    receiptWindow.document.write(`<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charSet="utf-8" />
+    <title>فاتورة ${invoice.id}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>${receiptStyles}</style>
+  </head>
+  <body>
+    ${markup}
+    <script>
+      window.onload = () => {
+        window.focus();
+        setTimeout(() => window.print(), 300);
+      };
+    <\/script>
+  </body>
+</html>`);
+    receiptWindow.document.close();
+    receiptWindow.focus();
   };
 
-  const handleShareWhatsApp = (invoice: any) => {
-    const message = `فاتورة رقم: ${invoice.id}\nالزبون: ${invoice.customerName}\nالمبلغ: ${invoice.total} دينار عراقي`;
+  const handleShareWhatsApp = (invoice: Invoice) => {
+    const remaining = Math.max(invoice.total - invoice.paid, 0);
+    const message = [
+      `فاتورة رقم: ${invoice.id}`,
+      `الزبون: ${invoice.customerName}`,
+      `المبلغ الكلي: ${formatCurrency(invoice.total)}`,
+      `المبلغ الواصل: ${formatCurrency(invoice.paid)}`,
+      `المبلغ المتبقي: ${formatCurrency(remaining)}`,
+      `تاريخ الاستلام: ${formatDate(invoice.receivedDate)}`,
+      `تاريخ التسليم: ${formatDate(invoice.deliveryDate)}`,
+    ].join('\n');
+
     const whatsappUrl = `https://wa.me/${invoice.phone.replace(/^0/, '964')}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -170,7 +236,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">الهاتف</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">المبلغ</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">صورة القماش</TableHead>
-                <TableHead className="text-[#F6E9CA] arabic-text text-right">تاريخ الإنشاء</TableHead>
+                <TableHead className="text-[#F6E9CA] arabic-text text-right">تاريخ الاستلام</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">تاريخ التسليم</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">الحالة</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">الإجراءات</TableHead>
@@ -182,7 +248,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                   <TableCell className="text-[#13312A] arabic-text">{invoice.id}</TableCell>
                   <TableCell className="text-[#13312A] arabic-text">{invoice.customerName}</TableCell>
                   <TableCell className="text-[#13312A]">{invoice.phone}</TableCell>
-                  <TableCell className="text-[#13312A]">{invoice.total} دينار عراقي</TableCell>
+                  <TableCell className="text-[#13312A]">{formatCurrency(invoice.total)}</TableCell>
                   <TableCell>
                     <ImageWithFallback
                       src={invoice.fabricImage}
@@ -190,8 +256,8 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                       className="w-12 h-12 rounded-lg object-cover border border-[#C69A72]"
                     />
                   </TableCell>
-                  <TableCell className="text-[#13312A]">{invoice.createdDate}</TableCell>
-                  <TableCell className="text-[#13312A]">{invoice.deliveryDate}</TableCell>
+                  <TableCell className="text-[#13312A]">{formatDate(invoice.receivedDate)}</TableCell>
+                  <TableCell className="text-[#13312A]">{formatDate(invoice.deliveryDate)}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(invoice.status)}>
                       {invoice.status}
@@ -211,7 +277,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                           <Copy className="w-4 h-4 ml-2" />
                           تكرار الفاتورة
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleExportPDF(invoice.id)} className="arabic-text">
+                        <DropdownMenuItem onClick={() => handleExportPDF(invoice)} className="arabic-text">
                           <Download className="w-4 h-4 ml-2" />
                           تصدير إلى PDF
                         </DropdownMenuItem>
@@ -257,11 +323,11 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
               
               <div className="grid grid-cols-2 gap-2 text-sm mb-4">
                 <p className="text-[#155446] arabic-text">الهاتف: {invoice.phone}</p>
-                <p className="text-[#155446] arabic-text">المبلغ: {invoice.total} دينار عراقي</p>
-                <p className="text-[#155446] arabic-text">الإنشاء: {invoice.createdDate}</p>
-                <p className="text-[#155446] arabic-text">التسليم: {invoice.deliveryDate}</p>
+                <p className="text-[#155446] arabic-text">المبلغ: {formatCurrency(invoice.total)}</p>
+                <p className="text-[#155446] arabic-text">الاستلام: {formatDate(invoice.receivedDate)}</p>
+                <p className="text-[#155446] arabic-text">التسليم: {formatDate(invoice.deliveryDate)}</p>
               </div>
-              
+
               <div className="flex gap-2 overflow-x-auto">
                 <Button size="sm" variant="outline" className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target whitespace-nowrap">
                   <Edit className="w-4 h-4 ml-1" />
@@ -271,9 +337,9 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                   <Copy className="w-4 h-4 ml-1" />
                   <span className="arabic-text">تكرار</span>
                 </Button>
-                <Button 
-                  size="sm" 
-                  onClick={() => handleExportPDF(invoice.id)}
+                <Button
+                  size="sm"
+                  onClick={() => handleExportPDF(invoice)}
                   className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target whitespace-nowrap"
                 >
                   <Download className="w-4 h-4 ml-1" />
