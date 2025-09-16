@@ -28,8 +28,8 @@ export const formatDate = (value: string) =>
 
 export const receiptStyles = `
   @page {
-    size: A5 portrait;
-    margin: 1.2cm;
+    size: A5 landscape;
+    margin: 1cm;
   }
 
   body {
@@ -48,20 +48,20 @@ export const receiptStyles = `
     width: 100%;
     display: flex;
     justify-content: center;
-    padding: 1.2cm 0;
+    padding: 1cm 0;
   }
 
   .receipt-container {
-    width: 14.8cm;
-    min-height: 21cm;
+    width: 21cm;
+    min-height: 14.8cm;
     background: #FDFBF7;
     border: 2px solid #C69A72;
     border-radius: 16px;
-    padding: 28px;
+    padding: 24px 32px;
     display: flex;
     flex-direction: column;
     gap: 24px;
-    box-shadow: 0 10px 25px rgba(19, 49, 42, 0.08);
+    box-shadow: 0 12px 28px rgba(19, 49, 42, 0.12);
     position: relative;
     overflow: hidden;
   }
@@ -80,23 +80,24 @@ export const receiptStyles = `
     display: flex;
     flex-direction: column;
     gap: 24px;
+    min-height: 100%;
   }
 
   .receipt-header {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
     gap: 24px;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
   .brand {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
 
   .brand-name {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 700;
     color: #13312A;
     letter-spacing: 1px;
@@ -107,6 +108,13 @@ export const receiptStyles = `
     color: #155446;
   }
 
+  .header-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
   .invoice-meta {
     background: rgba(246, 233, 202, 0.9);
     border: 1px solid rgba(198, 154, 114, 0.6);
@@ -115,12 +123,75 @@ export const receiptStyles = `
     display: flex;
     flex-direction: column;
     gap: 6px;
-    min-width: 180px;
   }
 
   .meta-item {
     font-size: 14px;
     color: #13312A;
+  }
+
+  .header-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .summary-pill {
+    border-radius: 14px;
+    border: 1px solid rgba(198, 154, 114, 0.45);
+    background: rgba(246, 233, 202, 0.55);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .summary-pill.accent {
+    background: linear-gradient(135deg, rgba(21, 84, 70, 0.92), rgba(19, 49, 42, 0.85));
+    border-color: rgba(21, 84, 70, 0.55);
+  }
+
+  .pill-label {
+    font-size: 12px;
+    color: #155446;
+  }
+
+  .pill-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #13312A;
+  }
+
+  .summary-pill.accent .pill-label {
+    color: rgba(253, 251, 247, 0.82);
+  }
+
+  .summary-pill.accent .pill-value {
+    color: #F6E9CA;
+  }
+
+  .content-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 20px 24px;
+  }
+
+  .customer-section {
+    grid-column: 1 / 2;
+  }
+
+  .amounts-section {
+    grid-column: 2 / 3;
+    align-self: start;
+  }
+
+  .dates-section {
+    grid-column: 1 / 2;
+  }
+
+  .notes-section {
+    grid-column: 1 / -1;
   }
 
   .section {
@@ -137,7 +208,7 @@ export const receiptStyles = `
 
   .info-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 12px 16px;
   }
 
@@ -149,6 +220,7 @@ export const receiptStyles = `
     border: 1px solid rgba(198, 154, 114, 0.4);
     border-radius: 12px;
     padding: 12px 14px;
+    min-height: 72px;
   }
 
   .info-label {
@@ -163,7 +235,7 @@ export const receiptStyles = `
 
   .amounts-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 12px;
   }
 
@@ -173,6 +245,9 @@ export const receiptStyles = `
     border: 1px solid rgba(198, 154, 114, 0.45);
     background: white;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .amount-card.highlight {
@@ -183,7 +258,6 @@ export const receiptStyles = `
   .amount-label {
     font-size: 13px;
     color: #155446;
-    margin-bottom: 6px;
   }
 
   .amount-value {
@@ -194,12 +268,12 @@ export const receiptStyles = `
 
   .dates-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 12px;
   }
 
   .note-box {
-    min-height: 80px;
+    min-height: 96px;
     border: 1.5px dashed rgba(198, 154, 114, 0.65);
     border-radius: 14px;
     padding: 16px;
@@ -216,10 +290,13 @@ export const receiptStyles = `
     gap: 16px;
     font-size: 13px;
     color: #155446;
+    padding-top: 16px;
+    border-top: 1px solid rgba(198, 154, 114, 0.45);
+    margin-top: auto;
   }
 
   .signature-box {
-    min-width: 180px;
+    min-width: 200px;
     border-top: 1.5px solid rgba(198, 154, 114, 0.9);
     padding-top: 12px;
     text-align: center;
@@ -256,68 +333,82 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
               <span className="brand-name">أزياء قرطبة</span>
               <span className="brand-tagline">وصل فاتورة - نموذج داخلي</span>
             </div>
-            <div className="invoice-meta">
-              <span className="meta-item">رقم الفاتورة: {invoice.id}</span>
-              <span className="meta-item">تاريخ الإصدار: {formatDate(invoice.receivedDate)}</span>
+            <div className="header-meta">
+              <div className="invoice-meta">
+                <span className="meta-item">رقم الفاتورة: {invoice.id}</span>
+                <span className="meta-item">تاريخ الإصدار: {formatDate(invoice.receivedDate)}</span>
+              </div>
+              <div className="header-summary">
+                <div className="summary-pill">
+                  <span className="pill-label">المبلغ الكلي</span>
+                  <span className="pill-value">{formatCurrency(invoice.total)}</span>
+                </div>
+                <div className="summary-pill accent">
+                  <span className="pill-label">المبلغ المتبقي</span>
+                  <span className="pill-value">{formatCurrency(remaining)}</span>
+                </div>
+              </div>
             </div>
           </header>
 
-          <section className="section">
-            <h2 className="section-title">بيانات الزبون</h2>
-            <div className="info-grid">
-              <div className="info-item">
-                <span className="info-label">اسم الزبون</span>
-                <span className="info-value">{invoice.customerName}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">رقم الهاتف</span>
-                <span className="info-value">{invoice.phone}</span>
-              </div>
-              {invoice.address ? (
-                <div className="info-item" style={{ gridColumn: 'span 2' }}>
-                  <span className="info-label">العنوان</span>
-                  <span className="info-value">{invoice.address}</span>
+          <div className="content-grid">
+            <section className="section customer-section">
+              <h2 className="section-title">بيانات الزبون</h2>
+              <div className="info-grid">
+                <div className="info-item">
+                  <span className="info-label">اسم الزبون</span>
+                  <span className="info-value">{invoice.customerName}</span>
                 </div>
-              ) : null}
-            </div>
-          </section>
+                <div className="info-item">
+                  <span className="info-label">رقم الهاتف</span>
+                  <span className="info-value">{invoice.phone}</span>
+                </div>
+                {invoice.address ? (
+                  <div className="info-item" style={{ gridColumn: 'span 2' }}>
+                    <span className="info-label">العنوان</span>
+                    <span className="info-value">{invoice.address}</span>
+                  </div>
+                ) : null}
+              </div>
+            </section>
 
-          <section className="section">
-            <h2 className="section-title">الحساب المالي</h2>
-            <div className="amounts-grid">
-              <div className="amount-card">
-                <div className="amount-label">المبلغ الكلي</div>
-                <div className="amount-value">{formatCurrency(invoice.total)}</div>
+            <section className="section amounts-section">
+              <h2 className="section-title">الحساب المالي</h2>
+              <div className="amounts-grid">
+                <div className="amount-card">
+                  <div className="amount-label">المبلغ الكلي</div>
+                  <div className="amount-value">{formatCurrency(invoice.total)}</div>
+                </div>
+                <div className="amount-card highlight">
+                  <div className="amount-label">المبلغ الواصل</div>
+                  <div className="amount-value">{formatCurrency(invoice.paid)}</div>
+                </div>
+                <div className="amount-card">
+                  <div className="amount-label">المبلغ المتبقي</div>
+                  <div className="amount-value">{formatCurrency(remaining)}</div>
+                </div>
               </div>
-              <div className="amount-card highlight">
-                <div className="amount-label">المبلغ الواصل</div>
-                <div className="amount-value">{formatCurrency(invoice.paid)}</div>
-              </div>
-              <div className="amount-card">
-                <div className="amount-label">المبلغ المتبقي</div>
-                <div className="amount-value">{formatCurrency(remaining)}</div>
-              </div>
-            </div>
-          </section>
+            </section>
 
-          <section className="section">
-            <h2 className="section-title">التواريخ</h2>
-            <div className="dates-grid">
-              <div className="info-item">
-                <span className="info-label">تاريخ الاستلام</span>
-                <span className="info-value">{formatDate(invoice.receivedDate)}</span>
+            <section className="section dates-section">
+              <h2 className="section-title">التواريخ</h2>
+              <div className="dates-grid">
+                <div className="info-item">
+                  <span className="info-label">تاريخ الاستلام</span>
+                  <span className="info-value">{formatDate(invoice.receivedDate)}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">تاريخ التسليم</span>
+                  <span className="info-value">{formatDate(invoice.deliveryDate)}</span>
+                </div>
               </div>
-              <div className="info-item">
-                <span className="info-label">تاريخ التسليم</span>
-                <span className="info-value">{formatDate(invoice.deliveryDate)}</span>
-              </div>
-            </div>
-          </section>
+            </section>
 
-          <section className="section">
-            <h2 className="section-title">ملاحظات</h2>
-            <div className="note-box">{invoice.notes || '—'}</div>
-          </section>
+            <section className="section notes-section">
+              <h2 className="section-title">ملاحظات</h2>
+              <div className="note-box">{invoice.notes || '—'}</div>
+            </section>
+          </div>
 
           <footer className="receipt-footer">
             <div>
