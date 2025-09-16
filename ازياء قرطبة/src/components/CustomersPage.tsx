@@ -14,9 +14,12 @@ import {
   MapPin,
   Calendar,
   CreditCard,
-  Star
+  Star,
+  Printer
 } from 'lucide-react';
 import { Customer } from '../types/customer';
+import { openPrintWindow, formatPrintDateTime } from './print/PrintUtils';
+import { formatCurrency, formatDate } from './PrintableInvoice';
 
 interface CustomersPageProps {
   customers: Customer[];
@@ -45,6 +48,41 @@ export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProp
     }
   };
 
+  const getLabelPrintStyle = (label: string): React.CSSProperties => {
+    switch (label) {
+      case 'ذهبي':
+        return {
+          backgroundColor: 'rgba(246, 196, 120, 0.25)',
+          color: '#8a5a00',
+          border: '1px solid rgba(246, 196, 120, 0.5)',
+        };
+      case 'وفي':
+        return {
+          backgroundColor: 'rgba(134, 88, 190, 0.18)',
+          color: '#533288',
+          border: '1px solid rgba(134, 88, 190, 0.35)',
+        };
+      case 'منتظم':
+        return {
+          backgroundColor: 'rgba(21, 84, 70, 0.15)',
+          color: '#155446',
+          border: '1px solid rgba(21, 84, 70, 0.4)',
+        };
+      case 'جديد':
+        return {
+          backgroundColor: 'rgba(59, 130, 246, 0.12)',
+          color: '#1d4ed8',
+          border: '1px solid rgba(59, 130, 246, 0.35)',
+        };
+      default:
+        return {
+          backgroundColor: 'rgba(198, 154, 114, 0.2)',
+          color: '#13312A',
+          border: '1px solid rgba(198, 154, 114, 0.4)',
+        };
+    }
+  };
+
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch = customer.name.includes(searchTerm) ||
                          customer.phone.includes(searchTerm) ||
@@ -52,6 +90,180 @@ export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProp
     const matchesFilter = filterLabel === 'all' || customer.label === filterLabel;
     return matchesSearch && matchesFilter;
   });
+
+  const handlePrintCustomers = () => {
+    const totalCustomers = filteredCustomers.length;
+    const totalOrders = filteredCustomers.reduce((sum, customer) => sum + customer.orders.length, 0);
+    const totalSpent = filteredCustomers.reduce((sum, customer) => sum + customer.totalSpent, 0);
+    const averageOrders = totalCustomers > 0 ? (totalOrders / totalCustomers).toFixed(1) : '0';
+    const labelCounts = filteredCustomers.reduce<Record<string, number>>((acc, customer) => {
+      acc[customer.label] = (acc[customer.label] || 0) + 1;
+      return acc;
+    }, {});
+    const now = new Date();
+
+    openPrintWindow('قائمة الزبائن', (
+      <>
+        <header className="print-header">
+          <h1 className="print-title">سجل الزبائن</h1>
+          <p className="print-subtitle">قائمة ببيانات الزبائن وتفاصيل التعامل معهم داخل مركز أزياء قرطبة</p>
+          <div className="print-meta">
+            <span>تاريخ الطباعة: {formatPrintDateTime(now)}</span>
+            <span>عدد الزبائن: {totalCustomers}</span>
+          </div>
+        </header>
+
+        <section className="print-section">
+          <h2 className="section-title">ملخص سريع</h2>
+          <div className="metrics-grid">
+            <div className="metric-card accent">
+              <span className="metric-label">عدد الزبائن الحالي</span>
+              <span className="metric-value">{totalCustomers}</span>
+            </div>
+            <div className="metric-card">
+              <span className="metric-label">إجمالي الإنفاق</span>
+              <span className="metric-value">{formatCurrency(totalSpent)}</span>
+            </div>
+            <div className="metric-card">
+              <span className="metric-label">عدد الطلبات المسجلة</span>
+              <span className="metric-value">{totalOrders}</span>
+            </div>
+            <div className="metric-card">
+              <span className="metric-label">متوسط الطلبات لكل زبون</span>
+              <span className="metric-value">{averageOrders}</span>
+            </div>
+            {Object.entries(labelCounts).map(([label, count]) => (
+              <div className="metric-card" key={label}>
+                <span className="metric-label">زبائن {label}</span>
+                <span className="metric-value">{count}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="print-section">
+          <h2 className="section-title">جدول الزبائن</h2>
+          <p className="section-description">يسرد الجدول التفاصيل الأساسية عن كل زبون بما في ذلك معلومات التواصل والتصنيف.</p>
+          <div className="print-table-wrapper">
+            <table className="print-table">
+              <thead>
+                <tr>
+                  <th>اسم الزبون</th>
+                  <th>الهاتف</th>
+                  <th>العنوان</th>
+                  <th>التصنيف</th>
+                  <th>آخر طلب</th>
+                  <th>إجمالي الإنفاق</th>
+                  <th>عدد الطلبات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCustomers.map((customer) => (
+                  <tr key={customer.id}>
+                    <td>{customer.name}</td>
+                    <td>{customer.phone}</td>
+                    <td>{customer.address}</td>
+                    <td>
+                      <span className="status-pill" style={getLabelPrintStyle(customer.label)}>
+                        {customer.label}
+                      </span>
+                    </td>
+                    <td>{formatDate(customer.lastOrder)}</td>
+                    <td>{formatCurrency(customer.totalSpent)}</td>
+                    <td>{customer.orders.length}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="print-section">
+          <h2 className="section-title">تفاصيل الزبائن</h2>
+          <p className="section-description">يقدم هذا القسم عرضاً تفصيلياً لتاريخ كل زبون وقياساته والطلبات التي تمت متابعتها.</p>
+          <div className="detail-cards">
+            {filteredCustomers.map((customer) => (
+              <article className="detail-card" key={`customer-${customer.id}`}>
+                <div className="detail-card-header">
+                  <h3 className="detail-title">{customer.name}</h3>
+                  <span className="status-pill" style={getLabelPrintStyle(customer.label)}>
+                    {customer.label}
+                  </span>
+                </div>
+                <div className="detail-grid two-column">
+                  <div className="detail-item">
+                    <span className="item-label">الهاتف</span>
+                    <span className="item-value">{customer.phone}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="item-label">العنوان</span>
+                    <span className="item-value">{customer.address}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="item-label">آخر طلب</span>
+                    <span className="item-value">{formatDate(customer.lastOrder)}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="item-label">إجمالي الإنفاق</span>
+                    <span className="item-value">{formatCurrency(customer.totalSpent)}</span>
+                  </div>
+                </div>
+
+                <div className="detail-subsection">
+                  <h4 className="subsection-title">القياسات الأساسية</h4>
+                  <div className="detail-grid two-column">
+                    <div className="detail-item">
+                      <span className="item-label">الطول</span>
+                      <span className="item-value">{customer.measurements.height} سم</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="item-label">الأكتاف</span>
+                      <span className="item-value">{customer.measurements.shoulder} سم</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="item-label">الخصر</span>
+                      <span className="item-value">{customer.measurements.waist} سم</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="item-label">الصدر</span>
+                      <span className="item-value">{customer.measurements.chest} سم</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="detail-subsection">
+                  <h4 className="subsection-title">سجل الطلبات</h4>
+                  <ul className="list">
+                    {customer.orders.length > 0 ? (
+                      customer.orders.map((order) => (
+                        <li className="list-item" key={order.id}>
+                          <div className="item-label">#{order.id} — {order.type}</div>
+                          <div className="item-value">الحالة: {order.status}</div>
+                          <div className="item-value">الفترة: {formatDate(order.orderDate)} إلى {formatDate(order.deliveryDate)}</div>
+                          <div className="item-value">قيمة الطلب: {formatCurrency(order.total)} | المدفوع: {formatCurrency(order.paid)}</div>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="list-item">لا توجد طلبات مسجلة لهذا الزبون.</li>
+                    )}
+                  </ul>
+                </div>
+
+                {customer.notes && (
+                  <div className="detail-grid">
+                    <div className="detail-item">
+                      <span className="item-label">ملاحظات إضافية</span>
+                      <span className="item-value">{customer.notes}</span>
+                    </div>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      </>
+    ));
+  };
 
   const NewCustomerDialog = () => (
     <Dialog open={isNewCustomerOpen} onOpenChange={setIsNewCustomerOpen}>
@@ -118,10 +330,20 @@ export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProp
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="text-2xl text-[#13312A] arabic-text">إدارة الزبائن</h1>
-        <Button onClick={() => setIsNewCustomerOpen(true)} className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target">
-          <Plus className="w-4 h-4 ml-2" />
-          <span className="arabic-text">زبون جديد</span>
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            onClick={handlePrintCustomers}
+            className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target"
+          >
+            <Printer className="w-4 h-4 ml-2" />
+            <span className="arabic-text">طباعة القائمة</span>
+          </Button>
+          <Button onClick={() => setIsNewCustomerOpen(true)} className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target">
+            <Plus className="w-4 h-4 ml-2" />
+            <span className="arabic-text">زبون جديد</span>
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filters */}
