@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Layout } from './components/Layout';
 import { LoginPage } from './components/LoginPage';
 import { Dashboard } from './components/Dashboard';
-import { OrdersPage } from './components/OrdersPage';
 import { InvoicesPage } from './components/InvoicesPage';
 import { CustomersPage } from './components/CustomersPage';
 import { ReportsPage } from './components/ReportsPage';
@@ -260,8 +259,6 @@ export default function App() {
     switch (currentPage) {
       case 'dashboard':
         return <Dashboard onNavigate={handleNavigate} />;
-      case 'orders':
-        return <OrdersPage />;
       case 'invoices':
         return <InvoicesPage />;
       case 'customers':
