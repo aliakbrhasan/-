@@ -62,6 +62,14 @@ const formatRangeDate = (date: Date) =>
     day: 'numeric',
   }).format(date);
 
+const mobileDateFormatter = new Intl.DateTimeFormat('ar-IQ', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+const formatMobileDate = (value: string) => mobileDateFormatter.format(new Date(value));
+
 const buildBoundaryDate = (parts: DateParts, isStart: boolean): Date | null => {
   const year = parseInt(parts.year, 10);
 
@@ -261,6 +269,17 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'معلق':
+        return 'غير مدفوع';
+      case 'جزئي':
+        return 'مدفوع جزئياً';
+      default:
+        return status;
+    }
+  };
+
   const getStatusPrintStyle = (status: string): React.CSSProperties => {
     switch (status) {
       case 'مدفوع':
@@ -355,7 +374,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
             </div>
             {Object.entries(statusCounts).map(([status, count]) => (
               <div className="metric-card" key={status}>
-                <span className="metric-label">فواتير {status}</span>
+                <span className="metric-label">فواتير {getStatusLabel(status)}</span>
                 <span className="metric-value">{count}</span>
               </div>
             ))}
@@ -398,7 +417,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                       <td>{formatCurrency(remaining)}</td>
                       <td>
                         <span className="status-pill" style={getStatusPrintStyle(invoice.status)}>
-                          {invoice.status}
+                          {getStatusLabel(invoice.status)}
                         </span>
                       </td>
                     </tr>
@@ -423,7 +442,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                   <div className="detail-card-header">
                     <h3 className="detail-title">{invoice.customerName}</h3>
                     <span className="status-pill" style={getStatusPrintStyle(invoice.status)}>
-                      {invoice.status}
+                      {getStatusLabel(invoice.status)}
                     </span>
                   </div>
                   <div className="detail-grid two-column">
@@ -648,7 +667,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                   <TableCell className="text-[#13312A]">{formatDate(invoice.deliveryDate)}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(invoice.status)}>
-                      {invoice.status}
+                      {getStatusLabel(invoice.status)}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -689,62 +708,76 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
 
       {/* Invoices Cards - Mobile */}
       <div className="md:hidden space-y-4">
-        {sortedInvoices.map((invoice) => (
-          <Card key={invoice.id} className="bg-white border-[#C69A72]">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="text-lg text-[#13312A] arabic-text mb-1">{invoice.customerName}</h3>
-                  <p className="text-sm text-[#155446]">{invoice.id}</p>
-                </div>
-                <div className="flex items-center gap-2">
+        {sortedInvoices.map((invoice) => {
+          const formattedReceivedDate = formatMobileDate(invoice.receivedDate);
+          const formattedDeliveryDate = formatMobileDate(invoice.deliveryDate);
+
+          return (
+            <Card key={invoice.id} className="bg-white border-[#C69A72] shadow-sm">
+              <CardContent className="p-4 space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="flex-1 space-y-1 text-right">
+                    <h3 className="text-lg font-semibold text-[#13312A] arabic-text">{invoice.customerName}</h3>
+                    <p className="text-sm text-[#7A6A58] arabic-text">رقم الفاتورة: {invoice.id}</p>
+                    <p className="text-sm text-[#155446] arabic-text">الهاتف: {invoice.phone}</p>
+                  </div>
                   <ImageWithFallback
                     src={invoice.fabricImage}
                     alt="صورة القماش"
-                    className="w-12 h-12 rounded-lg object-cover border border-[#C69A72]"
+                    className="w-20 h-20 rounded-xl object-cover border-2 border-[#C69A72] shadow-sm"
                   />
-                  <Badge className={getStatusColor(invoice.status)}>
-                    {invoice.status}
+                </div>
+
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-2xl font-bold text-[#13312A] arabic-text">{formatCurrency(invoice.total)}</span>
+                  <Badge
+                    className={`${getStatusColor(invoice.status)} arabic-text px-3 py-1 text-sm font-medium rounded-full shadow-sm`}
+                  >
+                    {getStatusLabel(invoice.status)}
                   </Badge>
                 </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-                <p className="text-[#155446] arabic-text">الهاتف: {invoice.phone}</p>
-                <p className="text-[#155446] arabic-text">المبلغ: {formatCurrency(invoice.total)}</p>
-                <p className="text-[#155446] arabic-text">الاستلام: {formatDate(invoice.receivedDate)}</p>
-                <p className="text-[#155446] arabic-text">التسليم: {formatDate(invoice.deliveryDate)}</p>
-              </div>
 
-              <div className="flex gap-2 overflow-x-auto">
-                <Button size="sm" variant="outline" className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target whitespace-nowrap">
-                  <Edit className="w-4 h-4 ml-1" />
-                  <span className="arabic-text">تعديل</span>
-                </Button>
-                <Button size="sm" variant="outline" className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target whitespace-nowrap">
-                  <Copy className="w-4 h-4 ml-1" />
-                  <span className="arabic-text">تكرار</span>
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleExportPDF(invoice)}
-                  className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target whitespace-nowrap"
-                >
-                  <Download className="w-4 h-4 ml-1" />
-                  <span className="arabic-text">PDF</span>
-                </Button>
-                <Button 
-                  size="sm" 
-                  onClick={() => handleShareWhatsApp(invoice)}
-                  className="bg-green-600 hover:bg-green-700 text-white touch-target whitespace-nowrap"
-                >
-                  <MessageCircle className="w-4 h-4 ml-1" />
-                  <span className="arabic-text">واتساب</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                <div className="space-y-2 text-sm arabic-text">
+                  <div className="flex items-center justify-between text-[#155446]">
+                    <span className="text-[#7A6A58]">تاريخ الاستلام</span>
+                    <span className="font-medium text-[#13312A]">{formattedReceivedDate}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[#155446]">
+                    <span className="text-[#7A6A58]">تاريخ التسليم</span>
+                    <span className="font-medium text-[#13312A]">{formattedDeliveryDate}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target flex-1 min-w-[8rem]"
+                  >
+                    <Edit className="w-4 h-4 ml-1" />
+                    <span className="arabic-text">تعديل</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handleExportPDF(invoice)}
+                    className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target flex-1 min-w-[8rem]"
+                  >
+                    <Download className="w-4 h-4 ml-1" />
+                    <span className="arabic-text">PDF</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handleShareWhatsApp(invoice)}
+                    className="bg-green-600 hover:bg-green-700 text-white touch-target flex-1 min-w-[8rem]"
+                  >
+                    <MessageCircle className="w-4 h-4 ml-1" />
+                    <span className="arabic-text">واتساب</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <Dialog open={isPrintDialogOpen} onOpenChange={handlePrintDialogOpenChange}>
