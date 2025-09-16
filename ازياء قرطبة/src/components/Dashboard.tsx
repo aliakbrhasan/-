@@ -12,14 +12,15 @@ import {
 
 interface DashboardProps {
   onNavigate: (page: string) => void;
+  onCreateInvoice: () => void;
 }
 
-export function Dashboard({ onNavigate }: DashboardProps) {
+export function Dashboard({ onNavigate, onCreateInvoice }: DashboardProps) {
 
   const quickActions = [
-    { label: 'طلب جديد', icon: FileText, action: () => onNavigate('orders'), color: 'bg-[#155446]' },
-    { label: 'فاتورة جديدة', icon: Receipt, action: () => onNavigate('invoices'), color: 'bg-[#C69A72]' },
-    { label: 'زبون جديد', icon: Users, action: () => onNavigate('customers'), color: 'bg-[#13312A]' },
+    { label: 'فاتورة جديدة', icon: Receipt, action: onCreateInvoice, color: 'bg-[#155446]' },
+    { label: 'تقارير العمل', icon: FileText, action: () => onNavigate('reports'), color: 'bg-[#C69A72]' },
+    { label: 'إدارة الزبائن', icon: Users, action: () => onNavigate('customers'), color: 'bg-[#13312A]' },
   ];
   
 

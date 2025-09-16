@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Layout } from './components/Layout';
 import { LoginPage } from './components/LoginPage';
 import { Dashboard } from './components/Dashboard';
-import { OrdersPage } from './components/OrdersPage';
 import { InvoicesPage } from './components/InvoicesPage';
 import { CustomersPage } from './components/CustomersPage';
 import { ReportsPage } from './components/ReportsPage';
 import { FinancialPage } from './components/FinancialPage';
 import { CustomerDetailsPage } from './components/CustomerDetailsPage';
+import { NewInvoiceDialog } from './components/NewInvoiceDialog';
 import { Toaster } from './components/ui/sonner';
 import { Customer } from './types/customer';
 
@@ -231,17 +231,20 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [isNewInvoiceDialogOpen, setIsNewInvoiceDialogOpen] = useState(false);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
     setCurrentPage('dashboard');
     setSelectedCustomer(null);
+    setIsNewInvoiceDialogOpen(false);
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setCurrentPage('dashboard');
     setSelectedCustomer(null);
+    setIsNewInvoiceDialogOpen(false);
   };
 
   const handleNavigate = (page: string) => {
@@ -249,6 +252,7 @@ export default function App() {
     if (page !== 'customerDetails') {
       setSelectedCustomer(null);
     }
+    setIsNewInvoiceDialogOpen(false);
   };
 
   const handleCustomerSelect = (customer: Customer) => {
@@ -256,14 +260,21 @@ export default function App() {
     setCurrentPage('customerDetails');
   };
 
+  const handleCreateInvoice = () => {
+    setIsNewInvoiceDialogOpen(true);
+  };
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <Dashboard onNavigate={handleNavigate} />;
-      case 'orders':
-        return <OrdersPage />;
+        return (
+          <Dashboard
+            onNavigate={handleNavigate}
+            onCreateInvoice={handleCreateInvoice}
+          />
+        );
       case 'invoices':
-        return <InvoicesPage />;
+        return <InvoicesPage onCreateInvoice={handleCreateInvoice} />;
       case 'customers':
         return (
           <CustomersPage
@@ -291,7 +302,12 @@ export default function App() {
       case 'financial':
         return <FinancialPage />;
       default:
-        return <Dashboard onNavigate={handleNavigate} />;
+        return (
+          <Dashboard
+            onNavigate={handleNavigate}
+            onCreateInvoice={handleCreateInvoice}
+          />
+        );
     }
   };
 
@@ -307,6 +323,10 @@ export default function App() {
           onLogout={handleLogout}
         >
           {renderCurrentPage()}
+          <NewInvoiceDialog
+            isOpen={isNewInvoiceDialogOpen}
+            onOpenChange={setIsNewInvoiceDialogOpen}
+          />
         </Layout>
       )}
       <Toaster position="top-center" />

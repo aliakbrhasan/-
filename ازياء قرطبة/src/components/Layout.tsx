@@ -14,7 +14,6 @@ interface LayoutProps {
 export function Layout({ children, currentPage, onNavigate, isLoggedIn, onLogout }: LayoutProps) {
   const navigationItems = [
     { id: 'dashboard', label: 'الصفحة الرئيسية', icon: Home },
-    { id: 'orders', label: 'الطلبات', icon: FileText },
     { id: 'invoices', label: 'الفواتير', icon: Receipt },
     { id: 'customers', label: 'الزبائن', icon: Users },
     { id: 'financial', label: 'المالية', icon: DollarSign },
