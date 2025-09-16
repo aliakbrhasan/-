@@ -48,7 +48,7 @@ export const receiptStyles = `
     width: 100%;
     display: flex;
     justify-content: center;
-    padding: 0.8cm 0;
+    padding: 0.6cm 0;
   }
 
   .receipt-container {
@@ -58,10 +58,10 @@ export const receiptStyles = `
     background: #FDFBF7;
     border: 2px solid #C69A72;
     border-radius: 16px;
-    padding: 18px 26px;
+    padding: 14px 20px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 14px;
     box-shadow: 0 12px 28px rgba(19, 49, 42, 0.12);
     position: relative;
     overflow: hidden;
@@ -82,38 +82,38 @@ export const receiptStyles = `
     height: 100%;
     display: grid;
     grid-template-rows: auto 1fr auto;
-    gap: 18px;
+    gap: 14px;
   }
 
   .receipt-header {
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 18px;
-    align-items: stretch;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-items: start;
   }
 
   .brand {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
   }
 
   .brand-name {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
     color: #13312A;
     letter-spacing: 1px;
   }
 
   .brand-tagline {
-    font-size: 13px;
+    font-size: 12px;
     color: #155446;
   }
 
   .header-meta {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     align-items: stretch;
   }
 
@@ -121,28 +121,28 @@ export const receiptStyles = `
     background: rgba(246, 233, 202, 0.9);
     border: 1px solid rgba(198, 154, 114, 0.6);
     border-radius: 12px;
-    padding: 10px 14px;
+    padding: 9px 12px;
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
 
   .meta-item {
-    font-size: 13px;
+    font-size: 12px;
     color: #13312A;
   }
 
   .header-summary {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
   }
 
   .summary-pill {
-    border-radius: 14px;
+    border-radius: 12px;
     border: 1px solid rgba(198, 154, 114, 0.45);
     background: rgba(246, 233, 202, 0.55);
-    padding: 10px 12px;
+    padding: 8px 10px;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -154,12 +154,12 @@ export const receiptStyles = `
   }
 
   .pill-label {
-    font-size: 11px;
+    font-size: 10px;
     color: #155446;
   }
 
   .pill-value {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     color: #13312A;
   }
@@ -174,47 +174,50 @@ export const receiptStyles = `
 
   .content-grid {
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 16px 20px;
-    align-content: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'customer amounts'
+      'dates notes';
+    gap: 12px 16px;
+    align-content: stretch;
+    align-items: stretch;
+    min-height: 0;
   }
 
   .customer-section {
-    grid-column: 1 / 2;
+    grid-area: customer;
   }
 
   .amounts-section {
-    grid-column: 2 / 3;
-    align-self: start;
+    grid-area: amounts;
   }
 
   .dates-section {
-    grid-column: 1 / 2;
-    align-self: stretch;
+    grid-area: dates;
   }
 
   .notes-section {
-    grid-column: 2 / 3;
-    grid-row: 2 / 3;
-    align-self: stretch;
+    grid-area: notes;
   }
 
   .section {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    min-height: 0;
   }
 
   .section-title {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     color: #155446;
   }
 
   .info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 10px 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
   }
 
   .info-item {
@@ -224,29 +227,29 @@ export const receiptStyles = `
     background: rgba(246, 233, 202, 0.55);
     border: 1px solid rgba(198, 154, 114, 0.4);
     border-radius: 12px;
-    padding: 10px 12px;
-    min-height: 64px;
+    padding: 8px 10px;
+    min-height: 56px;
   }
 
   .info-label {
-    font-size: 12px;
+    font-size: 11px;
     color: #155446;
   }
 
   .info-value {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     word-break: break-word;
   }
 
   .amounts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .amount-card {
-    padding: 12px;
+    padding: 10px;
     border-radius: 14px;
     border: 1px solid rgba(198, 154, 114, 0.45);
     background: white;
@@ -262,31 +265,32 @@ export const receiptStyles = `
   }
 
   .amount-label {
-    font-size: 13px;
+    font-size: 12px;
     color: #155446;
   }
 
   .amount-value {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: #13312A;
   }
 
   .dates-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .note-box {
-    min-height: 84px;
+    min-height: 0;
     height: 100%;
+    flex: 1;
     border: 1.5px dashed rgba(198, 154, 114, 0.65);
     border-radius: 14px;
-    padding: 12px 14px;
+    padding: 10px 12px;
     background: rgba(246, 233, 202, 0.35);
-    font-size: 13px;
-    line-height: 1.6;
+    font-size: 12px;
+    line-height: 1.5;
     color: #13312A;
     display: flex;
     align-items: flex-start;
@@ -297,18 +301,19 @@ export const receiptStyles = `
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    gap: 12px;
-    font-size: 12px;
+    gap: 10px;
+    font-size: 11px;
     color: #155446;
-    padding-top: 12px;
+    padding-top: 10px;
     border-top: 1px solid rgba(198, 154, 114, 0.45);
     margin-top: auto;
+    flex-wrap: wrap;
   }
 
   .signature-box {
-    min-width: 160px;
+    min-width: 140px;
     border-top: 1.5px solid rgba(198, 154, 114, 0.9);
-    padding-top: 12px;
+    padding-top: 10px;
     text-align: center;
   }
 
@@ -318,12 +323,10 @@ export const receiptStyles = `
       max-width: 100%;
     }
 
-    .receipt-inner {
-      grid-template-rows: repeat(3, auto);
-    }
-
     .content-grid {
       grid-template-columns: 1fr;
+      grid-template-rows: none;
+      grid-template-areas: none;
       gap: 14px;
     }
 
@@ -336,9 +339,15 @@ export const receiptStyles = `
       align-self: stretch;
     }
 
+    .info-grid,
+    .amounts-grid,
+    .dates-grid {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
     .note-box {
       height: auto;
-      min-height: 120px;
+      min-height: 110px;
     }
   }
 
@@ -407,7 +416,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
                   <span className="info-value">{invoice.phone}</span>
                 </div>
                 {invoice.address ? (
-                  <div className="info-item" style={{ gridColumn: 'span 2' }}>
+                  <div className="info-item" style={{ gridColumn: '1 / -1' }}>
                     <span className="info-label">العنوان</span>
                     <span className="info-value">{invoice.address}</span>
                   </div>
