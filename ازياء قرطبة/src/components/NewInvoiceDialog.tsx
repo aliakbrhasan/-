@@ -44,6 +44,49 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
   const [quickAddValue, setQuickAddValue] = useState('');
   const [quickAddError, setQuickAddError] = useState('');
 
+  // Collar (نوع الياقة)
+  const [collarOptions, setCollarOptions] = useState<FabricOption[]>([
+    { id: 'regular', label: 'عادية' },
+    { id: 'mandarin', label: 'صينية' },
+    { id: 'formal', label: 'رسمية' },
+  ]);
+  const [selectedCollarOptions, setSelectedCollarOptions] = useState<string[]>([]);
+  const [isCollarPopoverOpen, setIsCollarPopoverOpen] = useState(false);
+  const [isCollarManagerOpen, setIsCollarManagerOpen] = useState(false);
+  const [collarOptionsDraft, setCollarOptionsDraft] = useState<FabricOption[]>([]);
+  const [collarManagerError, setCollarManagerError] = useState('');
+  const [isCollarQuickAddOpen, setIsCollarQuickAddOpen] = useState(false);
+  const [collarQuickAddValue, setCollarQuickAddValue] = useState('');
+  const [collarQuickAddError, setCollarQuickAddError] = useState('');
+
+  // Chest style (أسلوب الصدر)
+  const [chestStyleOptions, setChestStyleOptions] = useState<FabricOption[]>([
+    { id: 'single', label: 'صدر واحد' },
+    { id: 'double', label: 'صدر مزدوج' },
+  ]);
+  const [selectedChestStyleOptions, setSelectedChestStyleOptions] = useState<string[]>([]);
+  const [isChestStylePopoverOpen, setIsChestStylePopoverOpen] = useState(false);
+  const [isChestStyleManagerOpen, setIsChestStyleManagerOpen] = useState(false);
+  const [chestStyleOptionsDraft, setChestStyleOptionsDraft] = useState<FabricOption[]>([]);
+  const [chestStyleManagerError, setChestStyleManagerError] = useState('');
+  const [isChestStyleQuickAddOpen, setIsChestStyleQuickAddOpen] = useState(false);
+  const [chestStyleQuickAddValue, setChestStyleQuickAddValue] = useState('');
+  const [chestStyleQuickAddError, setChestStyleQuickAddError] = useState('');
+
+  // Sleeve end (نهاية الكم)
+  const [sleeveEndOptions, setSleeveEndOptions] = useState<FabricOption[]>([
+    { id: 'cuff', label: 'كم بحاشية' },
+    { id: 'plain', label: 'كم عادي' },
+  ]);
+  const [selectedSleeveEndOptions, setSelectedSleeveEndOptions] = useState<string[]>([]);
+  const [isSleeveEndPopoverOpen, setIsSleeveEndPopoverOpen] = useState(false);
+  const [isSleeveEndManagerOpen, setIsSleeveEndManagerOpen] = useState(false);
+  const [sleeveEndOptionsDraft, setSleeveEndOptionsDraft] = useState<FabricOption[]>([]);
+  const [sleeveEndManagerError, setSleeveEndManagerError] = useState('');
+  const [isSleeveEndQuickAddOpen, setIsSleeveEndQuickAddOpen] = useState(false);
+  const [sleeveEndQuickAddValue, setSleeveEndQuickAddValue] = useState('');
+  const [sleeveEndQuickAddError, setSleeveEndQuickAddError] = useState('');
+
   useEffect(() => {
     if (!isOpen) {
       setDeliveryDate('');
@@ -53,6 +96,19 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
       setIsSourcePopoverOpen(false);
       setIsFabricManagerOpen(false);
       setIsQuickAddDialogOpen(false);
+      // reset design fields
+      setSelectedCollarOptions([]);
+      setSelectedChestStyleOptions([]);
+      setSelectedSleeveEndOptions([]);
+      setIsCollarPopoverOpen(false);
+      setIsChestStylePopoverOpen(false);
+      setIsSleeveEndPopoverOpen(false);
+      setIsCollarManagerOpen(false);
+      setIsChestStyleManagerOpen(false);
+      setIsSleeveEndManagerOpen(false);
+      setIsCollarQuickAddOpen(false);
+      setIsChestStyleQuickAddOpen(false);
+      setIsSleeveEndQuickAddOpen(false);
     }
   }, [isOpen]);
 
@@ -74,6 +130,192 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
         ? previous.filter((item) => item !== sourceId)
         : [...previous, sourceId],
     );
+  };
+
+  // Collars helpers
+  const toggleCollarOption = (optionId: string) => {
+    setSelectedCollarOptions((previous) =>
+      previous.includes(optionId)
+        ? previous.filter((item) => item !== optionId)
+        : [...previous, optionId],
+    );
+  };
+
+  const openCollarManager = (open: boolean) => {
+    setIsCollarManagerOpen(open);
+    if (open) {
+      setCollarOptionsDraft(collarOptions.map((o) => ({ ...o })));
+      setCollarManagerError('');
+    }
+  };
+
+  const submitCollarOptions: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const cleaned = collarOptionsDraft.map((o) => ({ ...o, label: o.label.trim() })).filter((o) => o.label !== '');
+    const labels = cleaned.map((o) => o.label);
+    if (new Set(labels).size !== labels.length) {
+      setCollarManagerError('الرجاء عدم تكرار أسماء الأنواع.');
+      return;
+    }
+    setCollarOptions(cleaned);
+    setSelectedCollarOptions((prev) => prev.filter((id) => cleaned.some((o) => o.id === id)));
+    setIsCollarManagerOpen(false);
+  };
+
+  const collarDraftLabelChange = (id: string, label: string) => {
+    setCollarOptionsDraft((prev) => prev.map((o) => (o.id === id ? { ...o, label } : o)));
+  };
+  const collarDraftDelete = (id: string) => {
+    setCollarOptionsDraft((prev) => prev.filter((o) => o.id !== id));
+  };
+  const collarDraftAdd = () => {
+    const id = `collar-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setCollarOptionsDraft((prev) => [...prev, { id, label: 'خيار جديد' }]);
+  };
+  const openCollarQuickAdd = (open: boolean) => {
+    setIsCollarQuickAddOpen(open);
+    if (!open) {
+      setCollarQuickAddValue('');
+      setCollarQuickAddError('');
+    }
+  };
+  const submitCollarQuickAdd: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const value = collarQuickAddValue.trim();
+    if (!value) {
+      setCollarQuickAddError('الرجاء إدخال اسم الخيار.');
+      return;
+    }
+    if (collarOptions.some((o) => o.label === value)) {
+      setCollarQuickAddError('هذا الخيار موجود بالفعل.');
+      return;
+    }
+    const option = { id: `collar-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, label: value };
+    setCollarOptions((prev) => [...prev, option]);
+    setSelectedCollarOptions((prev) => [...prev, option.id]);
+    openCollarQuickAdd(false);
+  };
+
+  // Chest style helpers
+  const toggleChestStyleOption = (optionId: string) => {
+    setSelectedChestStyleOptions((previous) =>
+      previous.includes(optionId)
+        ? previous.filter((item) => item !== optionId)
+        : [...previous, optionId],
+    );
+  };
+  const openChestStyleManager = (open: boolean) => {
+    setIsChestStyleManagerOpen(open);
+    if (open) {
+      setChestStyleOptionsDraft(chestStyleOptions.map((o) => ({ ...o })));
+      setChestStyleManagerError('');
+    }
+  };
+  const submitChestStyleOptions: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const cleaned = chestStyleOptionsDraft.map((o) => ({ ...o, label: o.label.trim() })).filter((o) => o.label !== '');
+    const labels = cleaned.map((o) => o.label);
+    if (new Set(labels).size !== labels.length) {
+      setChestStyleManagerError('الرجاء عدم تكرار أسماء الأنواع.');
+      return;
+    }
+    setChestStyleOptions(cleaned);
+    setSelectedChestStyleOptions((prev) => prev.filter((id) => cleaned.some((o) => o.id === id)));
+    setIsChestStyleManagerOpen(false);
+  };
+  const chestStyleDraftLabelChange = (id: string, label: string) => {
+    setChestStyleOptionsDraft((prev) => prev.map((o) => (o.id === id ? { ...o, label } : o)));
+  };
+  const chestStyleDraftDelete = (id: string) => {
+    setChestStyleOptionsDraft((prev) => prev.filter((o) => o.id !== id));
+  };
+  const chestStyleDraftAdd = () => {
+    const id = `chest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setChestStyleOptionsDraft((prev) => [...prev, { id, label: 'خيار جديد' }]);
+  };
+  const openChestStyleQuickAdd = (open: boolean) => {
+    setIsChestStyleQuickAddOpen(open);
+    if (!open) {
+      setChestStyleQuickAddValue('');
+      setChestStyleQuickAddError('');
+    }
+  };
+  const submitChestStyleQuickAdd: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const value = chestStyleQuickAddValue.trim();
+    if (!value) {
+      setChestStyleQuickAddError('الرجاء إدخال اسم الخيار.');
+      return;
+    }
+    if (chestStyleOptions.some((o) => o.label === value)) {
+      setChestStyleQuickAddError('هذا الخيار موجود بالفعل.');
+      return;
+    }
+    const option = { id: `chest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, label: value };
+    setChestStyleOptions((prev) => [...prev, option]);
+    setSelectedChestStyleOptions((prev) => [...prev, option.id]);
+    openChestStyleQuickAdd(false);
+  };
+
+  // Sleeve end helpers
+  const toggleSleeveEndOption = (optionId: string) => {
+    setSelectedSleeveEndOptions((previous) =>
+      previous.includes(optionId)
+        ? previous.filter((item) => item !== optionId)
+        : [...previous, optionId],
+    );
+  };
+  const openSleeveEndManager = (open: boolean) => {
+    setIsSleeveEndManagerOpen(open);
+    if (open) {
+      setSleeveEndOptionsDraft(sleeveEndOptions.map((o) => ({ ...o })));
+      setSleeveEndManagerError('');
+    }
+  };
+  const submitSleeveEndOptions: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const cleaned = sleeveEndOptionsDraft.map((o) => ({ ...o, label: o.label.trim() })).filter((o) => o.label !== '');
+    const labels = cleaned.map((o) => o.label);
+    if (new Set(labels).size !== labels.length) {
+      setSleeveEndManagerError('الرجاء عدم تكرار أسماء الأنواع.');
+      return;
+    }
+    setSleeveEndOptions(cleaned);
+    setSelectedSleeveEndOptions((prev) => prev.filter((id) => cleaned.some((o) => o.id === id)));
+    setIsSleeveEndManagerOpen(false);
+  };
+  const sleeveEndDraftLabelChange = (id: string, label: string) => {
+    setSleeveEndOptionsDraft((prev) => prev.map((o) => (o.id === id ? { ...o, label } : o)));
+  };
+  const sleeveEndDraftDelete = (id: string) => {
+    setSleeveEndOptionsDraft((prev) => prev.filter((o) => o.id !== id));
+  };
+  const sleeveEndDraftAdd = () => {
+    const id = `sleeve-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setSleeveEndOptionsDraft((prev) => [...prev, { id, label: 'خيار جديد' }]);
+  };
+  const openSleeveEndQuickAdd = (open: boolean) => {
+    setIsSleeveEndQuickAddOpen(open);
+    if (!open) {
+      setSleeveEndQuickAddValue('');
+      setSleeveEndQuickAddError('');
+    }
+  };
+  const submitSleeveEndQuickAdd: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const value = sleeveEndQuickAddValue.trim();
+    if (!value) {
+      setSleeveEndQuickAddError('الرجاء إدخال اسم الخيار.');
+      return;
+    }
+    if (sleeveEndOptions.some((o) => o.label === value)) {
+      setSleeveEndQuickAddError('هذا الخيار موجود بالفعل.');
+      return;
+    }
+    const option = { id: `sleeve-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, label: value };
+    setSleeveEndOptions((prev) => [...prev, option]);
+    setSelectedSleeveEndOptions((prev) => [...prev, option.id]);
+    openSleeveEndQuickAdd(false);
   };
 
   const handleFabricManagerOpenChange = (open: boolean) => {
@@ -341,40 +583,216 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">نوع الياقة</Label>
-                  <Select>
-                    <SelectTrigger className="bg-white border-[#C69A72]">
-                      <SelectValue placeholder="اختر نوع الياقة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="regular">عادية</SelectItem>
-                      <SelectItem value="mandarin">صينية</SelectItem>
-                      <SelectItem value="formal">رسمية</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Popover open={isCollarPopoverOpen} onOpenChange={setIsCollarPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-between bg-white border-[#C69A72] text-[#155446] arabic-text',
+                          selectedCollarOptions.length === 0 && 'text-muted-foreground',
+                        )}
+                      >
+                        <span className="flex-1 text-right truncate">
+                          {selectedCollarOptions.length > 0
+                            ? collarOptions
+                                .filter((o) => selectedCollarOptions.includes(o.id))
+                                .map((o) => o.label)
+                                .join('، ')
+                            : 'اختر نوع الياقة'}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0 bg-[#F6E9CA] border-[#C69A72]">
+                      <Command className="arabic-text text-right">
+                        <CommandList className="text-right">
+                          <CommandItem
+                            value="add-new"
+                            onSelect={() => {
+                              setIsCollarPopoverOpen(false);
+                              openCollarQuickAdd(true);
+                            }}
+                            className="flex flex-row-reverse items-center justify-end gap-2 text-[#155446]"
+                          >
+                            <Plus className="h-4 w-4" />
+                            <span>إضافة خيار جديد</span>
+                          </CommandItem>
+                          <CommandSeparator className="bg-[#C69A72]/50" />
+                          {collarOptions.map((option) => {
+                            const isSelected = selectedCollarOptions.includes(option.id);
+                            return (
+                              <CommandItem
+                                key={option.id}
+                                value={option.label}
+                                onSelect={() => toggleCollarOption(option.id)}
+                                className="flex items-center justify-between gap-2"
+                              >
+                                <span className="flex-1 text-right">{option.label}</span>
+                                <Check className={cn('h-4 w-4 text-[#155446] transition-opacity', isSelected ? 'opacity-100' : 'opacity-0')} />
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandList>
+                        <div className="border-t border-[#C69A72]/50 px-2 py-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => {
+                              setIsCollarPopoverOpen(false);
+                              openCollarManager(true);
+                            }}
+                            className="w-full flex-row-reverse justify-center text-[#155446]"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            تعديل الخيارات
+                          </Button>
+                        </div>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">أسلوب الصدر</Label>
-                  <Select>
-                    <SelectTrigger className="bg-white border-[#C69A72]">
-                      <SelectValue placeholder="اختر أسلوب الصدر" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="single">صدر واحد</SelectItem>
-                      <SelectItem value="double">صدر مزدوج</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Popover open={isChestStylePopoverOpen} onOpenChange={setIsChestStylePopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-between bg-white border-[#C69A72] text-[#155446] arabic-text',
+                          selectedChestStyleOptions.length === 0 && 'text-muted-foreground',
+                        )}
+                      >
+                        <span className="flex-1 text-right truncate">
+                          {selectedChestStyleOptions.length > 0
+                            ? chestStyleOptions
+                                .filter((o) => selectedChestStyleOptions.includes(o.id))
+                                .map((o) => o.label)
+                                .join('، ')
+                            : 'اختر أسلوب الصدر'}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0 bg-[#F6E9CA] border-[#C69A72]">
+                      <Command className="arabic-text text-right">
+                        <CommandList className="text-right">
+                          <CommandItem
+                            value="add-new"
+                            onSelect={() => {
+                              setIsChestStylePopoverOpen(false);
+                              openChestStyleQuickAdd(true);
+                            }}
+                            className="flex flex-row-reverse items-center justify-end gap-2 text-[#155446]"
+                          >
+                            <Plus className="h-4 w-4" />
+                            <span>إضافة خيار جديد</span>
+                          </CommandItem>
+                          <CommandSeparator className="bg-[#C69A72]/50" />
+                          {chestStyleOptions.map((option) => {
+                            const isSelected = selectedChestStyleOptions.includes(option.id);
+                            return (
+                              <CommandItem
+                                key={option.id}
+                                value={option.label}
+                                onSelect={() => toggleChestStyleOption(option.id)}
+                                className="flex items-center justify-between gap-2"
+                              >
+                                <span className="flex-1 text-right">{option.label}</span>
+                                <Check className={cn('h-4 w-4 text-[#155446] transition-opacity', isSelected ? 'opacity-100' : 'opacity-0')} />
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandList>
+                        <div className="border-t border-[#C69A72]/50 px-2 py-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => {
+                              setIsChestStylePopoverOpen(false);
+                              openChestStyleManager(true);
+                            }}
+                            className="w-full flex-row-reverse justify-center text-[#155446]"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            تعديل الخيارات
+                          </Button>
+                        </div>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">نهاية الكم</Label>
-                  <Select>
-                    <SelectTrigger className="bg-white border-[#C69A72]">
-                      <SelectValue placeholder="اختر نهاية الكم" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cuff">كم بحاشية</SelectItem>
-                      <SelectItem value="plain">كم عادي</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Popover open={isSleeveEndPopoverOpen} onOpenChange={setIsSleeveEndPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-between bg-white border-[#C69A72] text-[#155446] arabic-text',
+                          selectedSleeveEndOptions.length === 0 && 'text-muted-foreground',
+                        )}
+                      >
+                        <span className="flex-1 text-right truncate">
+                          {selectedSleeveEndOptions.length > 0
+                            ? sleeveEndOptions
+                                .filter((o) => selectedSleeveEndOptions.includes(o.id))
+                                .map((o) => o.label)
+                                .join('، ')
+                            : 'اختر نهاية الكم'}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0 bg-[#F6E9CA] border-[#C69A72]">
+                      <Command className="arabic-text text-right">
+                        <CommandList className="text-right">
+                          <CommandItem
+                            value="add-new"
+                            onSelect={() => {
+                              setIsSleeveEndPopoverOpen(false);
+                              openSleeveEndQuickAdd(true);
+                            }}
+                            className="flex flex-row-reverse items-center justify-end gap-2 text-[#155446]"
+                          >
+                            <Plus className="h-4 w-4" />
+                            <span>إضافة خيار جديد</span>
+                          </CommandItem>
+                          <CommandSeparator className="bg-[#C69A72]/50" />
+                          {sleeveEndOptions.map((option) => {
+                            const isSelected = selectedSleeveEndOptions.includes(option.id);
+                            return (
+                              <CommandItem
+                                key={option.id}
+                                value={option.label}
+                                onSelect={() => toggleSleeveEndOption(option.id)}
+                                className="flex items-center justify-between gap-2"
+                              >
+                                <span className="flex-1 text-right">{option.label}</span>
+                                <Check className={cn('h-4 w-4 text-[#155446] transition-opacity', isSelected ? 'opacity-100' : 'opacity-0')} />
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandList>
+                        <div className="border-t border-[#C69A72]/50 px-2 py-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => {
+                              setIsSleeveEndPopoverOpen(false);
+                              openSleeveEndManager(true);
+                            }}
+                            className="w-full flex-row-reverse justify-center text-[#155446]"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            تعديل الخيارات
+                          </Button>
+                        </div>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </CardContent>
             </Card>
@@ -443,6 +861,162 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
         </DialogContent>
       </Dialog>
 
+      {/* Collars manager */}
+      <Dialog open={isCollarManagerOpen} onOpenChange={openCollarManager}>
+        <DialogContent className="max-w-lg bg-[#F6E9CA] border-[#C69A72]">
+          <DialogHeader>
+            <DialogTitle className="text-[#13312A] arabic-text text-lg">تعديل خيارات الياقة</DialogTitle>
+            <DialogDescription className="text-[#155446] arabic-text">أضف أو عدل أو احذف الخيارات.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submitCollarOptions} className="space-y-4">
+            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+              {collarOptionsDraft.map((o) => (
+                <div key={o.id} className="flex items-center gap-2">
+                  <Input value={o.label} onChange={(e) => collarDraftLabelChange(o.id, e.target.value)} className="flex-1 bg-white border-[#C69A72] text-right" />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => collarDraftDelete(o.id)} className="text-red-600 hover:bg-red-100" aria-label="حذف الخيار">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              {collarOptionsDraft.length === 0 && (
+                <p className="text-sm text-[#155446] arabic-text text-center">لا توجد خيارات حالياً.</p>
+              )}
+            </div>
+            {collarManagerError && <p className="text-sm text-red-600 arabic-text text-right">{collarManagerError}</p>}
+            <div className="flex items-center justify-between gap-3">
+              <Button type="button" variant="outline" onClick={collarDraftAdd} className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]">إضافة خيار</Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => openCollarManager(false)} className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]">إلغاء</Button>
+                <Button type="submit" className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA]">حفظ</Button>
+              </div>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Collars quick add */}
+      <Dialog open={isCollarQuickAddOpen} onOpenChange={openCollarQuickAdd}>
+        <DialogContent className="max-w-md bg-[#F6E9CA] border-[#C69A72]">
+          <DialogHeader>
+            <DialogTitle className="text-[#13312A] arabic-text text-lg">إضافة خيار للياقة</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitCollarQuickAdd} className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-[#13312A] arabic-text">اسم الخيار</Label>
+              <Input value={collarQuickAddValue} onChange={(e) => { setCollarQuickAddValue(e.target.value); if (collarQuickAddError) setCollarQuickAddError(''); }} className="bg-white border-[#C69A72] text-right" placeholder="أدخل اسم الخيار" />
+              {collarQuickAddError && <p className="text-sm text-red-600 arabic-text text-right">{collarQuickAddError}</p>}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => openCollarQuickAdd(false)} className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]">إلغاء</Button>
+              <Button type="submit" className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA]">حفظ</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chest style manager */}
+      <Dialog open={isChestStyleManagerOpen} onOpenChange={openChestStyleManager}>
+        <DialogContent className="max-w-lg bg-[#F6E9CA] border-[#C69A72]">
+          <DialogHeader>
+            <DialogTitle className="text-[#13312A] arabic-text text-lg">تعديل أسلوب الصدر</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitChestStyleOptions} className="space-y-4">
+            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+              {chestStyleOptionsDraft.map((o) => (
+                <div key={o.id} className="flex items-center gap-2">
+                  <Input value={o.label} onChange={(e) => chestStyleDraftLabelChange(o.id, e.target.value)} className="flex-1 bg-white border-[#C69A72] text-right" />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => chestStyleDraftDelete(o.id)} className="text-red-600 hover:bg-red-100" aria-label="حذف الخيار">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              {chestStyleOptionsDraft.length === 0 && (
+                <p className="text-sm text-[#155446] arabic-text text-center">لا توجد خيارات حالياً.</p>
+              )}
+            </div>
+            {chestStyleManagerError && <p className="text-sm text-red-600 arabic-text text-right">{chestStyleManagerError}</p>}
+            <div className="flex items-center justify-between gap-3">
+              <Button type="button" variant="outline" onClick={chestStyleDraftAdd} className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]">إضافة خيار</Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => openChestStyleManager(false)} className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]">إلغاء</Button>
+                <Button type="submit" className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA]">حفظ</Button>
+              </div>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chest style quick add */}
+      <Dialog open={isChestStyleQuickAddOpen} onOpenChange={openChestStyleQuickAdd}>
+        <DialogContent className="max-w-md bg-[#F6E9CA] border-[#C69A72]">
+          <DialogHeader>
+            <DialogTitle className="text-[#13312A] arabic-text text-lg">إضافة خيار لأسلوب الصدر</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitChestStyleQuickAdd} className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-[#13312A] arabic-text">اسم الخيار</Label>
+              <Input value={chestStyleQuickAddValue} onChange={(e) => { setChestStyleQuickAddValue(e.target.value); if (chestStyleQuickAddError) setChestStyleQuickAddError(''); }} className="bg-white border-[#C69A72] text-right" placeholder="أدخل اسم الخيار" />
+              {chestStyleQuickAddError && <p className="text-sm text-red-600 arabic-text text-right">{chestStyleQuickAddError}</p>}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => openChestStyleQuickAdd(false)} className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]">إلغاء</Button>
+              <Button type="submit" className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA]">حفظ</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sleeve end manager */}
+      <Dialog open={isSleeveEndManagerOpen} onOpenChange={openSleeveEndManager}>
+        <DialogContent className="max-w-lg bg-[#F6E9CA] border-[#C69A72]">
+          <DialogHeader>
+            <DialogTitle className="text-[#13312A] arabic-text text-lg">تعديل نهاية الكم</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitSleeveEndOptions} className="space-y-4">
+            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+              {sleeveEndOptionsDraft.map((o) => (
+                <div key={o.id} className="flex items-center gap-2">
+                  <Input value={o.label} onChange={(e) => sleeveEndDraftLabelChange(o.id, e.target.value)} className="flex-1 bg-white border-[#C69A72] text-right" />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => sleeveEndDraftDelete(o.id)} className="text-red-600 hover:bg-red-100" aria-label="حذف الخيار">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              {sleeveEndOptionsDraft.length === 0 && (
+                <p className="text-sm text-[#155446] arabic-text text-center">لا توجد خيارات حالياً.</p>
+              )}
+            </div>
+            {sleeveEndManagerError && <p className="text-sm text-red-600 arabic-text text-right">{sleeveEndManagerError}</p>}
+            <div className="flex items-center justify-between gap-3">
+              <Button type="button" variant="outline" onClick={sleeveEndDraftAdd} className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]">إضافة خيار</Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => openSleeveEndManager(false)} className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]">إلغاء</Button>
+                <Button type="submit" className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA]">حفظ</Button>
+              </div>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sleeve end quick add */}
+      <Dialog open={isSleeveEndQuickAddOpen} onOpenChange={openSleeveEndQuickAdd}>
+        <DialogContent className="max-w-md bg-[#F6E9CA] border-[#C69A72]">
+          <DialogHeader>
+            <DialogTitle className="text-[#13312A] arabic-text text-lg">إضافة خيار لنهاية الكم</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitSleeveEndQuickAdd} className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-[#13312A] arabic-text">اسم الخيار</Label>
+              <Input value={sleeveEndQuickAddValue} onChange={(e) => { setSleeveEndQuickAddValue(e.target.value); if (sleeveEndQuickAddError) setSleeveEndQuickAddError(''); }} className="bg-white border-[#C69A72] text-right" placeholder="أدخل اسم الخيار" />
+              {sleeveEndQuickAddError && <p className="text-sm text-red-600 arabic-text text-right">{sleeveEndQuickAddError}</p>}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => openSleeveEndQuickAdd(false)} className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]">إلغاء</Button>
+              <Button type="submit" className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA]">حفظ</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
       <Dialog open={isFabricManagerOpen} onOpenChange={handleFabricManagerOpenChange}>
         <DialogContent className="max-w-lg bg-[#F6E9CA] border-[#C69A72]">
           <DialogHeader>
