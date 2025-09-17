@@ -18,6 +18,7 @@ import {
   MoreVertical,
   FileImage,
   MessageCircle,
+  Phone,
   Printer,
 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -277,6 +278,47 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
         return 'مدفوع جزئياً';
       default:
         return status;
+    }
+  };
+
+  const getStatusTheme = (status: string) => {
+    switch (status) {
+      case 'مدفوع':
+        return {
+          cardBg: '#F5FBF8',
+          border: '#9CC7B5',
+          badgeBg: '#DFF3EB',
+          badgeText: '#155446',
+          imageBg: '#E7F3EE',
+          iconBg: '#E4F0EA',
+        } as const;
+      case 'معلق':
+        return {
+          cardBg: '#FFF7F7',
+          border: '#E6BFC3',
+          badgeBg: '#FCE6E8',
+          badgeText: '#9C1F30',
+          imageBg: '#F9E4E6',
+          iconBg: '#F6DADB',
+        } as const;
+      case 'جزئي':
+        return {
+          cardBg: '#FFF9F1',
+          border: '#E8CFA8',
+          badgeBg: '#FFEED7',
+          badgeText: '#8A5A00',
+          imageBg: '#FCEFD9',
+          iconBg: '#F8E3C0',
+        } as const;
+      default:
+        return {
+          cardBg: '#FDFBF7',
+          border: '#D9C1A6',
+          badgeBg: '#F1E2D0',
+          badgeText: '#13312A',
+          imageBg: '#F5EAD9',
+          iconBg: '#F1E2D0',
+        } as const;
     }
   };
 
@@ -571,6 +613,10 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
     window.open(whatsappUrl, '_blank');
   };
 
+  const handlePrintInvoice = (invoice: Invoice) => {
+    openPrintWindow(`فاتورة ${invoice.id}`, <PrintableInvoice invoice={invoice} />);
+  };
+
   const handleSaveAsImage = (invoiceId: string) => {
     console.log('Saving as image:', invoiceId);
     // Image export logic would go here
@@ -711,80 +757,93 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
         {sortedInvoices.map((invoice) => {
           const formattedReceivedDate = formatMobileDate(invoice.receivedDate);
           const formattedDeliveryDate = formatMobileDate(invoice.deliveryDate);
+          const statusTheme = getStatusTheme(invoice.status);
+          const statusLabel = getStatusLabel(invoice.status);
 
           return (
-            <Card key={invoice.id} className="bg-white border-[#C69A72] shadow-sm rounded-2xl">
-              <CardContent className="p-3">
-                <div className="flex items-stretch gap-3 min-h-[7rem]">
-                  <div className="w-20 flex-shrink-0 self-stretch overflow-hidden rounded-xl border border-[#C69A72] bg-[#FDFBF7] min-h-[7rem]">
-                    <ImageWithFallback
-                      src={invoice.fabricImage}
-                      alt="صورة القماش"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-
-                  <div className="flex flex-1 flex-col justify-between text-right">
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-semibold text-[#13312A] arabic-text">{invoice.customerName}</h3>
-                      <div className="flex items-center justify-between text-[11px] text-[#7A6A58] arabic-text">
-                        <span>#{invoice.id}</span>
-                        <span>
-                          هاتف <span className="font-medium text-[#13312A]">{invoice.phone}</span>
+            <Card
+              key={invoice.id}
+              className="shadow-sm rounded-3xl border-2 transition-transform duration-200 hover:-translate-y-0.5"
+              style={{ backgroundColor: statusTheme.cardBg, borderColor: statusTheme.border }}
+            >
+              <CardContent className="p-4">
+                <div className="flex flex-row-reverse items-stretch gap-4">
+                  <div className="flex-1 flex flex-col justify-between gap-3">
+                    <div className="space-y-3">
+                      <div className="flex flex-col gap-1.5">
+                        <h3 className="text-base font-semibold text-[#13312A] arabic-text">{invoice.customerName}</h3>
+                        <div className="flex items-center gap-2 text-sm text-[#155446]">
+                          <Phone className="w-4 h-4" />
+                          <span className="numeric-text">{invoice.phone}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl font-bold text-[#13312A] arabic-text">
+                          <span className="numeric-text">{formatCurrency(invoice.total)}</span>
+                        </span>
+                        <span
+                          className="px-3 py-1 text-xs font-semibold rounded-full shadow-sm arabic-text"
+                          style={{ backgroundColor: statusTheme.badgeBg, color: statusTheme.badgeText }}
+                        >
+                          {statusLabel}
                         </span>
                       </div>
                     </div>
-
-                    <div className="pt-1">
-                      <span className="block text-xs text-[#7A6A58] arabic-text">المبلغ الكلي</span>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-xl font-bold text-[#13312A] arabic-text">{formatCurrency(invoice.total)}</span>
-                        <Badge
-                          className={`${getStatusColor(invoice.status)} arabic-text px-3 py-1 text-[11px] font-medium rounded-full shadow-sm`}
-                        >
-                          {getStatusLabel(invoice.status)}
-                        </Badge>
+                    <div className="grid gap-1 text-sm arabic-text text-[#13312A]">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#7A6A58]">تاريخ الاستلام:</span>
+                        <span className="numeric-text">{formattedReceivedDate}</span>
                       </div>
-                    </div>
-
-                    <div className="space-y-1 pt-2 text-xs arabic-text text-[#13312A]">
-                      <div dir="rtl" className="flex items-center justify-between gap-2">
-                        <span className="text-[#7A6A58]">تاريخ الاستلام</span>
-                        <span className="font-medium">{formattedReceivedDate}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#7A6A58]">تاريخ التسليم:</span>
+                        <span className="numeric-text">{formattedDeliveryDate}</span>
                       </div>
-                      <div dir="rtl" className="flex items-center justify-between gap-2">
-                        <span className="text-[#7A6A58]">تاريخ التسليم</span>
-                        <span className="font-medium">{formattedDeliveryDate}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-9 w-[4.75rem] px-2 border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]"
-                      >
-                        <Edit className="w-4 h-4 ml-1" />
-                        <span className="arabic-text">تعديل</span>
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => handleExportPDF(invoice)}
-                        className="h-9 w-[4.75rem] px-2 bg-[#155446] text-[#F6E9CA] hover:bg-[#13312A]"
-                      >
-                        <Download className="w-4 h-4 ml-1" />
-                        <span className="arabic-text">PDF</span>
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => handleShareWhatsApp(invoice)}
-                        className="h-9 w-[4.75rem] px-2 bg-green-600 text-white hover:bg-green-700"
-                      >
-                        <MessageCircle className="w-4 h-4 ml-1" />
-                        <span className="arabic-text">واتساب</span>
-                      </Button>
                     </div>
                   </div>
+                  <div className="w-24 min-h-[8rem] flex-shrink-0 self-stretch">
+                    <div
+                      className="h-full w-full overflow-hidden rounded-2xl border"
+                      style={{ borderColor: statusTheme.border, backgroundColor: statusTheme.imageBg }}
+                    >
+                      <ImageWithFallback
+                        src={invoice.fabricImage}
+                        alt={`صورة قماش ${invoice.customerName}`}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end gap-2">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="rounded-full border transition-transform duration-200 hover:-translate-y-0.5"
+                    style={{ backgroundColor: statusTheme.iconBg, borderColor: statusTheme.border, color: statusTheme.badgeText }}
+                    onClick={() => handleShareWhatsApp(invoice)}
+                    aria-label={`مشاركة فاتورة ${invoice.customerName} عبر واتساب`}
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="rounded-full border transition-transform duration-200 hover:-translate-y-0.5"
+                    style={{ backgroundColor: statusTheme.iconBg, borderColor: statusTheme.border, color: statusTheme.badgeText }}
+                    onClick={() => handlePrintInvoice(invoice)}
+                    aria-label={`طباعة فاتورة ${invoice.customerName}`}
+                  >
+                    <Printer className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="rounded-full border transition-transform duration-200 hover:-translate-y-0.5"
+                    style={{ backgroundColor: statusTheme.iconBg, borderColor: statusTheme.border, color: statusTheme.badgeText }}
+                    onClick={() => handleExportPDF(invoice)}
+                    aria-label={`تنزيل فاتورة ${invoice.customerName} بصيغة PDF`}
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
