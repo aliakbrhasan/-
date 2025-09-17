@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:opsz,wght@8..60,400;8..60,600&family=Tajawal:wght@400;500;600;700&display=swap');
+
 /*! tailwindcss v4.1.3 | MIT License | https://tailwindcss.com */
 @layer properties {
   @supports (((-webkit-hyphens: none)) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
@@ -67,7 +69,8 @@
 
 @layer theme {
   :root, :host {
-    --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-sans: "Tajawal", "Noto Kufi Arabic", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-numeric: "Source Sans 3", "Source Sans Variable", "Tajawal", sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --color-red-50: oklch(.971 .013 17.38);
     --color-red-100: oklch(.936 .032 17.717);
@@ -401,12 +404,18 @@
     background-color: var(--background);
     color: var(--foreground);
     direction: rtl;
-    font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-sans);
   }
 
   .arabic-text {
-    font-family: Arial, Tahoma, sans-serif;
+    font-family: var(--font-sans);
     font-weight: var(--font-weight-medium);
+  }
+
+  .numeric-text {
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
   }
 
   .btn-primary {
