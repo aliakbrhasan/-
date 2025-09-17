@@ -19,6 +19,7 @@ import {
   FileImage,
   MessageCircle,
   Printer,
+  Eye,
 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import {
@@ -29,6 +30,7 @@ import {
   PrintableInvoiceData,
 } from './PrintableInvoice';
 import { openPrintWindow, formatPrintDateTime } from './print/PrintUtils';
+import { InvoiceDetailsDialog } from './InvoiceDetailsDialog';
 
 type DateParts = {
   year: string;
@@ -119,11 +121,26 @@ type InvoiceStatus = 'مدفوع' | 'معلق' | 'جزئي' | string;
 type Invoice = PrintableInvoiceData & {
   status: InvoiceStatus;
   fabricImage: string;
+  measurements?: {
+    length?: number;
+    shoulder?: number;
+    waist?: number;
+    chest?: number;
+  };
+  designDetails?: {
+    fabricType?: string[];
+    fabricSource?: string[];
+    collarType?: string[];
+    chestStyle?: string[];
+    sleeveEnd?: string[];
+  };
 };
 
 export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
 
   const invoices: Invoice[] = [
     {
@@ -137,7 +154,20 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       deliveryDate: '2024-01-25',
       status: 'مدفوع',
       notes: 'تم الدفع بالكامل مع طلب تجهيز خاص بالياقة.',
-      fabricImage: 'https://images.unsplash.com/photo-1642683497706-77a72ea549bb?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&fit=crop'
+      fabricImage: 'https://images.unsplash.com/photo-1642683497706-77a72ea549bb?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&fit=crop',
+      measurements: {
+        length: 180,
+        shoulder: 45,
+        waist: 90,
+        chest: 100
+      },
+      designDetails: {
+        fabricType: ['قطن', 'حرير'],
+        fabricSource: ['خارج المحل'],
+        collarType: ['صينية'],
+        chestStyle: ['صدر مزدوج'],
+        sleeveEnd: ['كم بحاشية']
+      }
     },
     {
       id: 'INV-002',
@@ -150,7 +180,20 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       deliveryDate: '2024-01-22',
       status: 'معلق',
       notes: 'المتبقي يستلم عند التسليم النهائي بعد المعاينة.',
-      fabricImage: 'https://images.unsplash.com/photo-1716541424785-f9746ae08cad?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop'
+      fabricImage: 'https://images.unsplash.com/photo-1716541424785-f9746ae08cad?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop',
+      measurements: {
+        length: 175,
+        shoulder: 42,
+        waist: 85,
+        chest: 95
+      },
+      designDetails: {
+        fabricType: ['صوف'],
+        fabricSource: ['داخل المحل'],
+        collarType: ['عادية'],
+        chestStyle: ['صدر واحد'],
+        sleeveEnd: ['كم عادي']
+      }
     },
     {
       id: 'INV-003',
@@ -163,7 +206,20 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       deliveryDate: '2024-01-20',
       status: 'جزئي',
       notes: 'إضافة تطريز يدوي في الأكمام.',
-      fabricImage: 'https://images.unsplash.com/photo-1564322955387-0d2def79fb5c?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop'
+      fabricImage: 'https://images.unsplash.com/photo-1564322955387-0d2def79fb5c?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop',
+      measurements: {
+        length: 185,
+        shoulder: 48,
+        waist: 95,
+        chest: 105
+      },
+      designDetails: {
+        fabricType: ['كتان', 'قطن'],
+        fabricSource: ['خارج المحل'],
+        collarType: ['رسمية'],
+        chestStyle: ['صدر مزدوج'],
+        sleeveEnd: ['كم بحاشية']
+      }
     },
     {
       id: 'INV-004',
@@ -176,7 +232,20 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       deliveryDate: '2024-01-28',
       status: 'مدفوع',
       notes: 'طلب تغليف خاص بالهدية.',
-      fabricImage: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=100&h=100&fit=crop'
+      fabricImage: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=100&h=100&fit=crop',
+      measurements: {
+        length: 170,
+        shoulder: 44,
+        waist: 88,
+        chest: 98
+      },
+      designDetails: {
+        fabricType: ['حرير'],
+        fabricSource: ['داخل المحل'],
+        collarType: ['صينية'],
+        chestStyle: ['صدر واحد'],
+        sleeveEnd: ['كم عادي']
+      }
     }
   ];
 
@@ -576,6 +645,11 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
     // Image export logic would go here
   };
 
+  const handleViewDetails = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setIsDetailsDialogOpen(true);
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
@@ -651,7 +725,11 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
             </TableHeader>
             <TableBody>
               {sortedInvoices.map((invoice) => (
-                <TableRow key={invoice.id} className="hover:bg-[#F6E9CA]">
+                <TableRow 
+                  key={invoice.id} 
+                  className="hover:bg-[#F6E9CA] cursor-pointer"
+                  onClick={() => handleViewDetails(invoice)}
+                >
                   <TableCell className="text-[#13312A] arabic-text">{invoice.id}</TableCell>
                   <TableCell className="text-[#13312A] arabic-text">{invoice.customerName}</TableCell>
                   <TableCell className="text-[#13312A]">{invoice.phone}</TableCell>
@@ -670,12 +748,16 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                       {getStatusLabel(invoice.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 px-3 touch-target">
                         <MoreVertical className="w-4 h-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-white border-[#C69A72]">
+                        <DropdownMenuItem onClick={() => handleViewDetails(invoice)} className="arabic-text">
+                          <Eye className="w-4 h-4 ml-2" />
+                          عرض التفاصيل
+                        </DropdownMenuItem>
                         <DropdownMenuItem className="arabic-text">
                           <Edit className="w-4 h-4 ml-2" />
                           تعديل الفاتورة
@@ -713,7 +795,11 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
           const formattedDeliveryDate = formatMobileDate(invoice.deliveryDate);
 
           return (
-            <Card key={invoice.id} className="bg-white border-[#C69A72] shadow-sm rounded-2xl">
+            <Card 
+              key={invoice.id} 
+              className="bg-white border-[#C69A72] shadow-sm rounded-2xl cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleViewDetails(invoice)}
+            >
               <CardContent className="p-3">
                 <div className="flex items-stretch gap-3 min-h-[7rem]">
                   <div className="w-20 flex-shrink-0 self-stretch overflow-hidden rounded-xl border border-[#C69A72] bg-[#FDFBF7] min-h-[7rem]">
@@ -758,7 +844,15 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                       </div>
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-2">
+                    <div className="flex justify-end gap-2 pt-2" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        onClick={() => handleViewDetails(invoice)}
+                        className="h-9 w-[4.75rem] px-2 bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        <Eye className="w-4 h-4 ml-1" />
+                        <span className="arabic-text">عرض</span>
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"
@@ -931,6 +1025,14 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
         </DialogContent>
       </Dialog>
 
+      {/* Invoice Details Dialog */}
+      {selectedInvoice && (
+        <InvoiceDetailsDialog
+          isOpen={isDetailsDialogOpen}
+          onOpenChange={setIsDetailsDialogOpen}
+          invoice={selectedInvoice}
+        />
+      )}
     </div>
   );
 }
