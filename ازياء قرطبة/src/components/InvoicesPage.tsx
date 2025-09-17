@@ -942,10 +942,12 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
           }
         }}
       >
-        <DialogContent className="max-w-4xl bg-[#F6E9CA] border-[#C69A72] p-0">
+        <DialogContent
+          className="w-full max-w-[calc(100vw-1.5rem)] sm:max-w-4xl lg:max-w-5xl xl:max-w-6xl bg-[#F6E9CA] border-[#C69A72] p-0 overflow-hidden max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-3rem)]"
+        >
           {selectedInvoice && (
-            <div className="flex flex-col max-h-[80vh]">
-              <div className="flex flex-col gap-4 border-b border-[#C69A72] bg-[#FDFBF7] px-6 py-5 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex h-full flex-col">
+              <div className="flex flex-col gap-4 border-b border-[#C69A72] bg-[#FDFBF7] px-4 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-3">
                     <h2 className="text-2xl font-semibold text-[#13312A] arabic-text">
@@ -991,8 +993,8 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                 </div>
               </div>
 
-              <ScrollArea className="max-h-[65vh]">
-                <div className="space-y-6 p-6">
+              <ScrollArea className="flex-1">
+                <div className="space-y-6 p-4 sm:p-6">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="rounded-xl border border-[#C69A72] bg-white p-4 shadow-sm">
                       <h3 className="text-lg font-semibold text-[#13312A] arabic-text mb-3">بيانات الزبون</h3>
@@ -1043,7 +1045,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
 
                   <div className="rounded-xl border border-[#C69A72] bg-white p-4 shadow-sm">
                     <h3 className="text-lg font-semibold text-[#13312A] arabic-text mb-3">القياسات التفصيلية</h3>
-                    <div className="grid gap-3 text-sm text-[#13312A] arabic-text grid-cols-2 sm:grid-cols-3">
+                    <div className="grid gap-3 text-sm text-[#13312A] arabic-text grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                       {(Object.entries(selectedInvoice.measurements) as [keyof MeasurementFields, string][]).map(([key, value]) => (
                         <div key={key} className="flex flex-col gap-1 rounded-lg border border-[#E2D4BD] bg-[#FDFBF7] p-3">
                           <span className="text-[#155446] text-xs">{measurementLabels[key]}</span>
