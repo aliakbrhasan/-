@@ -714,65 +714,77 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
 
           return (
             <Card key={invoice.id} className="bg-white border-[#C69A72] shadow-sm">
-              <CardContent className="p-4 space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="flex-1 space-y-1 text-right">
-                    <h3 className="text-lg font-semibold text-[#13312A] arabic-text">{invoice.customerName}</h3>
-                    <p className="text-sm text-[#7A6A58] arabic-text">رقم الفاتورة: {invoice.id}</p>
-                    <p className="text-sm text-[#155446] arabic-text">الهاتف: {invoice.phone}</p>
+              <CardContent className="p-3">
+                <div className="flex gap-3">
+                  <div className="w-20 flex-shrink-0 self-stretch overflow-hidden rounded-xl border border-[#C69A72] bg-[#FDFBF7]">
+                    <ImageWithFallback
+                      src={invoice.fabricImage}
+                      alt="صورة القماش"
+                      className="h-full w-full object-cover"
+                    />
                   </div>
-                  <ImageWithFallback
-                    src={invoice.fabricImage}
-                    alt="صورة القماش"
-                    className="w-20 h-20 rounded-xl object-cover border-2 border-[#C69A72] shadow-sm"
-                  />
-                </div>
 
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-2xl font-bold text-[#13312A] arabic-text">{formatCurrency(invoice.total)}</span>
-                  <Badge
-                    className={`${getStatusColor(invoice.status)} arabic-text px-3 py-1 text-sm font-medium rounded-full shadow-sm`}
-                  >
-                    {getStatusLabel(invoice.status)}
-                  </Badge>
-                </div>
+                  <div className="flex flex-1 flex-col gap-3 text-right">
+                    <div className="space-y-1">
+                      <h3 className="text-base font-semibold text-[#13312A] arabic-text">{invoice.customerName}</h3>
+                      <div className="space-y-1 text-xs text-[#7A6A58] arabic-text">
+                        <div>
+                          رقم الفاتورة: <span className="font-medium text-[#13312A]">{invoice.id}</span>
+                        </div>
+                        <div>
+                          الهاتف: <span className="font-medium text-[#13312A]">{invoice.phone}</span>
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="space-y-2 text-sm arabic-text">
-                  <div className="flex items-center justify-between text-[#155446]">
-                    <span className="text-[#7A6A58]">تاريخ الاستلام</span>
-                    <span className="font-medium text-[#13312A]">{formattedReceivedDate}</span>
+                    <div className="space-y-1">
+                      <span className="block text-sm text-[#7A6A58] arabic-text">المبلغ الكلي</span>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-2xl font-bold text-[#13312A] arabic-text">{formatCurrency(invoice.total)}</span>
+                        <Badge className={`${getStatusColor(invoice.status)} arabic-text px-3 py-1 text-xs font-medium rounded-full shadow-sm`}>
+                          {getStatusLabel(invoice.status)}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm arabic-text text-[#13312A]">
+                      <div dir="rtl" className="flex items-center justify-between">
+                        <span className="text-[#7A6A58]">تاريخ الاستلام</span>
+                        <span className="font-medium">{formattedReceivedDate}</span>
+                      </div>
+                      <div dir="rtl" className="flex items-center justify-between">
+                        <span className="text-[#7A6A58]">تاريخ التسليم</span>
+                        <span className="font-medium">{formattedDeliveryDate}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap justify-end gap-2 pt-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 min-w-[6.5rem] border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]"
+                      >
+                        <Edit className="w-4 h-4 ml-1" />
+                        <span className="arabic-text">تعديل</span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleExportPDF(invoice)}
+                        className="flex-1 min-w-[6.5rem] bg-[#155446] text-[#F6E9CA] hover:bg-[#13312A]"
+                      >
+                        <Download className="w-4 h-4 ml-1" />
+                        <span className="arabic-text">PDF</span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleShareWhatsApp(invoice)}
+                        className="flex-1 min-w-[6.5rem] bg-green-600 text-white hover:bg-green-700"
+                      >
+                        <MessageCircle className="w-4 h-4 ml-1" />
+                        <span className="arabic-text">واتساب</span>
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between text-[#155446]">
-                    <span className="text-[#7A6A58]">تاريخ التسليم</span>
-                    <span className="font-medium text-[#13312A]">{formattedDeliveryDate}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target flex-1 min-w-[8rem]"
-                  >
-                    <Edit className="w-4 h-4 ml-1" />
-                    <span className="arabic-text">تعديل</span>
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => handleExportPDF(invoice)}
-                    className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target flex-1 min-w-[8rem]"
-                  >
-                    <Download className="w-4 h-4 ml-1" />
-                    <span className="arabic-text">PDF</span>
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => handleShareWhatsApp(invoice)}
-                    className="bg-green-600 hover:bg-green-700 text-white touch-target flex-1 min-w-[8rem]"
-                  >
-                    <MessageCircle className="w-4 h-4 ml-1" />
-                    <span className="arabic-text">واتساب</span>
-                  </Button>
                 </div>
               </CardContent>
             </Card>
