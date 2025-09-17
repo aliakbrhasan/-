@@ -30,8 +30,13 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
     { id: 'linen', label: 'كتان' },
   ]);
   const [selectedFabricOptions, setSelectedFabricOptions] = useState<string[]>([]);
-  const [fabricSource, setFabricSource] = useState('');
+  const [selectedFabricSources, setSelectedFabricSources] = useState<string[]>([]);
+  const fabricSourceOptions: { id: string; label: string }[] = [
+    { id: 'outside', label: 'خارج المحل' },
+    { id: 'inside', label: 'داخل المحل' },
+  ];
   const [isFabricPopoverOpen, setIsFabricPopoverOpen] = useState(false);
+  const [isSourcePopoverOpen, setIsSourcePopoverOpen] = useState(false);
   const [isFabricManagerOpen, setIsFabricManagerOpen] = useState(false);
   const [fabricOptionsDraft, setFabricOptionsDraft] = useState<FabricOption[]>([]);
   const [fabricManagerError, setFabricManagerError] = useState('');
@@ -43,8 +48,9 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
     if (!isOpen) {
       setDeliveryDate('');
       setSelectedFabricOptions([]);
-      setFabricSource('');
+      setSelectedFabricSources([]);
       setIsFabricPopoverOpen(false);
+      setIsSourcePopoverOpen(false);
       setIsFabricManagerOpen(false);
       setIsQuickAddDialogOpen(false);
     }
@@ -59,6 +65,14 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
       previous.includes(optionId)
         ? previous.filter((item) => item !== optionId)
         : [...previous, optionId],
+    );
+  };
+
+  const toggleFabricSource = (sourceId: string) => {
+    setSelectedFabricSources((previous) =>
+      previous.includes(sourceId)
+        ? previous.filter((item) => item !== sourceId)
+        : [...previous, sourceId],
     );
   };
 
@@ -277,15 +291,53 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">مصدر القماش</Label>
-                  <Select value={fabricSource} onValueChange={setFabricSource}>
-                    <SelectTrigger className="bg-white border-[#C69A72]">
-                      <SelectValue placeholder="اختر مصدر القماش" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="inside">داخل المحل</SelectItem>
-                      <SelectItem value="outside">خارج المحل</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Popover open={isSourcePopoverOpen} onOpenChange={setIsSourcePopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-between bg-white border-[#C69A72] text-[#155446] arabic-text',
+                          selectedFabricSources.length === 0 && 'text-muted-foreground',
+                        )}
+                     >
+                        <span className="flex-1 text-right truncate">
+                          {selectedFabricSources.length > 0
+                            ? fabricSourceOptions
+                                .filter((o) => selectedFabricSources.includes(o.id))
+                                .map((o) => o.label)
+                                .join('، ')
+                            : 'اختر مصدر القماش'}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0 bg-[#F6E9CA] border-[#C69A72]">
+                      <Command className="arabic-text text-right">
+                        <CommandList className="text-right">
+                          {fabricSourceOptions.map((option) => {
+                            const isSelected = selectedFabricSources.includes(option.id);
+                            return (
+                              <CommandItem
+                                key={option.id}
+                                value={option.label}
+                                onSelect={() => toggleFabricSource(option.id)}
+                                className="flex items-center justify-between gap-2"
+                              >
+                                <span className="flex-1 text-right">{option.label}</span>
+                                <Check
+                                  className={cn(
+                                    'h-4 w-4 text-[#155446] transition-opacity',
+                                    isSelected ? 'opacity-100' : 'opacity-0',
+                                  )}
+                                />
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">نوع الياقة</Label>
