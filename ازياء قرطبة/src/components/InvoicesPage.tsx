@@ -707,16 +707,16 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       </Card>
 
       {/* Invoices Cards - Mobile */}
-      <div className="md:hidden space-y-4">
+      <div className="md:hidden space-y-3">
         {sortedInvoices.map((invoice) => {
           const formattedReceivedDate = formatMobileDate(invoice.receivedDate);
           const formattedDeliveryDate = formatMobileDate(invoice.deliveryDate);
 
           return (
-            <Card key={invoice.id} className="bg-white border-[#C69A72] shadow-sm">
+            <Card key={invoice.id} className="bg-white border-[#C69A72] shadow-sm rounded-2xl">
               <CardContent className="p-3">
-                <div className="flex gap-3">
-                  <div className="w-20 flex-shrink-0 self-stretch overflow-hidden rounded-xl border border-[#C69A72] bg-[#FDFBF7]">
+                <div className="flex items-stretch gap-3 min-h-[7rem]">
+                  <div className="w-20 flex-shrink-0 self-stretch overflow-hidden rounded-xl border border-[#C69A72] bg-[#FDFBF7] min-h-[7rem]">
                     <ImageWithFallback
                       src={invoice.fabricImage}
                       alt="صورة القماش"
@@ -724,45 +724,45 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                     />
                   </div>
 
-                  <div className="flex flex-1 flex-col gap-3 text-right">
+                  <div className="flex flex-1 flex-col justify-between text-right">
                     <div className="space-y-1">
-                      <h3 className="text-base font-semibold text-[#13312A] arabic-text">{invoice.customerName}</h3>
-                      <div className="space-y-1 text-xs text-[#7A6A58] arabic-text">
-                        <div>
-                          رقم الفاتورة: <span className="font-medium text-[#13312A]">{invoice.id}</span>
-                        </div>
-                        <div>
-                          الهاتف: <span className="font-medium text-[#13312A]">{invoice.phone}</span>
-                        </div>
+                      <h3 className="text-sm font-semibold text-[#13312A] arabic-text">{invoice.customerName}</h3>
+                      <div className="flex items-center justify-between text-[11px] text-[#7A6A58] arabic-text">
+                        <span>#{invoice.id}</span>
+                        <span>
+                          هاتف <span className="font-medium text-[#13312A]">{invoice.phone}</span>
+                        </span>
                       </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <span className="block text-sm text-[#7A6A58] arabic-text">المبلغ الكلي</span>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-2xl font-bold text-[#13312A] arabic-text">{formatCurrency(invoice.total)}</span>
-                        <Badge className={`${getStatusColor(invoice.status)} arabic-text px-3 py-1 text-xs font-medium rounded-full shadow-sm`}>
+                    <div className="pt-1">
+                      <span className="block text-xs text-[#7A6A58] arabic-text">المبلغ الكلي</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xl font-bold text-[#13312A] arabic-text">{formatCurrency(invoice.total)}</span>
+                        <Badge
+                          className={`${getStatusColor(invoice.status)} arabic-text px-3 py-1 text-[11px] font-medium rounded-full shadow-sm`}
+                        >
                           {getStatusLabel(invoice.status)}
                         </Badge>
                       </div>
                     </div>
 
-                    <div className="space-y-2 text-sm arabic-text text-[#13312A]">
-                      <div dir="rtl" className="flex items-center justify-between">
+                    <div className="space-y-1 pt-2 text-xs arabic-text text-[#13312A]">
+                      <div dir="rtl" className="flex items-center justify-between gap-2">
                         <span className="text-[#7A6A58]">تاريخ الاستلام</span>
                         <span className="font-medium">{formattedReceivedDate}</span>
                       </div>
-                      <div dir="rtl" className="flex items-center justify-between">
+                      <div dir="rtl" className="flex items-center justify-between gap-2">
                         <span className="text-[#7A6A58]">تاريخ التسليم</span>
                         <span className="font-medium">{formattedDeliveryDate}</span>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap justify-end gap-2 pt-1">
+                    <div className="flex justify-end gap-2 pt-2">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="flex-1 min-w-[6.5rem] border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]"
+                        className="h-9 w-[4.75rem] px-2 border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]"
                       >
                         <Edit className="w-4 h-4 ml-1" />
                         <span className="arabic-text">تعديل</span>
@@ -770,7 +770,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                       <Button
                         size="sm"
                         onClick={() => handleExportPDF(invoice)}
-                        className="flex-1 min-w-[6.5rem] bg-[#155446] text-[#F6E9CA] hover:bg-[#13312A]"
+                        className="h-9 w-[4.75rem] px-2 bg-[#155446] text-[#F6E9CA] hover:bg-[#13312A]"
                       >
                         <Download className="w-4 h-4 ml-1" />
                         <span className="arabic-text">PDF</span>
@@ -778,7 +778,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                       <Button
                         size="sm"
                         onClick={() => handleShareWhatsApp(invoice)}
-                        className="flex-1 min-w-[6.5rem] bg-green-600 text-white hover:bg-green-700"
+                        className="h-9 w-[4.75rem] px-2 bg-green-600 text-white hover:bg-green-700"
                       >
                         <MessageCircle className="w-4 h-4 ml-1" />
                         <span className="arabic-text">واتساب</span>
