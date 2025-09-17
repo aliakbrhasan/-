@@ -8,6 +8,7 @@ import { Badge } from './ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { Label } from './ui/label';
+import { ScrollArea } from './ui/scroll-area';
 import {
   Plus,
   Search,
@@ -62,6 +63,24 @@ const formatRangeDate = (date: Date) =>
     day: 'numeric',
   }).format(date);
 
+const measurementLabels: Record<keyof MeasurementFields, string> = {
+  length: 'الطول',
+  shoulder: 'الكتف',
+  chest: 'الصدر',
+  waist: 'الخصر',
+  sleeve: 'طول الكم',
+  collarCircumference: 'محيط الياقة',
+};
+
+const designLabels: Record<keyof DesignPreferences, string> = {
+  fabricType: 'نوع القماش',
+  collarStyle: 'تصميم الياقة',
+  chestStyle: 'أسلوب الصدر',
+  sleeveFinish: 'نهاية الأكمام',
+  buttonStyle: 'نوع الأزرار',
+  pocketStyle: 'تصميم الجيوب',
+};
+
 const buildBoundaryDate = (parts: DateParts, isStart: boolean): Date | null => {
   const year = parseInt(parts.year, 10);
 
@@ -108,14 +127,35 @@ interface InvoicesPageProps {
 
 type InvoiceStatus = 'مدفوع' | 'معلق' | 'جزئي' | string;
 
+type MeasurementFields = {
+  length: string;
+  shoulder: string;
+  chest: string;
+  waist: string;
+  sleeve: string;
+  collarCircumference: string;
+};
+
+type DesignPreferences = {
+  fabricType: string;
+  collarStyle: string;
+  chestStyle: string;
+  sleeveFinish: string;
+  buttonStyle: string;
+  pocketStyle: string;
+};
+
 type Invoice = PrintableInvoiceData & {
   status: InvoiceStatus;
   fabricImage: string;
+  measurements: MeasurementFields;
+  design: DesignPreferences;
 };
 
 export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   const invoices: Invoice[] = [
     {
@@ -129,7 +169,24 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       deliveryDate: '2024-01-25',
       status: 'مدفوع',
       notes: 'تم الدفع بالكامل مع طلب تجهيز خاص بالياقة.',
-      fabricImage: 'https://images.unsplash.com/photo-1642683497706-77a72ea549bb?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&fit=crop'
+      fabricImage:
+        'https://images.unsplash.com/photo-1642683497706-77a72ea549bb?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&fit=crop',
+      measurements: {
+        length: '145 سم',
+        shoulder: '48 سم',
+        chest: '102 سم',
+        waist: '94 سم',
+        sleeve: '62 سم',
+        collarCircumference: '41 سم',
+      },
+      design: {
+        fabricType: 'قطن مصري بدرجة بيج دافئة',
+        collarStyle: 'ياقة رسمية مع تطريز داخلي',
+        chestStyle: 'صدر مزدوج مع أزرار مخفية',
+        sleeveFinish: 'كم بحاشية عريضة مع كبك ذهبي',
+        buttonStyle: 'أزرار لؤلؤية بلون عاجي',
+        pocketStyle: 'جيب جانبي مخفي وجيب أمامي مائل',
+      },
     },
     {
       id: 'INV-002',
@@ -142,7 +199,24 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       deliveryDate: '2024-01-22',
       status: 'معلق',
       notes: 'المتبقي يستلم عند التسليم النهائي بعد المعاينة.',
-      fabricImage: 'https://images.unsplash.com/photo-1716541424785-f9746ae08cad?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop'
+      fabricImage:
+        'https://images.unsplash.com/photo-1716541424785-f9746ae08cad?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop',
+      measurements: {
+        length: '140 سم',
+        shoulder: '46 سم',
+        chest: '98 سم',
+        waist: '90 سم',
+        sleeve: '60 سم',
+        collarCircumference: '39 سم',
+      },
+      design: {
+        fabricType: 'صوف خفيف بدرجة رمادية دخانية',
+        collarStyle: 'ياقة صينية مع طرف متدرج',
+        chestStyle: 'صدر واحد مع جيب صدر بارز',
+        sleeveFinish: 'أكمام مستقيمة مع زر خشبي',
+        buttonStyle: 'أزرار خشبية بلون الجوز',
+        pocketStyle: 'جيب مزدوج مع فتحة خلفية',
+      },
     },
     {
       id: 'INV-003',
@@ -155,7 +229,24 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       deliveryDate: '2024-01-20',
       status: 'جزئي',
       notes: 'إضافة تطريز يدوي في الأكمام.',
-      fabricImage: 'https://images.unsplash.com/photo-1564322955387-0d2def79fb5c?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop'
+      fabricImage:
+        'https://images.unsplash.com/photo-1564322955387-0d2def79fb5c?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop',
+      measurements: {
+        length: '150 سم',
+        shoulder: '49 سم',
+        chest: '108 سم',
+        waist: '98 سم',
+        sleeve: '64 سم',
+        collarCircumference: '42 سم',
+      },
+      design: {
+        fabricType: 'حرير ثقيل بنقشة شرقية',
+        collarStyle: 'ياقة دائرية مع خط تطريز',
+        chestStyle: 'صدر مزدوج مع تطريز يدوي',
+        sleeveFinish: 'أكمام مطوية مع خيوط ذهبية',
+        buttonStyle: 'أزرار معدنية منقوشة',
+        pocketStyle: 'جيبان داخليان مخفيان',
+      },
     },
     {
       id: 'INV-004',
@@ -168,7 +259,23 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       deliveryDate: '2024-01-28',
       status: 'مدفوع',
       notes: 'طلب تغليف خاص بالهدية.',
-      fabricImage: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=100&h=100&fit=crop'
+      fabricImage: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=100&h=100&fit=crop',
+      measurements: {
+        length: '142 سم',
+        shoulder: '47 سم',
+        chest: '100 سم',
+        waist: '92 سم',
+        sleeve: '61 سم',
+        collarCircumference: '40 سم',
+      },
+      design: {
+        fabricType: 'كتان فاخر ممزوج بخيوط فضية',
+        collarStyle: 'ياقة رسمية ببطانة مخفية',
+        chestStyle: 'صدر واحد بسيط مع خط تطريز',
+        sleeveFinish: 'أكمام بحافة داخلية ناعمة',
+        buttonStyle: 'أزرار معدنية مطلية بالفضة',
+        pocketStyle: 'جيب أمامي مستقيم مع جيب داخلي',
+      },
     }
   ];
 
@@ -557,6 +664,14 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
     // Image export logic would go here
   };
 
+  const openInvoiceDetails = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+  };
+
+  const closeInvoiceDetails = () => {
+    setSelectedInvoice(null);
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
@@ -632,7 +747,19 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
             </TableHeader>
             <TableBody>
               {sortedInvoices.map((invoice) => (
-                <TableRow key={invoice.id} className="hover:bg-[#F6E9CA]">
+                <TableRow
+                  key={invoice.id}
+                  className="hover:bg-[#F6E9CA] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#155446]/60"
+                  onClick={() => openInvoiceDetails(invoice)}
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      openInvoiceDetails(invoice);
+                    }
+                  }}
+                  aria-label={`عرض تفاصيل الفاتورة ${invoice.id}`}
+                >
                   <TableCell className="text-[#13312A] arabic-text">{invoice.id}</TableCell>
                   <TableCell className="text-[#13312A] arabic-text">{invoice.customerName}</TableCell>
                   <TableCell className="text-[#13312A]">{invoice.phone}</TableCell>
@@ -653,27 +780,58 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 px-3 touch-target">
+                      <DropdownMenuTrigger
+                        onClick={(event) => event.stopPropagation()}
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 px-3 touch-target"
+                      >
                         <MoreVertical className="w-4 h-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-white border-[#C69A72]">
-                        <DropdownMenuItem className="arabic-text">
+                        <DropdownMenuItem
+                          className="arabic-text"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                          }}
+                        >
                           <Edit className="w-4 h-4 ml-2" />
                           تعديل الفاتورة
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="arabic-text">
+                        <DropdownMenuItem
+                          className="arabic-text"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                          }}
+                        >
                           <Copy className="w-4 h-4 ml-2" />
                           تكرار الفاتورة
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleExportPDF(invoice)} className="arabic-text">
+                        <DropdownMenuItem
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleExportPDF(invoice);
+                          }}
+                          className="arabic-text"
+                        >
                           <Download className="w-4 h-4 ml-2" />
                           تصدير إلى PDF
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleShareWhatsApp(invoice)} className="arabic-text">
+                        <DropdownMenuItem
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleShareWhatsApp(invoice);
+                          }}
+                          className="arabic-text"
+                        >
                           <MessageCircle className="w-4 h-4 ml-2" />
                           مشاركة عبر واتساب
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleSaveAsImage(invoice.id)} className="arabic-text">
+                        <DropdownMenuItem
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleSaveAsImage(invoice.id);
+                          }}
+                          className="arabic-text"
+                        >
                           <FileImage className="w-4 h-4 ml-2" />
                           حفظ كصورة
                         </DropdownMenuItem>
@@ -690,7 +848,20 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
       {/* Invoices Cards - Mobile */}
       <div className="md:hidden space-y-4">
         {sortedInvoices.map((invoice) => (
-          <Card key={invoice.id} className="bg-white border-[#C69A72]">
+          <Card
+            key={invoice.id}
+            className="bg-white border-[#C69A72] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#155446]/60"
+            onClick={() => openInvoiceDetails(invoice)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openInvoiceDetails(invoice);
+              }
+            }}
+            aria-label={`عرض تفاصيل الفاتورة ${invoice.id}`}
+          >
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -717,25 +888,41 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
               </div>
 
               <div className="flex gap-2 overflow-x-auto">
-                <Button size="sm" variant="outline" className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target whitespace-nowrap">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target whitespace-nowrap"
+                  onClick={(event) => event.stopPropagation()}
+                >
                   <Edit className="w-4 h-4 ml-1" />
                   <span className="arabic-text">تعديل</span>
                 </Button>
-                <Button size="sm" variant="outline" className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target whitespace-nowrap">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target whitespace-nowrap"
+                  onClick={(event) => event.stopPropagation()}
+                >
                   <Copy className="w-4 h-4 ml-1" />
                   <span className="arabic-text">تكرار</span>
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => handleExportPDF(invoice)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleExportPDF(invoice);
+                  }}
                   className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target whitespace-nowrap"
                 >
                   <Download className="w-4 h-4 ml-1" />
                   <span className="arabic-text">PDF</span>
                 </Button>
-                <Button 
-                  size="sm" 
-                  onClick={() => handleShareWhatsApp(invoice)}
+                <Button
+                  size="sm"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleShareWhatsApp(invoice);
+                  }}
                   className="bg-green-600 hover:bg-green-700 text-white touch-target whitespace-nowrap"
                 >
                   <MessageCircle className="w-4 h-4 ml-1" />
@@ -746,6 +933,154 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
           </Card>
         ))}
       </div>
+
+      <Dialog
+        open={Boolean(selectedInvoice)}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeInvoiceDetails();
+          }
+        }}
+      >
+        <DialogContent
+          className="w-full max-w-[calc(100vw-1.5rem)] sm:max-w-4xl lg:max-w-5xl xl:max-w-6xl bg-[#F6E9CA] border-[#C69A72] p-0 overflow-hidden max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-3rem)]"
+        >
+          {selectedInvoice && (
+            <div className="flex h-full flex-col">
+              <div className="flex flex-col gap-4 border-b border-[#C69A72] bg-[#FDFBF7] px-4 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h2 className="text-2xl font-semibold text-[#13312A] arabic-text">
+                      {selectedInvoice.customerName}
+                    </h2>
+                    <Badge className={`${getStatusColor(selectedInvoice.status)} arabic-text px-3 py-1`}> 
+                      {selectedInvoice.status}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-sm text-[#155446] arabic-text">
+                    <span className="rounded-full border border-[#C69A72] bg-white px-3 py-1">
+                      رقم الفاتورة: {selectedInvoice.id}
+                    </span>
+                    <span className="rounded-full border border-[#C69A72] bg-white px-3 py-1">
+                      الهاتف: {selectedInvoice.phone}
+                    </span>
+                    {selectedInvoice.address && (
+                      <span className="rounded-full border border-[#C69A72] bg-white px-3 py-1">
+                        العنوان: {selectedInvoice.address}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-center gap-2">
+                    <ImageWithFallback
+                      src={selectedInvoice.fabricImage}
+                      alt="صورة القماش"
+                      className="h-20 w-20 rounded-xl border border-[#C69A72] object-cover shadow-sm"
+                    />
+                    <span className="text-xs text-[#155446] arabic-text">صورة القماش</span>
+                  </div>
+                  <div className="grid gap-2 text-sm text-[#13312A] arabic-text">
+                    <div className="rounded-lg border border-[#C69A72] bg-white/80 px-4 py-2 shadow-sm">
+                      <span className="block text-xs text-[#155446]">تاريخ الاستلام</span>
+                      <span className="font-medium">{formatDate(selectedInvoice.receivedDate)}</span>
+                    </div>
+                    <div className="rounded-lg border border-[#C69A72] bg-white/80 px-4 py-2 shadow-sm">
+                      <span className="block text-xs text-[#155446]">تاريخ التسليم</span>
+                      <span className="font-medium">{formatDate(selectedInvoice.deliveryDate)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <ScrollArea className="flex-1">
+                <div className="space-y-6 p-4 sm:p-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="rounded-xl border border-[#C69A72] bg-white p-4 shadow-sm">
+                      <h3 className="text-lg font-semibold text-[#13312A] arabic-text mb-3">بيانات الزبون</h3>
+                      <div className="grid gap-3 text-sm text-[#13312A] arabic-text sm:grid-cols-2">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[#155446] text-xs">اسم الزبون</span>
+                          <span>{selectedInvoice.customerName}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[#155446] text-xs">رقم الهاتف</span>
+                          <span>{selectedInvoice.phone}</span>
+                        </div>
+                        {selectedInvoice.address && (
+                          <div className="flex flex-col gap-1 sm:col-span-2">
+                            <span className="text-[#155446] text-xs">العنوان</span>
+                            <span>{selectedInvoice.address}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-[#C69A72] bg-white p-4 shadow-sm">
+                      <h3 className="text-lg font-semibold text-[#13312A] arabic-text mb-3">المبالغ والمواعيد</h3>
+                      <div className="grid gap-3 text-sm text-[#13312A] arabic-text sm:grid-cols-2">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[#155446] text-xs">المبلغ الكلي</span>
+                          <span>{formatCurrency(selectedInvoice.total)}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[#155446] text-xs">المبلغ الواصل</span>
+                          <span>{formatCurrency(selectedInvoice.paid)}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[#155446] text-xs">المبلغ المتبقي</span>
+                          <span>{formatCurrency(Math.max(selectedInvoice.total - selectedInvoice.paid, 0))}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[#155446] text-xs">تاريخ الاستلام</span>
+                          <span>{formatDate(selectedInvoice.receivedDate)}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[#155446] text-xs">تاريخ التسليم</span>
+                          <span>{formatDate(selectedInvoice.deliveryDate)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-[#C69A72] bg-white p-4 shadow-sm">
+                    <h3 className="text-lg font-semibold text-[#13312A] arabic-text mb-3">القياسات التفصيلية</h3>
+                    <div className="grid gap-3 text-sm text-[#13312A] arabic-text grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                      {(Object.entries(selectedInvoice.measurements) as [keyof MeasurementFields, string][]).map(([key, value]) => (
+                        <div key={key} className="flex flex-col gap-1 rounded-lg border border-[#E2D4BD] bg-[#FDFBF7] p-3">
+                          <span className="text-[#155446] text-xs">{measurementLabels[key]}</span>
+                          <span>{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-[#C69A72] bg-white p-4 shadow-sm">
+                    <h3 className="text-lg font-semibold text-[#13312A] arabic-text mb-3">تفاصيل التصميم</h3>
+                    <div className="grid gap-3 text-sm text-[#13312A] arabic-text grid-cols-1 sm:grid-cols-2">
+                      {(Object.entries(selectedInvoice.design) as [keyof DesignPreferences, string][]).map(([key, value]) => (
+                        <div key={key} className="flex flex-col gap-1 rounded-lg border border-[#E2D4BD] bg-[#FDFBF7] p-3">
+                          <span className="text-[#155446] text-xs">{designLabels[key]}</span>
+                          <span>{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {selectedInvoice.notes && (
+                    <div className="rounded-xl border border-[#C69A72] bg-white p-4 shadow-sm">
+                      <h3 className="text-lg font-semibold text-[#13312A] arabic-text mb-3">ملاحظات إضافية</h3>
+                      <p className="text-sm leading-relaxed text-[#155446] arabic-text bg-[#FDFBF7] rounded-lg border border-[#E2D4BD] p-4">
+                        {selectedInvoice.notes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isPrintDialogOpen} onOpenChange={handlePrintDialogOpenChange}>
         <DialogContent className="max-w-3xl bg-[#F6E9CA] border-[#C69A72]">
