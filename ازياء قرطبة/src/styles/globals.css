@@ -231,3 +231,118 @@
 html {
   font-size: var(--font-size);
 }
+
+/* === MODAL SYSTEM === */
+/* قفل التمرير عند فتح النوافذ */
+body.has-modal {
+  overflow: hidden;
+}
+
+/* النظام الأساسي للمودالات */
+.tm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.tm-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.tm-modal__wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  min-height: 100dvh;
+}
+
+/* Bottom-sheet فقط على الشاشات الصغيرة */
+@media (max-width: 640px) {
+  .tm-modal--sheet .tm-modal__wrap {
+    align-items: flex-end;
+  }
+}
+
+/* تأكيد المحاذاة الوسطى */
+.tm-modal--center .tm-modal__wrap {
+  align-items: center;
+}
+
+.tm-modal__panel {
+  width: 100%;
+  max-width: 720px;
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--modal-bg, #f5e9ca);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.tm-modal__header {
+  position: sticky;
+  top: 0;
+  background: inherit;
+  z-index: 1;
+  padding: 24px 24px 0 24px;
+}
+
+.tm-modal__footer {
+  position: sticky;
+  bottom: 0;
+  background: inherit;
+  z-index: 1;
+  padding: 0 24px 24px 24px;
+}
+
+.tm-modal__body {
+  overflow-y: auto;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 640px) {
+  .tm-modal__wrap {
+    padding: 0;
+  }
+  
+  .tm-modal__panel {
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+  
+  .tm-modal--sheet .tm-modal__panel {
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+/* === MODAL BACKDROP DARKENING === */
+/* جعل الخلفية أكثر ظلاماً للنوافذ المنبثقة */
+[data-radix-dialog-overlay] {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* للخلفية المخصصة */
+.tm-modal__backdrop {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* تجاوز خصائص Radix UI للخلفية */
+[data-slot="dialog-content"] .tm-modal__backdrop,
+[data-radix-dialog-content] .tm-modal__backdrop {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
