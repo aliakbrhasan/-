@@ -283,14 +283,14 @@ export function RolesManagementPage({ onBack }: RolesManagementPageProps) {
               إضافة دور جديد
             </Button>
           </DialogTrigger>
-            <DialogContent className="w-[98vw] max-w-4xl h-[95vh] max-h-[95vh] p-2 sm:p-6">
-            <DialogHeader>
+            <DialogContent className="w-full max-w-4xl h-[85vh] sm:h-[90vh] max-h-[85vh] sm:max-h-[90vh] p-3 sm:p-6 m-0 rounded-none sm:rounded-lg flex flex-col overscroll-contain">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle className="arabic-text">إضافة دور جديد</DialogTitle>
               <DialogDescription className="arabic-text">
                 قم بإضافة دور جديد مع الصلاحيات المطلوبة
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-6 overflow-y-auto max-h-[calc(95vh-120px)] pr-2">
+            <div className="space-y-6 overflow-y-auto flex-1 min-h-0 max-h-[calc(85vh-100px)] sm:max-h-[calc(90vh-120px)] pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 touch-pan-y">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="roleName" className="arabic-text">اسم الدور</Label>
@@ -437,7 +437,7 @@ export function RolesManagementPage({ onBack }: RolesManagementPageProps) {
                 </div>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex-shrink-0 mt-4">
               <Button variant="outline" onClick={() => setIsAddRoleDialogOpen(false)}>
                 إلغاء
               </Button>
@@ -651,14 +651,14 @@ export function RolesManagementPage({ onBack }: RolesManagementPageProps) {
       {/* نافذة تعديل الدور */}
       {editingRole && (
         <Dialog open={!!editingRole} onOpenChange={() => setEditingRole(null)}>
-            <DialogContent className="w-[98vw] max-w-4xl h-[95vh] max-h-[95vh] p-2 sm:p-6">
-            <DialogHeader>
+            <DialogContent className="w-full max-w-4xl h-[85vh] sm:h-[90vh] max-h-[85vh] sm:max-h-[90vh] p-3 sm:p-6 m-0 rounded-none sm:rounded-lg flex flex-col overscroll-contain">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle className="arabic-text">تعديل الدور</DialogTitle>
               <DialogDescription className="arabic-text">
                 قم بتعديل بيانات الدور والصلاحيات
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-6 overflow-y-auto max-h-[calc(95vh-120px)] pr-2">
+            <div className="space-y-6 overflow-y-auto flex-1 min-h-0 max-h-[calc(85vh-100px)] sm:max-h-[calc(90vh-120px)] pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 touch-pan-y">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="editRoleName" className="arabic-text">اسم الدور</Label>
@@ -772,7 +772,7 @@ export function RolesManagementPage({ onBack }: RolesManagementPageProps) {
                 </div>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex-shrink-0 mt-4">
               <Button variant="outline" onClick={() => setEditingRole(null)}>
                 إلغاء
               </Button>

@@ -172,79 +172,85 @@ export function UsersManagementPage({ onNavigate }: UsersManagementPageProps) {
                 إضافة مستخدم
               </Button>
             </DialogTrigger>
-            <DialogContent className="w-[98vw] max-w-md h-[90vh] max-h-[90vh]">
-              <DialogHeader>
+            <DialogContent className="w-full max-w-md h-[85vh] sm:h-[90vh] max-h-[85vh] sm:max-h-[90vh] p-3 sm:p-6 m-0 rounded-none sm:rounded-lg flex flex-col overscroll-contain">
+              <DialogHeader className="flex-shrink-0">
                 <DialogTitle className="arabic-text">إضافة مستخدم جديد</DialogTitle>
                 <DialogDescription className="arabic-text">
                   قم بإضافة مستخدم جديد للنظام
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[calc(90vh-120px)] pr-2">
-                <div>
-                  <Label htmlFor="userCode" className="arabic-text">رمز المستخدم</Label>
-                  <Input
-                    id="userCode"
-                    value={newUser.code || ''}
-                    onChange={(e) => setNewUser({ ...newUser, code: e.target.value })}
-                    placeholder="أدخل رمز المستخدم"
-                  />
+              <div className="space-y-4 overflow-y-auto flex-1 min-h-0 max-h-[calc(85vh-100px)] sm:max-h-[calc(90vh-120px)] pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 touch-pan-y">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="userCode" className="arabic-text">رمز المستخدم</Label>
+                    <Input
+                      id="userCode"
+                      value={newUser.code || ''}
+                      onChange={(e) => setNewUser({ ...newUser, code: e.target.value })}
+                      placeholder="أدخل رمز المستخدم"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="userName" className="arabic-text">اسم المستخدم</Label>
+                    <Input
+                      id="userName"
+                      value={newUser.name || ''}
+                      onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                      placeholder="أدخل اسم المستخدم"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="userName" className="arabic-text">اسم المستخدم</Label>
-                  <Input
-                    id="userName"
-                    value={newUser.name || ''}
-                    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                    placeholder="أدخل اسم المستخدم"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="userEmail" className="arabic-text">البريد الإلكتروني</Label>
+                    <Input
+                      id="userEmail"
+                      type="email"
+                      value={newUser.email || ''}
+                      onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                      placeholder="أدخل البريد الإلكتروني"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="userPhone" className="arabic-text">رقم الهاتف</Label>
+                    <Input
+                      id="userPhone"
+                      value={newUser.phone || ''}
+                      onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                      placeholder="أدخل رقم الهاتف"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="userEmail" className="arabic-text">البريد الإلكتروني</Label>
-                  <Input
-                    id="userEmail"
-                    type="email"
-                    value={newUser.email || ''}
-                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                    placeholder="أدخل البريد الإلكتروني"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="userPhone" className="arabic-text">رقم الهاتف</Label>
-                  <Input
-                    id="userPhone"
-                    value={newUser.phone || ''}
-                    onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-                    placeholder="أدخل رقم الهاتف"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="userStatus" className="arabic-text">الحالة</Label>
-                  <Select value={newUser.status} onValueChange={(value: any) => setNewUser({ ...newUser, status: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الحالة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ادمن">ادمن</SelectItem>
-                      <SelectItem value="موظف">موظف</SelectItem>
-                      <SelectItem value="محاسب">محاسب</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="userRole" className="arabic-text">الدور</Label>
-                  <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الدور" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="مدير النظام">مدير النظام</SelectItem>
-                      <SelectItem value="مندوب مبيعات">مندوب مبيعات</SelectItem>
-                      <SelectItem value="محاسب رئيسي">محاسب رئيسي</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="userStatus" className="arabic-text">الحالة</Label>
+                    <Select value={newUser.status} onValueChange={(value: any) => setNewUser({ ...newUser, status: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الحالة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ادمن">ادمن</SelectItem>
+                        <SelectItem value="موظف">موظف</SelectItem>
+                        <SelectItem value="محاسب">محاسب</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="userRole" className="arabic-text">الدور</Label>
+                    <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الدور" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="مدير النظام">مدير النظام</SelectItem>
+                        <SelectItem value="مندوب مبيعات">مندوب مبيعات</SelectItem>
+                        <SelectItem value="محاسب رئيسي">محاسب رئيسي</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
-              <DialogFooter>
+              <DialogFooter className="flex-shrink-0 mt-4">
                 <Button variant="outline" onClick={() => setIsAddUserDialogOpen(false)}>
                   إلغاء
                 </Button>
@@ -403,81 +409,87 @@ export function UsersManagementPage({ onNavigate }: UsersManagementPageProps) {
       {/* نافذة تعديل المستخدم */}
       {editingUser && (
         <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
-          <DialogContent className="w-[98vw] max-w-md h-[90vh] max-h-[90vh]">
-            <DialogHeader>
+          <DialogContent className="w-full max-w-md h-[100dvh] max-h-[100dvh] p-4 sm:p-6 m-0 rounded-none sm:rounded-lg flex flex-col overscroll-contain">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle className="arabic-text">تعديل المستخدم</DialogTitle>
               <DialogDescription className="arabic-text">
                 قم بتعديل بيانات المستخدم
               </DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[calc(90vh-120px)] pr-2">
-              <div>
-                <Label htmlFor="editUserCode" className="arabic-text">رمز المستخدم</Label>
-                <Input
-                  id="editUserCode"
-                  value={editingUser.code}
-                  onChange={(e) => setEditingUser({ ...editingUser, code: e.target.value })}
-                />
+            <div className="space-y-4 overflow-y-auto flex-1 min-h-0 max-h-[calc(100dvh-200px)] pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 touch-pan-y">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editUserCode" className="arabic-text">رمز المستخدم</Label>
+                  <Input
+                    id="editUserCode"
+                    value={editingUser.code}
+                    onChange={(e) => setEditingUser({ ...editingUser, code: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editUserName" className="arabic-text">اسم المستخدم</Label>
+                  <Input
+                    id="editUserName"
+                    value={editingUser.name}
+                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="editUserName" className="arabic-text">اسم المستخدم</Label>
-                <Input
-                  id="editUserName"
-                  value={editingUser.name}
-                  onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editUserEmail" className="arabic-text">البريد الإلكتروني</Label>
+                  <Input
+                    id="editUserEmail"
+                    type="email"
+                    value={editingUser.email}
+                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editUserPhone" className="arabic-text">رقم الهاتف</Label>
+                  <Input
+                    id="editUserPhone"
+                    value={editingUser.phone}
+                    onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="editUserEmail" className="arabic-text">البريد الإلكتروني</Label>
-                <Input
-                  id="editUserEmail"
-                  type="email"
-                  value={editingUser.email}
-                  onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="editUserPhone" className="arabic-text">رقم الهاتف</Label>
-                <Input
-                  id="editUserPhone"
-                  value={editingUser.phone}
-                  onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="editUserStatus" className="arabic-text">الحالة</Label>
-                <Select 
-                  value={editingUser.status} 
-                  onValueChange={(value: any) => setEditingUser({ ...editingUser, status: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ادمن">ادمن</SelectItem>
-                    <SelectItem value="موظف">موظف</SelectItem>
-                    <SelectItem value="محاسب">محاسب</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="editUserRole" className="arabic-text">الدور</Label>
-                <Select 
-                  value={editingUser.role} 
-                  onValueChange={(value) => setEditingUser({ ...editingUser, role: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="مدير النظام">مدير النظام</SelectItem>
-                    <SelectItem value="مندوب مبيعات">مندوب مبيعات</SelectItem>
-                    <SelectItem value="محاسب رئيسي">محاسب رئيسي</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editUserStatus" className="arabic-text">الحالة</Label>
+                  <Select 
+                    value={editingUser.status} 
+                    onValueChange={(value: any) => setEditingUser({ ...editingUser, status: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ادمن">ادمن</SelectItem>
+                      <SelectItem value="موظف">موظف</SelectItem>
+                      <SelectItem value="محاسب">محاسب</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="editUserRole" className="arabic-text">الدور</Label>
+                  <Select 
+                    value={editingUser.role} 
+                    onValueChange={(value) => setEditingUser({ ...editingUser, role: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="مدير النظام">مدير النظام</SelectItem>
+                      <SelectItem value="مندوب مبيعات">مندوب مبيعات</SelectItem>
+                      <SelectItem value="محاسب رئيسي">محاسب رئيسي</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex-shrink-0 mt-4">
               <Button variant="outline" onClick={() => setEditingUser(null)}>
                 إلغاء
               </Button>
