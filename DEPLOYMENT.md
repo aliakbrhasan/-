@@ -11,7 +11,7 @@ This project is configured for deployment on Netlify with the following setup:
 ## Build Configuration
 
 - **Base Directory**: `ازياء قرطبة`
-- **Publish Directory**: `ازياء قرطبة/build`
+- **Publish Directory**: `build` (relative to base directory)
 - **Build Command**: `npm run build`
 - **Node Version**: 18
 
@@ -21,6 +21,8 @@ This project is configured for deployment on Netlify with the following setup:
 - Security headers for XSS protection
 - Optimized caching for static assets
 - Automatic redirects for client-side routing
+- Code splitting for better performance
+- ESM build configuration (no CJS deprecation warnings)
 
 ## Deployment
 
