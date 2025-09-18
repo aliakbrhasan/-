@@ -101,7 +101,7 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className="fixed inset-0 m-0 p-0 max-w-none max-h-none w-screen h-screen bg-[#F6E9CA] border-0 flex flex-col"
+        className="fixed inset-0 !top-0 !left-0 !translate-x-0 !translate-y-0 !rounded-none m-0 p-0 max-w-none max-h-none w-screen h-screen bg-[#F6E9CA] border-0 flex flex-col [&_[data-slot='dialog-close']]:hidden"
         style={{ transform: 'none' }}
       >
         <DialogHeader className="p-4 pb-3 border-b border-[#C69A72]/30 flex-shrink-0">
