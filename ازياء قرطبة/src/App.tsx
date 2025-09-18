@@ -9,6 +9,8 @@ import { FinancialPage } from './components/FinancialPage';
 import { CustomerDetailsPage } from './components/CustomerDetailsPage';
 import { InvoiceDetailsPage } from './components/InvoiceDetailsPage';
 import { NewInvoiceDialog } from './components/NewInvoiceDialog';
+import { UsersManagementPage } from './components/UsersManagementPage';
+import { RolesManagementPage } from './components/RolesManagementPage';
 import { Toaster } from './components/ui/sonner';
 import { Customer } from './types/customer';
 
@@ -341,6 +343,10 @@ export default function App() {
         return <ReportsPage />;
       case 'financial':
         return <FinancialPage />;
+      case 'users':
+        return <UsersManagementPage onNavigate={handleNavigate} />;
+      case 'roles':
+        return <RolesManagementPage onBack={() => setCurrentPage('users')} />;
       default:
         return (
           <Dashboard

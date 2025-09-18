@@ -66,10 +66,11 @@ export function Layout({ children, currentPage, onNavigate, isLoggedIn, onLogout
               </Button>
               <Button
                 variant="ghost"
+                onClick={() => onNavigate('users')}
                 className="flex items-center gap-3 justify-start text-[#F6E9CA] hover:bg-[#155446] p-4 touch-target"
               >
                 <Settings size={20} />
-                <span className="arabic-text">الإعدادات</span>
+                <span className="arabic-text">إدارة المستخدمين</span>
               </Button>
               <Button
                 variant="ghost"
@@ -136,6 +137,7 @@ export function Layout({ children, currentPage, onNavigate, isLoggedIn, onLogout
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
+              onClick={() => onNavigate('users')}
               className="text-[#C69A72] hover:text-[#F6E9CA] hover:bg-[#155446] p-2 touch-target"
             >
               <Settings size={18} />
