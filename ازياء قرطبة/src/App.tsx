@@ -7,6 +7,7 @@ import { CustomersPage } from './components/CustomersPage';
 import { ReportsPage } from './components/ReportsPage';
 import { FinancialPage } from './components/FinancialPage';
 import { CustomerDetailsPage } from './components/CustomerDetailsPage';
+import { InvoiceDetailsPage } from './components/InvoiceDetailsPage';
 import { NewInvoiceDialog } from './components/NewInvoiceDialog';
 import { Toaster } from './components/ui/sonner';
 import { Customer } from './types/customer';
@@ -231,12 +232,14 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [isNewInvoiceDialogOpen, setIsNewInvoiceDialogOpen] = useState(false);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
     setCurrentPage('dashboard');
     setSelectedCustomer(null);
+    setSelectedInvoice(null);
     setIsNewInvoiceDialogOpen(false);
   };
 
@@ -244,13 +247,17 @@ export default function App() {
     setIsLoggedIn(false);
     setCurrentPage('dashboard');
     setSelectedCustomer(null);
+    setSelectedInvoice(null);
     setIsNewInvoiceDialogOpen(false);
   };
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page);
-    if (page !== 'customerDetails') {
+    if (page !== 'customerDetails' && page !== 'invoiceDetails') {
       setSelectedCustomer(null);
+    }
+    if (page !== 'invoiceDetails') {
+      setSelectedInvoice(null);
     }
     setIsNewInvoiceDialogOpen(false);
   };
@@ -264,6 +271,26 @@ export default function App() {
     setIsNewInvoiceDialogOpen(true);
   };
 
+  const handleViewInvoiceDetails = (invoice: any) => {
+    setSelectedInvoice(invoice);
+    setCurrentPage('invoiceDetails');
+  };
+
+  const handleMarkAsPaid = (invoiceId: string) => {
+    // Here you would typically update the invoice status in your data store
+    console.log('Marking invoice as paid:', invoiceId);
+    // For now, we'll just update the local state
+    if (selectedInvoice && selectedInvoice.id === invoiceId) {
+      setSelectedInvoice({
+        ...selectedInvoice,
+        status: 'مدفوع',
+        paid: selectedInvoice.total
+      });
+    }
+    // You would also update the invoices list here in a real application
+    // This is just for demonstration purposes
+  };
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'dashboard':
@@ -274,7 +301,7 @@ export default function App() {
           />
         );
       case 'invoices':
-        return <InvoicesPage onCreateInvoice={handleCreateInvoice} />;
+        return <InvoicesPage onCreateInvoice={handleCreateInvoice} onViewInvoiceDetails={handleViewInvoiceDetails} onMarkAsPaid={handleMarkAsPaid} />;
       case 'customers':
         return (
           <CustomersPage
@@ -296,6 +323,19 @@ export default function App() {
             customers={customersData}
             onCustomerSelect={handleCustomerSelect}
           />
+        );
+      case 'invoiceDetails':
+        return selectedInvoice ? (
+          <InvoiceDetailsPage
+            invoice={selectedInvoice}
+            onBack={() => {
+              setSelectedInvoice(null);
+              setCurrentPage('invoices');
+            }}
+            onMarkAsPaid={handleMarkAsPaid}
+          />
+        ) : (
+          <InvoicesPage onCreateInvoice={handleCreateInvoice} onViewInvoiceDetails={handleViewInvoiceDetails} onMarkAsPaid={handleMarkAsPaid} />
         );
       case 'reports':
         return <ReportsPage />;

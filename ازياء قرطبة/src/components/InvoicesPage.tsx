@@ -20,6 +20,7 @@ import {
   MessageCircle,
   Printer,
   Eye,
+  CheckCircle,
 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import {
@@ -30,6 +31,7 @@ import {
   PrintableInvoiceData,
 } from './PrintableInvoice';
 import { openPrintWindow, formatPrintDateTime } from './print/PrintUtils';
+import { InvoiceDetailsPage } from './InvoiceDetailsPage';
 import { InvoiceDetailsDialog } from './InvoiceDetailsDialog';
 
 type DateParts = {
@@ -114,6 +116,8 @@ const buildBoundaryDate = (parts: DateParts, isStart: boolean): Date | null => {
 
 interface InvoicesPageProps {
   onCreateInvoice: () => void;
+  onViewInvoiceDetails?: (invoice: Invoice) => void;
+  onMarkAsPaid?: (invoiceId: string) => void;
 }
 
 type InvoiceStatus = 'مدفوع' | 'معلق' | 'جزئي' | string;
@@ -136,7 +140,7 @@ type Invoice = PrintableInvoiceData & {
   };
 };
 
-export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
+export function InvoicesPage({ onCreateInvoice, onViewInvoiceDetails, onMarkAsPaid }: InvoicesPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -679,8 +683,22 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
   };
 
   const handleViewDetails = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setIsDetailsDialogOpen(true);
+    if (onViewInvoiceDetails) {
+      onViewInvoiceDetails(invoice);
+    } else {
+      setSelectedInvoice(invoice);
+      setIsDetailsDialogOpen(true);
+    }
+  };
+
+  const handleMarkAsPaid = (invoice: Invoice) => {
+    if (onMarkAsPaid) {
+      onMarkAsPaid(invoice.id);
+    }
+  };
+
+  const canMarkAsPaid = (invoice: Invoice) => {
+    return invoice.status === 'معلق' || invoice.status === 'جزئي';
   };
 
   return (
@@ -754,6 +772,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">تاريخ التسليم</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">الحالة</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">طباعة</TableHead>
+                <TableHead className="text-[#F6E9CA] arabic-text text-right">تم الدفع</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
@@ -792,6 +811,21 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                     >
                       <Printer className="w-4 h-4" />
                     </Button>
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    {canMarkAsPaid(invoice) ? (
+                      <Button
+                        size="sm"
+                        onClick={() => handleMarkAsPaid(invoice)}
+                        className="bg-green-600 hover:bg-green-700 text-white touch-target flex items-center gap-1"
+                        aria-label={`تم الدفع لفاتورة ${invoice.customerName}`}
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        <span className="hidden sm:inline">تم الدفع</span>
+                      </Button>
+                    ) : (
+                      <span className="text-gray-400 text-sm">مدفوع</span>
+                    )}
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
@@ -850,7 +884,23 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                 <div className="flex items-stretch gap-2 min-h-[5rem]">
                   {/* Left info column - compact */}
                   <div className="flex-1 text-right">
-                    <h3 className="text-2xl font-bold text-[#13312A] arabic-text truncate mb-0.5">{invoice.customerName}</h3>
+                    <div className="flex items-center justify-between mb-0.5">
+                      <h3 className="text-2xl font-bold text-[#13312A] arabic-text truncate">{invoice.customerName}</h3>
+                      {canMarkAsPaid(invoice) && (
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkAsPaid(invoice);
+                          }}
+                          className="h-6 px-2 rounded-full bg-green-600 hover:bg-green-700 text-white text-xs flex items-center gap-1"
+                          aria-label={`تم الدفع لفاتورة ${invoice.customerName}`}
+                        >
+                          <CheckCircle className="h-3 w-3" />
+                          تم الدفع
+                        </Button>
+                      )}
+                    </div>
 
                     <div className="space-y-0.5 text-xs">
                       <div className="flex items-center justify-between">
@@ -1072,8 +1122,8 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Invoice Details Dialog */}
-      {selectedInvoice && (
+      {/* Invoice Details Dialog - Fallback for when onViewInvoiceDetails is not provided */}
+      {selectedInvoice && !onViewInvoiceDetails && (
         <InvoiceDetailsDialog
           isOpen={isDetailsDialogOpen}
           onOpenChange={setIsDetailsDialogOpen}
