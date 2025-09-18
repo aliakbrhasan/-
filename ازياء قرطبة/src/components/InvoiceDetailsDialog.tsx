@@ -100,7 +100,7 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] max-h-[90vh] bg-[#F6E9CA] border-[#C69A72] p-0 flex flex-col">
+      <DialogContent className="max-w-4xl w-[98vw] sm:w-[95vw] h-[90vh] max-h-[90vh] bg-[#F6E9CA] border-[#C69A72] p-0 flex flex-col">
         <DialogHeader className="p-4 pb-3 border-b border-[#C69A72]/30 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>

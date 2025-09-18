@@ -592,7 +592,36 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
   };
 
   const handlePrintInvoice = (invoice: Invoice) => {
-    openPrintWindow(`فاتورة ${invoice.id}`, <PrintableInvoice invoice={invoice} />);
+    const receiptWindow = window.open('', '_blank', 'width=900,height=700');
+
+    if (!receiptWindow) {
+      return;
+    }
+
+    const markup = renderToStaticMarkup(<PrintableInvoice invoice={invoice} />);
+
+    receiptWindow.document.write(`<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charSet="utf-8" />
+    <title>فاتورة ${invoice.id}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>${receiptStyles}</style>
+  </head>
+  <body>
+    ${markup}
+    <script>
+      window.onload = () => {
+        window.focus();
+        setTimeout(() => window.print(), 300);
+      };
+    <\/script>
+  </body>
+</html>`);
+    receiptWindow.document.close();
+    receiptWindow.focus();
   };
 
   const handleExportPDF = (invoice: Invoice) => {
@@ -724,6 +753,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">تاريخ الاستلام</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">تاريخ التسليم</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">الحالة</TableHead>
+                <TableHead className="text-[#F6E9CA] arabic-text text-right">طباعة</TableHead>
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
@@ -751,6 +781,17 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                     <Badge className={getStatusColor(invoice.status)}>
                       {getStatusLabel(invoice.status)}
                     </Badge>
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handlePrintInvoice(invoice)}
+                      className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] hover:text-white touch-target"
+                      aria-label={`طباعة فاتورة ${invoice.customerName}`}
+                    >
+                      <Printer className="w-4 h-4" />
+                    </Button>
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
