@@ -283,14 +283,14 @@ export function RolesManagementPage({ onBack }: RolesManagementPageProps) {
               إضافة دور جديد
             </Button>
           </DialogTrigger>
-            <DialogContent className="max-w-4xl">
+            <DialogContent className="max-w-4xl flex flex-col">
             <DialogHeader>
               <DialogTitle className="arabic-text">إضافة دور جديد</DialogTitle>
               <DialogDescription className="arabic-text">
                 قم بإضافة دور جديد مع الصلاحيات المطلوبة
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-6 overflow-y-auto flex-1 min-h-0 px-6">
+            <div className="space-y-6 flex-1 min-h-0 px-6 py-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="roleName" className="arabic-text">اسم الدور</Label>
@@ -651,14 +651,14 @@ export function RolesManagementPage({ onBack }: RolesManagementPageProps) {
       {/* نافذة تعديل الدور */}
       {editingRole && (
         <Dialog open={!!editingRole} onOpenChange={() => setEditingRole(null)}>
-            <DialogContent className="max-w-4xl">
+            <DialogContent className="max-w-4xl flex flex-col">
             <DialogHeader>
               <DialogTitle className="arabic-text">تعديل الدور</DialogTitle>
               <DialogDescription className="arabic-text">
                 قم بتعديل بيانات الدور والصلاحيات
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-6 overflow-y-auto flex-1 min-h-0 px-6">
+            <div className="space-y-6 flex-1 min-h-0 px-6 py-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="editRoleName" className="arabic-text">اسم الدور</Label>

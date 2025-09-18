@@ -87,12 +87,12 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 min-h-[100dvh]",
           className,
         )}
         {...props}
       >
-        <div className="w-full max-w-none sm:max-w-2xl bg-background rounded-t-2xl sm:rounded-2xl shadow-lg max-h-[100dvh] overflow-y-auto flex flex-col">
+        <div className="relative w-full sm:max-w-2xl bg-background rounded-t-2xl sm:rounded-2xl shadow-lg max-h-[100dvh] overflow-y-auto -webkit-overflow-scrolling-touch">
           {children}
           <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
             <XIcon />
@@ -108,7 +108,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left sticky top-0 bg-background z-10 p-6 pb-4", className)}
+      className={cn("flex flex-col gap-2 text-center sm:text-left sticky top-0 bg-background z-10 p-6 pb-4 border-b", className)}
       {...props}
     />
   );
@@ -119,7 +119,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sticky bottom-0 bg-background z-10 p-6 pt-4 border-t",
+        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sticky bottom-0 bg-background z-10 p-6 pt-4 border-t mt-auto",
         className,
       )}
       {...props}
