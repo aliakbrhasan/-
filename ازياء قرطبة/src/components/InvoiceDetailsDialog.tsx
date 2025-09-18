@@ -100,17 +100,9 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="w-[98vw] h-[98vh] max-w-none max-h-none overflow-hidden bg-[#F6E9CA] border-[#C69A72] p-0 m-2"
-        style={{
-          position: 'fixed',
-          top: '1vh',
-          left: '1vw',
-          right: '1vw',
-          bottom: '1vh',
-          transform: 'none',
-          margin: '0'
-        }}
+      <DialogContent
+        className="fixed inset-0 m-0 p-0 max-w-none max-h-none w-screen h-screen bg-[#F6E9CA] border-0 flex flex-col"
+        style={{ transform: 'none' }}
       >
         <DialogHeader className="p-4 pb-3 border-b border-[#C69A72]/30 flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -138,14 +130,10 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
           </div>
         </DialogHeader>
 
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0" style={{ height: 'calc(100% - 80px)' }}>
-          <div 
-            className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0 scrollbar-thin scrollbar-thumb-[#C69A72] scrollbar-track-transparent" 
-            style={{ 
-              maxHeight: 'calc(100vh - 160px)',
-              scrollbarWidth: 'thin',
-              scrollbarColor: '#C69A72 transparent'
-            }}
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+          <div
+            className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0 scrollbar-thin scrollbar-thumb-[#C69A72] scrollbar-track-transparent"
+            style={{ scrollbarWidth: 'thin', scrollbarColor: '#C69A72 transparent' }}
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 pb-4">
               {/* Left Column */}
