@@ -390,16 +390,6 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
                 <span className="meta-item">رقم الفاتورة: {invoice.id}</span>
                 <span className="meta-item">تاريخ الإصدار: {formatDate(invoice.receivedDate)}</span>
               </div>
-              <div className="header-summary">
-                <div className="summary-pill">
-                  <span className="pill-label">المبلغ الكلي</span>
-                  <span className="pill-value">{formatCurrency(invoice.total)}</span>
-                </div>
-                <div className="summary-pill accent">
-                  <span className="pill-label">المبلغ المتبقي</span>
-                  <span className="pill-value">{formatCurrency(remaining)}</span>
-                </div>
-              </div>
             </div>
           </header>
 

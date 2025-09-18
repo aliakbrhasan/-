@@ -87,6 +87,15 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
   const [sleeveEndQuickAddValue, setSleeveEndQuickAddValue] = useState('');
   const [sleeveEndQuickAddError, setSleeveEndQuickAddError] = useState('');
 
+  // Bunija (نوع البنيجة)
+  const [bunijaOptions] = useState<FabricOption[]>([
+    { id: 'single', label: 'بنايج' },
+    { id: 'half', label: 'نصف بنيجة' },
+    { id: 'double', label: 'بنيجتين' },
+  ]);
+  const [selectedBunijaOptions, setSelectedBunijaOptions] = useState<string[]>([]);
+  const [isBunijaPopoverOpen, setIsBunijaPopoverOpen] = useState(false);
+
   useEffect(() => {
     if (!isOpen) {
       setDeliveryDate('');
@@ -100,9 +109,11 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
       setSelectedCollarOptions([]);
       setSelectedChestStyleOptions([]);
       setSelectedSleeveEndOptions([]);
+      setSelectedBunijaOptions([]);
       setIsCollarPopoverOpen(false);
       setIsChestStylePopoverOpen(false);
       setIsSleeveEndPopoverOpen(false);
+      setIsBunijaPopoverOpen(false);
       setIsCollarManagerOpen(false);
       setIsChestStyleManagerOpen(false);
       setIsSleeveEndManagerOpen(false);
@@ -260,6 +271,14 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
   // Sleeve end helpers
   const toggleSleeveEndOption = (optionId: string) => {
     setSelectedSleeveEndOptions((previous) =>
+      previous.includes(optionId)
+        ? previous.filter((item) => item !== optionId)
+        : [...previous, optionId],
+    );
+  };
+
+  const toggleBunijaOption = (optionId: string) => {
+    setSelectedBunijaOptions((previous) =>
       previous.includes(optionId)
         ? previous.filter((item) => item !== optionId)
         : [...previous, optionId],
@@ -790,6 +809,51 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
                             تعديل الخيارات
                           </Button>
                         </div>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <Label className="text-[#13312A] arabic-text">نوع البنيجة</Label>
+                  <Popover open={isBunijaPopoverOpen} onOpenChange={setIsBunijaPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-between bg-white border-[#C69A72] text-[#155446] arabic-text',
+                          selectedBunijaOptions.length === 0 && 'text-muted-foreground',
+                        )}
+                      >
+                        <span className="flex-1 text-right truncate">
+                          {selectedBunijaOptions.length > 0
+                            ? bunijaOptions
+                                .filter((o) => selectedBunijaOptions.includes(o.id))
+                                .map((o) => o.label)
+                                .join('، ')
+                            : 'اختر نوع البنيجة'}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0 bg-[#F6E9CA] border-[#C69A72]">
+                      <Command className="arabic-text text-right">
+                        <CommandList className="text-right">
+                          {bunijaOptions.map((option) => {
+                            const isSelected = selectedBunijaOptions.includes(option.id);
+                            return (
+                              <CommandItem
+                                key={option.id}
+                                value={option.label}
+                                onSelect={() => toggleBunijaOption(option.id)}
+                                className="flex items-center justify-between gap-2"
+                              >
+                                <span className="flex-1 text-right">{option.label}</span>
+                                <Check className={cn('h-4 w-4 text-[#155446] transition-opacity', isSelected ? 'opacity-100' : 'opacity-0')} />
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandList>
                       </Command>
                     </PopoverContent>
                   </Popover>
