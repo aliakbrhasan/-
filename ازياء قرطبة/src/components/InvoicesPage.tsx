@@ -802,7 +802,8 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
           return (
             <Card 
               key={invoice.id} 
-              className="bg-white border-[#C69A72] shadow-sm rounded-xl hover:shadow-md transition-shadow"
+              className="bg-white border-[#C69A72] shadow-sm rounded-xl hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => handleViewDetails(invoice)}
             >
               <CardContent className="p-2">
                 <div className="flex items-stretch gap-2 min-h-[5rem]">
@@ -840,7 +841,7 @@ export function InvoicesPage({ onCreateInvoice }: InvoicesPageProps) {
                     </div>
 
                     {/* Action buttons - organized and clear */}
-                    <div className="mt-1 flex justify-end gap-1">
+                    <div className="mt-1 flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                       <Button
                         size="sm"
                         variant="ghost"
