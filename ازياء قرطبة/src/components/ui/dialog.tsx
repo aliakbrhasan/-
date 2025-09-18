@@ -22,22 +22,30 @@ function useBodyScrollLock(isLocked: boolean) {
 }
 
 function Dialog({
+  open: openProp,
+  defaultOpen,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  const [open, setOpen] = React.useState(props.open ?? false);
-  
-  // Use body scroll lock when dialog is open
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(
+    defaultOpen ?? false,
+  );
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : uncontrolledOpen;
+
   useBodyScrollLock(open);
-  
+
   return (
-    <DialogPrimitive.Root 
-      data-slot="dialog" 
+    <DialogPrimitive.Root
+      data-slot="dialog"
       open={open}
-      onOpenChange={(newOpen) => {
-        setOpen(newOpen);
-        props.onOpenChange?.(newOpen);
+      onOpenChange={(nextOpen) => {
+        if (!isControlled) {
+          setUncontrolledOpen(nextOpen);
+        }
+        onOpenChange?.(nextOpen);
       }}
-      {...props} 
+      {...props}
     />
   );
 }
@@ -68,11 +76,29 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
+        "fixed inset-0 z-[999] bg-slate-950/70 backdrop-blur data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
         className,
       )}
       {...props}
     />
+  );
+}
+
+function isElementOfType<
+  T extends
+    | typeof DialogHeader
+    | typeof DialogFooter,
+>(
+  child: React.ReactNode,
+  component: T,
+): child is React.ReactElement<React.ComponentProps<T>> {
+  return (
+    React.isValidElement(child) &&
+    (child.type === component ||
+      // Support for possible displayName overrides after bundling
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((child.type as any)?.displayName &&
+        (child.type as any)?.displayName === (component as unknown as { displayName?: string }).displayName))
   );
 }
 
@@ -81,25 +107,60 @@ function DialogContent({
   children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content>) {
+  const childArray = React.Children.toArray(children);
+  const headerElements: React.ReactElement[] = [];
+  const footerElements: React.ReactElement[] = [];
+  const bodyElements: React.ReactNode[] = [];
+
+  childArray.forEach((child) => {
+    if (isElementOfType(child, DialogHeader)) {
+      headerElements.push(child);
+      return;
+    }
+
+    if (isElementOfType(child, DialogFooter)) {
+      footerElements.push(child);
+      return;
+    }
+
+    bodyElements.push(child);
+  });
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
-      <DialogPrimitive.Content
-        data-slot="dialog-content"
-        className={cn(
-          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 min-h-[100dvh]",
-          className,
-        )}
-        {...props}
-      >
-        <div className="relative w-full sm:max-w-2xl bg-background rounded-t-2xl sm:rounded-2xl shadow-lg max-h-[100dvh] overflow-y-auto -webkit-overflow-scrolling-touch">
-          {children}
-          <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
-            <XIcon />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
+      <div className="fixed inset-0 z-[1000] overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+          <DialogPrimitive.Content
+            data-slot="dialog-content"
+            className={cn(
+              "relative flex max-h-[calc(100dvh-3rem)] w-full max-w-[min(100vw-2rem,90rem)] flex-col overflow-hidden rounded-2xl border border-border/60 bg-background text-foreground shadow-[0_20px_70px_rgba(15,23,42,0.35)] outline-none ring-1 ring-border/40 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-h-[calc(100dvh-4rem)]",
+              className,
+            )}
+            {...props}
+          >
+            <DialogPrimitive.Close className="ring-offset-background absolute top-4 ltr:right-4 rtl:left-4 inline-flex size-9 items-center justify-center rounded-full border border-border/60 bg-background/95 text-muted-foreground shadow-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+              <XIcon />
+              <span className="sr-only">Close</span>
+            </DialogPrimitive.Close>
+            <div className="flex min-h-0 flex-1 flex-col">
+              {headerElements.map((element) =>
+                React.cloneElement(element, {
+                  className: cn("flex-shrink-0", element.props.className),
+                }),
+              )}
+              <div className="scrollbar-thin flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
+                {bodyElements}
+              </div>
+              {footerElements.map((element) =>
+                React.cloneElement(element, {
+                  className: cn("flex-shrink-0", element.props.className),
+                }),
+              )}
+            </div>
+          </DialogPrimitive.Content>
         </div>
-      </DialogPrimitive.Content>
+      </div>
     </DialogPortal>
   );
 }
@@ -108,24 +169,31 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left sticky top-0 bg-background z-10 p-6 pb-4 border-b", className)}
-      {...props}
-    />
-  );
-}
-
-function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sticky bottom-0 bg-background z-10 p-6 pt-4 border-t mt-auto",
+        "sticky top-0 z-10 flex flex-col gap-2 border-b border-border/60 bg-gradient-to-b from-background/92 via-background/95 to-background/98 p-6 pb-4 text-center shadow-[0_10px_30px_-20px_rgba(15,23,42,0.75)] sm:text-left",
         className,
       )}
       {...props}
     />
   );
 }
+
+DialogHeader.displayName = "DialogHeader";
+
+function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="dialog-footer"
+      className={cn(
+        "sticky bottom-0 mt-auto z-10 flex flex-col-reverse gap-2 border-t border-border/60 bg-gradient-to-t from-background/92 via-background/95 to-background/98 p-6 pt-4 shadow-[0_-10px_30px_-20px_rgba(15,23,42,0.65)] sm:flex-row sm:justify-end",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+DialogFooter.displayName = "DialogFooter";
 
 function DialogTitle({
   className,
