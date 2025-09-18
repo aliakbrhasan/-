@@ -100,19 +100,7 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="fixed inset-0 m-0 p-0 max-w-none max-h-none w-screen h-screen bg-[#F6E9CA] border-0 flex flex-col"
-        style={{
-          transform: 'none',
-          inset: 0,
-          width: '100vw',
-          minWidth: '100vw',
-          height: '100dvh',
-          minHeight: '100vh',
-          maxWidth: '100vw',
-          maxHeight: '100dvh',
-        }}
-      >
+      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] max-h-[90vh] bg-[#F6E9CA] border-[#C69A72] p-0 flex flex-col">
         <DialogHeader className="p-4 pb-3 border-b border-[#C69A72]/30 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
@@ -139,50 +127,61 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
           </div>
         </DialogHeader>
 
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-          <div
-            className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0 scrollbar-thin scrollbar-thumb-[#C69A72] scrollbar-track-transparent"
-            style={{ scrollbarWidth: 'thin', scrollbarColor: '#C69A72 transparent' }}
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 pb-4">
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-4">
+            {/* Header Info */}
+            <div className="bg-white rounded-lg border border-[#C69A72] p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="text-center sm:text-right">
+                  <h2 className="text-2xl font-bold text-[#13312A] arabic-text">{invoice.customerName}</h2>
+                  <p className="text-[#155446] arabic-text">رقم الفاتورة: {invoice.id}</p>
+                </div>
+                <div className="flex items-center justify-center gap-4">
+                  <Badge className={`${getStatusColor(invoice.status)} text-sm px-3 py-1`}>
+                    {invoice.status}
+                  </Badge>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-[#13312A]">{formatCurrency(invoice.total)}</p>
+                    <p className="text-sm text-[#155446] arabic-text">المبلغ الكلي</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Left Column */}
-              <div className="space-y-4 md:space-y-6">
+              <div className="space-y-4">
                 {/* Customer Information */}
                 <Card className="bg-white border-[#C69A72]">
-                  <CardHeader className="p-3 md:p-6">
-                    <CardTitle className="text-[#13312A] arabic-text text-base md:text-lg flex items-center gap-2">
-                      <User className="h-4 w-4 md:h-5 md:w-5" />
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-[#13312A] arabic-text text-lg flex items-center gap-2">
+                      <User className="h-5 w-5" />
                       بيانات الزبون
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-3 md:p-6 pt-0 space-y-3 md:space-y-4">
-                    <div className="space-y-1 md:space-y-2">
-                      <div className="flex items-center gap-2 text-[#155446] arabic-text">
-                        <User className="h-3 w-3 md:h-4 md:w-4" />
-                        <span className="text-xs md:text-sm font-medium">الاسم</span>
+                  <CardContent className="p-4 pt-0 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <User className="h-4 w-4 text-[#155446]" />
+                      <div>
+                        <p className="text-sm text-[#155446] arabic-text">الاسم</p>
+                        <p className="text-lg font-semibold text-[#13312A] arabic-text">{invoice.customerName}</p>
                       </div>
-                      <p className="text-[#13312A] arabic-text text-base md:text-lg font-semibold">
-                        {invoice.customerName}
-                      </p>
                     </div>
-                    <div className="space-y-1 md:space-y-2">
-                      <div className="flex items-center gap-2 text-[#155446] arabic-text">
-                        <Phone className="h-3 w-3 md:h-4 md:w-4" />
-                        <span className="text-xs md:text-sm font-medium">الهاتف</span>
+                    <div className="flex items-center gap-3">
+                      <Phone className="h-4 w-4 text-[#155446]" />
+                      <div>
+                        <p className="text-sm text-[#155446] arabic-text">الهاتف</p>
+                        <p className="text-lg font-semibold text-[#13312A]">{invoice.phone}</p>
                       </div>
-                      <p className="text-[#13312A] text-base md:text-lg font-semibold">
-                        {invoice.phone}
-                      </p>
                     </div>
                     {invoice.address && (
-                      <div className="space-y-1 md:space-y-2">
-                        <div className="flex items-center gap-2 text-[#155446] arabic-text">
-                          <MapPin className="h-3 w-3 md:h-4 md:w-4" />
-                          <span className="text-xs md:text-sm font-medium">العنوان</span>
+                      <div className="flex items-center gap-3">
+                        <MapPin className="h-4 w-4 text-[#155446]" />
+                        <div>
+                          <p className="text-sm text-[#155446] arabic-text">العنوان</p>
+                          <p className="text-lg font-semibold text-[#13312A] arabic-text">{invoice.address}</p>
                         </div>
-                        <p className="text-[#13312A] arabic-text text-base md:text-lg font-semibold">
-                          {invoice.address}
-                        </p>
                       </div>
                     )}
                   </CardContent>
@@ -191,36 +190,36 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
                 {/* Measurements */}
                 {invoice.measurements && (
                   <Card className="bg-white border-[#C69A72]">
-                    <CardHeader className="p-3 md:p-6">
-                      <CardTitle className="text-[#13312A] arabic-text text-base md:text-lg flex items-center gap-2">
-                        <Ruler className="h-4 w-4 md:h-5 md:w-5" />
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-[#13312A] arabic-text text-lg flex items-center gap-2">
+                        <Ruler className="h-5 w-5" />
                         القياسات
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 md:p-6 pt-0">
-                      <div className="grid grid-cols-2 gap-2 md:gap-4">
+                    <CardContent className="p-4 pt-0">
+                      <div className="grid grid-cols-2 gap-3">
                         {invoice.measurements.length && (
-                          <div className="text-center p-2 md:p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
-                            <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium mb-1">الطول</div>
-                            <div className="text-[#13312A] text-base md:text-xl font-bold">{invoice.measurements.length} سم</div>
+                          <div className="text-center p-3 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
+                            <div className="text-[#155446] arabic-text text-sm font-medium mb-1">الطول</div>
+                            <div className="text-[#13312A] text-xl font-bold">{invoice.measurements.length} سم</div>
                           </div>
                         )}
                         {invoice.measurements.shoulder && (
-                          <div className="text-center p-2 md:p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
-                            <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium mb-1">الكتف</div>
-                            <div className="text-[#13312A] text-base md:text-xl font-bold">{invoice.measurements.shoulder} سم</div>
+                          <div className="text-center p-3 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
+                            <div className="text-[#155446] arabic-text text-sm font-medium mb-1">الكتف</div>
+                            <div className="text-[#13312A] text-xl font-bold">{invoice.measurements.shoulder} سم</div>
                           </div>
                         )}
                         {invoice.measurements.waist && (
-                          <div className="text-center p-2 md:p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
-                            <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium mb-1">الخصر</div>
-                            <div className="text-[#13312A] text-base md:text-xl font-bold">{invoice.measurements.waist} سم</div>
+                          <div className="text-center p-3 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
+                            <div className="text-[#155446] arabic-text text-sm font-medium mb-1">الخصر</div>
+                            <div className="text-[#13312A] text-xl font-bold">{invoice.measurements.waist} سم</div>
                           </div>
                         )}
                         {invoice.measurements.chest && (
-                          <div className="text-center p-2 md:p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
-                            <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium mb-1">الصدر</div>
-                            <div className="text-[#13312A] text-base md:text-xl font-bold">{invoice.measurements.chest} سم</div>
+                          <div className="text-center p-3 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
+                            <div className="text-[#155446] arabic-text text-sm font-medium mb-1">الصدر</div>
+                            <div className="text-[#13312A] text-xl font-bold">{invoice.measurements.chest} سم</div>
                           </div>
                         )}
                       </div>
@@ -231,23 +230,23 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
               </div>
 
               {/* Right Column */}
-              <div className="space-y-4 md:space-y-6">
+              <div className="space-y-4">
                 {/* Design Details */}
                 {invoice.designDetails && (
                   <Card className="bg-white border-[#C69A72]">
-                    <CardHeader className="p-3 md:p-6">
-                      <CardTitle className="text-[#13312A] arabic-text text-base md:text-lg flex items-center gap-2">
-                        <Scissors className="h-4 w-4 md:h-5 md:w-5" />
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-[#13312A] arabic-text text-lg flex items-center gap-2">
+                        <Scissors className="h-5 w-5" />
                         تفاصيل التصميم
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 md:p-6 pt-0 space-y-3 md:space-y-4">
+                    <CardContent className="p-4 pt-0 space-y-3">
                       {invoice.designDetails.fabricType && invoice.designDetails.fabricType.length > 0 && (
-                        <div className="space-y-1 md:space-y-2">
-                          <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium">نوع القماش</div>
-                          <div className="flex flex-wrap gap-1 md:gap-2">
+                        <div>
+                          <div className="text-[#155446] arabic-text text-sm font-medium mb-2">نوع القماش</div>
+                          <div className="flex flex-wrap gap-2">
                             {invoice.designDetails.fabricType.map((type, index) => (
-                              <Badge key={index} variant="secondary" className="bg-[#F6E9CA] text-[#13312A] border-[#C69A72] text-xs">
+                              <Badge key={index} variant="secondary" className="bg-[#F6E9CA] text-[#13312A] border-[#C69A72]">
                                 {type}
                               </Badge>
                             ))}
@@ -255,11 +254,11 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
                         </div>
                       )}
                       {invoice.designDetails.fabricSource && invoice.designDetails.fabricSource.length > 0 && (
-                        <div className="space-y-1 md:space-y-2">
-                          <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium">مصدر القماش</div>
-                          <div className="flex flex-wrap gap-1 md:gap-2">
+                        <div>
+                          <div className="text-[#155446] arabic-text text-sm font-medium mb-2">مصدر القماش</div>
+                          <div className="flex flex-wrap gap-2">
                             {invoice.designDetails.fabricSource.map((source, index) => (
-                              <Badge key={index} variant="secondary" className="bg-[#F6E9CA] text-[#13312A] border-[#C69A72] text-xs">
+                              <Badge key={index} variant="secondary" className="bg-[#F6E9CA] text-[#13312A] border-[#C69A72]">
                                 {source}
                               </Badge>
                             ))}
@@ -267,11 +266,11 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
                         </div>
                       )}
                       {invoice.designDetails.collarType && invoice.designDetails.collarType.length > 0 && (
-                        <div className="space-y-1 md:space-y-2">
-                          <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium">نوع الياقة</div>
-                          <div className="flex flex-wrap gap-1 md:gap-2">
+                        <div>
+                          <div className="text-[#155446] arabic-text text-sm font-medium mb-2">نوع الياقة</div>
+                          <div className="flex flex-wrap gap-2">
                             {invoice.designDetails.collarType.map((type, index) => (
-                              <Badge key={index} variant="secondary" className="bg-[#F6E9CA] text-[#13312A] border-[#C69A72] text-xs">
+                              <Badge key={index} variant="secondary" className="bg-[#F6E9CA] text-[#13312A] border-[#C69A72]">
                                 {type}
                               </Badge>
                             ))}
@@ -279,11 +278,11 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
                         </div>
                       )}
                       {invoice.designDetails.chestStyle && invoice.designDetails.chestStyle.length > 0 && (
-                        <div className="space-y-1 md:space-y-2">
-                          <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium">أسلوب الصدر</div>
-                          <div className="flex flex-wrap gap-1 md:gap-2">
+                        <div>
+                          <div className="text-[#155446] arabic-text text-sm font-medium mb-2">أسلوب الصدر</div>
+                          <div className="flex flex-wrap gap-2">
                             {invoice.designDetails.chestStyle.map((style, index) => (
-                              <Badge key={index} variant="secondary" className="bg-[#F6E9CA] text-[#13312A] border-[#C69A72] text-xs">
+                              <Badge key={index} variant="secondary" className="bg-[#F6E9CA] text-[#13312A] border-[#C69A72]">
                                 {style}
                               </Badge>
                             ))}
@@ -291,11 +290,11 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
                         </div>
                       )}
                       {invoice.designDetails.sleeveEnd && invoice.designDetails.sleeveEnd.length > 0 && (
-                        <div className="space-y-1 md:space-y-2">
-                          <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium">نهاية الكم</div>
-                          <div className="flex flex-wrap gap-1 md:gap-2">
+                        <div>
+                          <div className="text-[#155446] arabic-text text-sm font-medium mb-2">نهاية الكم</div>
+                          <div className="flex flex-wrap gap-2">
                             {invoice.designDetails.sleeveEnd.map((end, index) => (
-                              <Badge key={index} variant="secondary" className="bg-[#F6E9CA] text-[#13312A] border-[#C69A72] text-xs">
+                              <Badge key={index} variant="secondary" className="bg-[#F6E9CA] text-[#13312A] border-[#C69A72]">
                                 {end}
                               </Badge>
                             ))}
@@ -308,25 +307,25 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
 
                 {/* Financial Information */}
                 <Card className="bg-white border-[#C69A72]">
-                  <CardHeader className="p-3 md:p-6">
-                    <CardTitle className="text-[#13312A] arabic-text text-base md:text-lg flex items-center gap-2">
-                      <CreditCard className="h-4 w-4 md:h-5 md:w-5" />
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-[#13312A] arabic-text text-lg flex items-center gap-2">
+                      <CreditCard className="h-5 w-5" />
                       المعلومات المالية
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-3 md:p-6 pt-0">
-                    <div className="space-y-2 md:space-y-4">
-                      <div className="text-center p-2 md:p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
-                        <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium mb-1 md:mb-2">المبلغ الكلي</div>
-                        <div className="text-[#13312A] text-lg md:text-2xl font-bold">{formatCurrency(invoice.total)}</div>
+                  <CardContent className="p-4 pt-0">
+                    <div className="space-y-3">
+                      <div className="text-center p-3 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
+                        <div className="text-[#155446] arabic-text text-sm font-medium mb-1">المبلغ الكلي</div>
+                        <div className="text-[#13312A] text-2xl font-bold">{formatCurrency(invoice.total)}</div>
                       </div>
-                      <div className="text-center p-2 md:p-4 bg-green-50 rounded-lg border border-green-200">
-                        <div className="text-green-700 arabic-text text-xs md:text-sm font-medium mb-1 md:mb-2">المبلغ المدفوع</div>
-                        <div className="text-green-800 text-lg md:text-2xl font-bold">{formatCurrency(invoice.paid)}</div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div className="text-green-700 arabic-text text-sm font-medium mb-1">المبلغ المدفوع</div>
+                        <div className="text-green-800 text-2xl font-bold">{formatCurrency(invoice.paid)}</div>
                       </div>
-                      <div className="text-center p-2 md:p-4 bg-orange-50 rounded-lg border border-orange-200">
-                        <div className="text-orange-700 arabic-text text-xs md:text-sm font-medium mb-1 md:mb-2">المبلغ المتبقي</div>
-                        <div className="text-orange-800 text-lg md:text-2xl font-bold">{formatCurrency(remaining)}</div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                        <div className="text-orange-700 arabic-text text-sm font-medium mb-1">المبلغ المتبقي</div>
+                        <div className="text-orange-800 text-2xl font-bold">{formatCurrency(remaining)}</div>
                       </div>
                     </div>
                   </CardContent>
@@ -334,21 +333,21 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
 
                 {/* Dates */}
                 <Card className="bg-white border-[#C69A72]">
-                  <CardHeader className="p-3 md:p-6">
-                    <CardTitle className="text-[#13312A] arabic-text text-base md:text-lg flex items-center gap-2">
-                      <Calendar className="h-4 w-4 md:h-5 md:w-5" />
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-[#13312A] arabic-text text-lg flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
                       التواريخ
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-3 md:p-6 pt-0">
-                    <div className="space-y-2 md:space-y-4">
-                      <div className="text-center p-2 md:p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
-                        <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium mb-1 md:mb-2">تاريخ الاستلام</div>
-                        <div className="text-[#13312A] text-sm md:text-lg font-semibold">{formatDate(invoice.receivedDate)}</div>
+                  <CardContent className="p-4 pt-0">
+                    <div className="space-y-3">
+                      <div className="text-center p-3 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
+                        <div className="text-[#155446] arabic-text text-sm font-medium mb-1">تاريخ الاستلام</div>
+                        <div className="text-[#13312A] text-lg font-semibold">{formatDate(invoice.receivedDate)}</div>
                       </div>
-                      <div className="text-center p-2 md:p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
-                        <div className="text-[#155446] arabic-text text-xs md:text-sm font-medium mb-1 md:mb-2">تاريخ التسليم</div>
-                        <div className="text-[#13312A] text-sm md:text-lg font-semibold">{formatDate(invoice.deliveryDate)}</div>
+                      <div className="text-center p-3 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
+                        <div className="text-[#155446] arabic-text text-sm font-medium mb-1">تاريخ التسليم</div>
+                        <div className="text-[#13312A] text-lg font-semibold">{formatDate(invoice.deliveryDate)}</div>
                       </div>
                     </div>
                   </CardContent>
@@ -357,15 +356,15 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
                 {/* Notes */}
                 {invoice.notes && (
                   <Card className="bg-white border-[#C69A72]">
-                    <CardHeader className="p-3 md:p-6">
-                      <CardTitle className="text-[#13312A] arabic-text text-base md:text-lg flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4 md:h-5 md:w-5" />
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-[#13312A] arabic-text text-lg flex items-center gap-2">
+                        <MessageCircle className="h-5 w-5" />
                         الملاحظات
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 md:p-6 pt-0">
-                      <div className="p-2 md:p-4 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
-                        <p className="text-[#13312A] arabic-text text-sm md:text-lg leading-relaxed">
+                    <CardContent className="p-4 pt-0">
+                      <div className="p-3 bg-[#F6E9CA] rounded-lg border border-[#C69A72]/30">
+                        <p className="text-[#13312A] arabic-text text-base leading-relaxed">
                           {invoice.notes}
                         </p>
                       </div>
@@ -376,18 +375,18 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
                 {/* Fabric Image */}
                 {invoice.fabricImage && (
                   <Card className="bg-white border-[#C69A72]">
-                    <CardHeader className="p-3 md:p-6">
-                      <CardTitle className="text-[#13312A] arabic-text text-base md:text-lg flex items-center gap-2">
-                        <FileImage className="h-4 w-4 md:h-5 md:w-5" />
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-[#13312A] arabic-text text-lg flex items-center gap-2">
+                        <FileImage className="h-5 w-5" />
                         صورة القماش
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 md:p-6 pt-0">
+                    <CardContent className="p-4 pt-0">
                       <div className="flex justify-center">
                         <img
                           src={invoice.fabricImage}
                           alt="صورة القماش"
-                          className="max-w-full h-auto max-h-48 md:max-h-64 rounded-lg border border-[#C69A72]/30 shadow-md"
+                          className="max-w-full h-auto max-h-64 rounded-lg border border-[#C69A72]/30 shadow-md"
                         />
                       </div>
                     </CardContent>
@@ -397,43 +396,39 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
             </div>
           </div>
 
-          {/* Fixed Action Buttons */}
-          <div className="flex-shrink-0 bg-[#F6E9CA] border-t border-[#C69A72]/30 p-3 md:p-4" style={{ position: 'sticky', bottom: 0, zIndex: 10 }}>
-            <div className="flex flex-wrap gap-2 md:gap-3 justify-center">
+          {/* Action Buttons */}
+          <div className="bg-[#F6E9CA] border-t border-[#C69A72]/30 p-4">
+            <div className="flex flex-wrap gap-3 justify-center">
               <Button
                 onClick={handlePrint}
-                className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] flex items-center gap-1 md:gap-2 text-xs md:text-sm"
+                className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] flex items-center gap-2"
               >
-                <Printer className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">طباعة</span>
-                <span className="sm:hidden">طب</span>
+                <Printer className="h-4 w-4" />
+                طباعة
               </Button>
               <Button
                 onClick={handleShare}
                 variant="outline"
-                className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] flex items-center gap-1 md:gap-2 text-xs md:text-sm"
+                className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] flex items-center gap-2"
               >
-                <Share2 className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">مشاركة</span>
-                <span className="sm:hidden">شارك</span>
+                <Share2 className="h-4 w-4" />
+                مشاركة
               </Button>
               <Button
                 onClick={handleSaveAsPDF}
                 variant="outline"
-                className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] flex items-center gap-1 md:gap-2 text-xs md:text-sm"
+                className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] flex items-center gap-2"
               >
-                <Download className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">حفظ PDF</span>
-                <span className="sm:hidden">PDF</span>
+                <Download className="h-4 w-4" />
+                حفظ PDF
               </Button>
               <Button
                 onClick={handleSaveAsImage}
                 variant="outline"
-                className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] flex items-center gap-1 md:gap-2 text-xs md:text-sm"
+                className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] flex items-center gap-2"
               >
-                <FileImage className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">حفظ صورة</span>
-                <span className="sm:hidden">صورة</span>
+                <FileImage className="h-4 w-4" />
+                حفظ صورة
               </Button>
             </div>
           </div>
