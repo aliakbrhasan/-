@@ -68,7 +68,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[999] bg-black/70 backdrop-blur-sm",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[999] bg-slate-950/80 backdrop-blur-[6px]",
         className,
       )}
       {...props}
@@ -91,7 +91,7 @@ function DialogContent({
           <DialogPrimitive.Content
             data-slot="dialog-content"
             className={cn(
-              "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 relative flex max-h-[calc(100dvh-3rem)] w-full max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-border/80 bg-background shadow-[0_32px_80px_-32px_rgba(15,23,42,0.65)] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:max-h-[calc(100dvh-4rem)] sm:max-w-4xl lg:max-w-5xl",
+              "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 relative flex max-h-[calc(100dvh-3rem)] w-full max-w-[min(100vw-2rem,90rem)] flex-col overflow-hidden rounded-[2rem] border border-border/70 bg-gradient-to-br from-background/98 via-background to-background/95 shadow-[0_40px_120px_-30px_rgba(15,23,42,0.75),0_20px_60px_-25px_rgba(15,23,42,0.6)] backdrop-blur-sm outline-none ring-1 ring-border/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:max-h-[calc(100dvh-4rem)]",
               className,
             )}
             {...props}
@@ -114,7 +114,10 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left sticky top-0 bg-background z-10 p-6 pb-4 border-b", className)}
+      className={cn(
+        "sticky top-0 z-10 flex flex-col gap-2 border-b border-border/60 bg-gradient-to-b from-background/92 via-background/95 to-background/98 p-6 pb-4 text-center shadow-[0_10px_30px_-20px_rgba(15,23,42,0.75)] sm:text-left",
+        className,
+      )}
       {...props}
     />
   );
@@ -125,7 +128,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sticky bottom-0 bg-background z-10 p-6 pt-4 border-t mt-auto",
+        "sticky bottom-0 mt-auto z-10 flex flex-col-reverse gap-2 border-t border-border/60 bg-gradient-to-t from-background/92 via-background/95 to-background/98 p-6 pt-4 shadow-[0_-10px_30px_-20px_rgba(15,23,42,0.65)] sm:flex-row sm:justify-end",
         className,
       )}
       {...props}
