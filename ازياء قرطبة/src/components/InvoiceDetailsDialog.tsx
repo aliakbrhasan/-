@@ -102,7 +102,16 @@ export function InvoiceDetailsDialog({ isOpen, onOpenChange, invoice }: InvoiceD
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         className="fixed inset-0 m-0 p-0 max-w-none max-h-none w-screen h-screen bg-[#F6E9CA] border-0 flex flex-col"
-        style={{ transform: 'none' }}
+        style={{
+          transform: 'none',
+          inset: 0,
+          width: '100vw',
+          minWidth: '100vw',
+          height: '100dvh',
+          minHeight: '100vh',
+          maxWidth: '100vw',
+          maxHeight: '100dvh',
+        }}
       >
         <DialogHeader className="p-4 pb-3 border-b border-[#C69A72]/30 flex-shrink-0">
           <div className="flex items-center justify-between">
