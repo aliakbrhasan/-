@@ -10,6 +10,7 @@ export interface PrintableInvoiceData {
   receivedDate: string;
   deliveryDate: string;
   notes?: string;
+  employeeSignature?: string;
 }
 
 export const formatCurrency = (value: number) =>
@@ -27,17 +28,29 @@ export const formatDate = (value: string) =>
   }).format(new Date(value));
 
 export const receiptStyles = `
+  :root {
+    --print-primary: var(--primary, #155446);
+    --print-secondary: var(--secondary, #C69A72);
+    --print-secondary-soft: var(--secondary-soft, rgba(198, 154, 114, 0.18));
+    --print-surface: var(--surface, #FDFBF7);
+    --print-surface-alt: var(--surface-alt, #F6E9CA);
+    --print-text: var(--text, #13312A);
+    --print-muted: var(--muted, rgba(19, 49, 42, 0.7));
+  }
+
   @page {
     size: A7 landscape;
-    margin: 0.5cm;
+    margin: 0.6cm;
   }
 
   body {
     margin: 0;
-    background: #f3ede0;
-    font-family: 'Tajawal', 'Noto Kufi Arabic', sans-serif;
+    background: var(--print-surface-alt);
+    font-family: 'Cairo', 'Tajawal', 'Noto Kufi Arabic', sans-serif;
     direction: rtl;
-    color: #13312A;
+    color: var(--print-text);
+    font-size: 12px;
+    line-height: 1.45;
   }
 
   * {
@@ -46,324 +59,249 @@ export const receiptStyles = `
 
   .receipt-wrapper {
     width: 100%;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
-    padding: 0.2cm 0;
+    align-items: center;
+    padding: 0.8rem;
   }
 
   .receipt-container {
     width: 100%;
-    max-width: calc(10.5cm - 1cm);
-    height: calc(7.4cm - 1cm);
-    background: #FDFBF7;
-    border: 2px solid #C69A72;
+    max-width: calc(10.5cm - 1.2cm);
+    min-height: calc(7.4cm - 1.2cm);
+    background: var(--print-surface);
+    border: 1px solid var(--print-secondary);
     border-radius: 12px;
-    padding: 10px 12px;
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    box-shadow: 0 12px 28px rgba(19, 49, 42, 0.12);
-    position: relative;
-    overflow: hidden;
+    gap: 12px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
     page-break-inside: avoid;
   }
 
-  .receipt-container::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(198, 154, 114, 0.12), rgba(21, 84, 70, 0.08));
-    pointer-events: none;
-  }
-
   .receipt-inner {
-    position: relative;
-    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     height: 100%;
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: 10px;
   }
 
   .receipt-header {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    align-items: start;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
   }
 
-  .brand {
+  .brand-block {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
   }
 
   .brand-name {
-    font-size: 16px;
-    font-weight: 700;
-    color: #13312A;
-    letter-spacing: 0.5px;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--print-primary);
+    letter-spacing: 0.3px;
   }
 
   .brand-tagline {
     font-size: 10px;
-    color: #155446;
+    color: var(--print-muted);
   }
 
   .header-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: stretch;
-  }
-
-  .invoice-meta {
-    background: rgba(246, 233, 202, 0.9);
-    border: 1px solid rgba(198, 154, 114, 0.6);
-    border-radius: 10px;
-    padding: 6px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .meta-item {
-    font-size: 10px;
-    color: #13312A;
-  }
-
-  .header-summary {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
+    background: var(--print-secondary-soft);
+    border: 1px solid var(--print-secondary);
+    border-radius: 9px;
+    padding: 8px 12px;
   }
 
-  .summary-pill {
-    border-radius: 10px;
-    border: 1px solid rgba(198, 154, 114, 0.45);
-    background: rgba(246, 233, 202, 0.55);
-    padding: 6px 8px;
+  .meta-row {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+    font-size: 11px;
   }
 
-  .summary-pill.accent {
-    background: linear-gradient(135deg, rgba(21, 84, 70, 0.92), rgba(19, 49, 42, 0.85));
-    border-color: rgba(21, 84, 70, 0.55);
+  .meta-label {
+    color: var(--print-muted);
+    font-weight: 600;
   }
 
-  .pill-label {
-    font-size: 9px;
-    color: #155446;
-  }
-
-  .pill-value {
-    font-size: 12px;
+  .meta-value {
+    color: var(--print-text);
     font-weight: 700;
-    color: #13312A;
-  }
-
-  .summary-pill.accent .pill-label {
-    color: rgba(253, 251, 247, 0.82);
-  }
-
-  .summary-pill.accent .pill-value {
-    color: #F6E9CA;
   }
 
   .content-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      'customer amounts'
-      'dates amounts';
-    gap: 8px 10px;
-    align-content: stretch;
+    grid-template-columns: 1fr 1.1fr 0.9fr;
+    gap: 10px;
     align-items: stretch;
-    min-height: 0;
   }
 
-  .customer-section {
-    grid-area: customer;
-  }
-
-  .amounts-section {
-    grid-area: amounts;
-  }
-
-  .dates-section {
-    grid-area: dates;
-  }
-
-  /* notes section removed for A7 compact layout */
-
-  .section {
+  .card {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    min-height: 0;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 9px;
+    border: 1px solid var(--print-secondary-soft);
+    background: var(--print-surface);
+    break-inside: avoid;
   }
 
-  .section-title {
+  .card-title {
     font-size: 12px;
-    font-weight: 600;
-    color: #155446;
+    font-weight: 700;
+    color: var(--print-primary);
   }
 
-  .info-grid {
+  .info-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 10px;
+    gap: 6px;
   }
 
-  .info-item {
+  .info-line {
     display: flex;
-    flex-direction: column;
-    gap: 3px;
-    background: rgba(246, 233, 202, 0.55);
-    border: 1px solid rgba(198, 154, 114, 0.4);
-    border-radius: 10px;
-    padding: 6px 8px;
-    min-height: 46px;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    font-size: 11px;
   }
 
   .info-label {
-    font-size: 10px;
-    color: #155446;
+    color: var(--print-muted);
+    font-weight: 500;
   }
 
   .info-value {
-    font-size: 12px;
     font-weight: 600;
+    color: var(--print-text);
     word-break: break-word;
+  }
+
+  .amounts-card {
+    background: linear-gradient(135deg, rgba(21, 84, 70, 0.08), rgba(246, 233, 202, 0.3));
+    border-color: rgba(21, 84, 70, 0.2);
   }
 
   .amounts-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
   }
 
-  .amount-card {
-    padding: 8px;
-    border-radius: 12px;
-    border: 1px solid rgba(198, 154, 114, 0.45);
-    background: white;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  .amount-row {
     display: flex;
-    flex-direction: column;
-    gap: 3px;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: baseline;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(21, 84, 70, 0.1);
   }
 
-  .amount-card.highlight {
-    background: rgba(21, 84, 70, 0.08);
-    border-color: rgba(21, 84, 70, 0.35);
+  .amount-row.highlight {
+    background: rgba(21, 84, 70, 0.12);
+    border-color: rgba(21, 84, 70, 0.25);
   }
 
   .amount-label {
-    font-size: 10px;
-    color: #155446;
+    font-size: 11px;
+    color: var(--print-muted);
   }
 
   .amount-value {
-    font-size: 13px;
-    font-weight: 700;
-    color: #13312A;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--print-text);
   }
 
-  .dates-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-  }
-
-  .note-box {
-    min-height: 0;
-    height: 100%;
+  .notes-box {
     flex: 1;
-    border: 1.5px dashed rgba(198, 154, 114, 0.65);
-    border-radius: 12px;
-    padding: 8px 10px;
-    background: rgba(246, 233, 202, 0.35);
     font-size: 10px;
-    line-height: 1.4;
-    color: #13312A;
+    line-height: 1.5;
+    color: var(--print-text);
+    background: rgba(246, 233, 202, 0.35);
+    border: 1px dashed var(--print-secondary);
+    border-radius: 9px;
+    padding: 8px;
     display: flex;
     align-items: flex-start;
-    word-break: break-word;
-    overflow: hidden;
+    justify-content: flex-start;
+  }
+
+  .notes-placeholder {
+    color: rgba(19, 49, 42, 0.5);
   }
 
   .receipt-footer {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    gap: 8px;
-    font-size: 9px;
-    color: #155446;
-    padding-top: 6px;
-    border-top: 1px solid rgba(198, 154, 114, 0.45);
-    margin-top: auto;
-    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--print-secondary);
+    font-size: 10px;
+    color: var(--print-muted);
   }
 
-  .signature-box {
-    min-width: 100px;
-    border-top: 1.5px solid rgba(198, 154, 114, 0.9);
-    padding-top: 6px;
+  .signature {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 120px;
+  }
+
+  .signature-line {
+    border-top: 1px solid var(--print-secondary);
+    padding-top: 4px;
     text-align: center;
+    color: var(--print-text);
+    font-size: 11px;
+    font-weight: 600;
+    min-height: 16px;
   }
 
   @media screen and (max-width: 900px) {
+    .receipt-wrapper {
+      min-height: auto;
+      padding: 1rem 0.5rem;
+    }
+
     .receipt-container {
-      height: auto;
       max-width: 100%;
     }
 
     .content-grid {
       grid-template-columns: 1fr;
-      grid-template-rows: none;
-      grid-template-areas: none;
-      gap: 10px;
-    }
-
-    .customer-section,
-    .amounts-section,
-    .dates-section,
-    .notes-section {
-      grid-column: 1 / -1;
-      grid-row: auto;
-      align-self: stretch;
-    }
-
-    .info-grid,
-    .amounts-grid,
-    .dates-grid {
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    }
-
-    .note-box {
-      height: auto;
-      min-height: 90px;
     }
   }
 
   @media print {
     body {
-      background: white;
+      background: transparent;
     }
 
     .receipt-wrapper {
+      min-height: auto;
       padding: 0;
     }
 
     .receipt-container {
-      margin: 0 auto;
-      width: calc(10.5cm - 1cm);
-      height: calc(7.4cm - 1cm);
       box-shadow: none;
+    }
+
+    .no-print {
+      display: none !important;
     }
   }
 `;
@@ -374,77 +312,97 @@ interface PrintableInvoiceProps {
 
 export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) => {
   const remaining = Math.max(invoice.total - invoice.paid, 0);
+  const signature = invoice.employeeSignature?.trim();
 
   return (
     <div className="receipt-wrapper">
       <div className="receipt-container">
         <div className="receipt-inner">
           <header className="receipt-header">
-            <div className="brand">
+            <div className="brand-block">
               <span className="brand-name">أزياء قرطبة</span>
-              <span className="brand-tagline">وصل فاتورة - نموذج داخلي</span>
+              <span className="brand-tagline">نموذج فاتورة داخلي</span>
             </div>
             <div className="header-meta">
-              <div className="invoice-meta">
-                <span className="meta-item">رقم الفاتورة: {invoice.id}</span>
-                <span className="meta-item">تاريخ الإصدار: {formatDate(invoice.receivedDate)}</span>
+              <div className="meta-row">
+                <span className="meta-label">رقم الفاتورة</span>
+                {/* رقم_الفاتورة */}
+                <span className="meta-value" data-field="رقم_الفاتورة">{invoice.id}</span>
+              </div>
+              <div className="meta-row">
+                <span className="meta-label">تاريخ الإصدار</span>
+                {/* تاريخ_الإصدار */}
+                <span className="meta-value" data-field="تاريخ_الإصدار">{formatDate(invoice.receivedDate)}</span>
               </div>
             </div>
           </header>
 
           <div className="content-grid">
-            <section className="section customer-section">
-              <h2 className="section-title">بيانات الزبون</h2>
-              <div className="info-grid">
-                <div className="info-item">
+            <section className="card">
+              <h2 className="card-title">بيانات الزبون</h2>
+              <div className="info-list">
+                <div className="info-line">
                   <span className="info-label">اسم الزبون</span>
-                  <span className="info-value">{invoice.customerName}</span>
+                  {/* اسم_الزبون */}
+                  <span className="info-value" data-field="اسم_الزبون">{invoice.customerName}</span>
                 </div>
-                <div className="info-item">
+                <div className="info-line">
                   <span className="info-label">رقم الهاتف</span>
-                  <span className="info-value">{invoice.phone}</span>
+                  {/* رقم_الهاتف */}
+                  <span className="info-value" data-field="رقم_الهاتف">{invoice.phone}</span>
                 </div>
               </div>
             </section>
 
-            <section className="section amounts-section">
-              <h2 className="section-title">الحساب المالي</h2>
+            <section className="card amounts-card">
+              <h2 className="card-title">الملخص المالي</h2>
               <div className="amounts-grid">
-                <div className="amount-card">
-                  <div className="amount-label">المبلغ الكلي</div>
-                  <div className="amount-value">{formatCurrency(invoice.total)}</div>
+                <div className="amount-row">
+                  <span className="amount-label">الإجمالي</span>
+                  {/* المبلغ_الإجمالي */}
+                  <span className="amount-value" data-field="المبلغ_الإجمالي">
+                    {formatCurrency(invoice.total)}
+                  </span>
                 </div>
-                <div className="amount-card highlight">
-                  <div className="amount-label">المبلغ الواصل</div>
-                  <div className="amount-value">{formatCurrency(invoice.paid)}</div>
+                <div className="amount-row highlight">
+                  <span className="amount-label">الواصل</span>
+                  {/* المبلغ_الواصل */}
+                  <span className="amount-value" data-field="المبلغ_الواصل">
+                    {formatCurrency(invoice.paid)}
+                  </span>
                 </div>
-                <div className="amount-card">
-                  <div className="amount-label">المبلغ المتبقي</div>
-                  <div className="amount-value">{formatCurrency(remaining)}</div>
-                </div>
-              </div>
-            </section>
-
-            <section className="section dates-section">
-              <h2 className="section-title">التواريخ</h2>
-              <div className="dates-grid">
-                <div className="info-item">
-                  <span className="info-label">تاريخ الاستلام</span>
-                  <span className="info-value">{formatDate(invoice.receivedDate)}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">تاريخ التسليم</span>
-                  <span className="info-value">{formatDate(invoice.deliveryDate)}</span>
+                <div className="amount-row">
+                  <span className="amount-label">المتبقي</span>
+                  {/* المبلغ_المتبقي */}
+                  <span className="amount-value" data-field="المبلغ_المتبقي">
+                    {formatCurrency(remaining)}
+                  </span>
                 </div>
               </div>
             </section>
 
-            {/* notes removed for A7 layout */}
+            <section className="card">
+              <h2 className="card-title">ملاحظات</h2>
+              <div className="notes-box">
+                {/* ملاحظات */}
+                {invoice.notes ? (
+                  <span data-field="ملاحظات">{invoice.notes}</span>
+                ) : (
+                  <span className="notes-placeholder">لا توجد ملاحظات</span>
+                )}
+              </div>
+            </section>
           </div>
 
           <footer className="receipt-footer">
-            <div>يرجى الاحتفاظ بالوصل للمراجعة.</div>
-            <div className="signature-box">توقيع الموظف</div>
+            <div className="signature">
+              <span>توقيع الموظف</span>
+              {/* توقيع_الموظف */}
+              <span className="signature-line" data-field="توقيع_الموظف">
+                {signature || '........................'}
+              </span>
+            </div>
+            <div>شكراً لتسوقكم معنا</div>
           </footer>
         </div>
       </div>
