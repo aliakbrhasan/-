@@ -242,25 +242,25 @@ export function CustomerDetailsPage({ customer, onBack }: CustomerDetailsPagePro
                 <CardTitle className="text-[#13312A] arabic-text text-lg">بيانات الزبون</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-[#13312A] arabic-text">اسم الزبون</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">اسم الزبون</Label>
                   <Input
                     defaultValue={customer.name}
-                    className="bg-white border-[#C69A72] text-right"
+                    className="flex-1 bg-white border-[#C69A72] text-right"
                   />
                 </div>
-                <div>
-                  <Label className="text-[#13312A] arabic-text">رقم الهاتف</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">رقم الهاتف</Label>
                   <Input
                     defaultValue={customer.phone}
-                    className="bg-white border-[#C69A72] text-right"
+                    className="flex-1 bg-white border-[#C69A72] text-right"
                   />
                 </div>
-                <div className="md:col-span-2">
-                  <Label className="text-[#13312A] arabic-text">العنوان</Label>
+                <div className="md:col-span-2 flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">العنوان</Label>
                   <Input
                     defaultValue={customer.address}
-                    className="bg-white border-[#C69A72] text-right"
+                    className="flex-1 bg-white border-[#C69A72] text-right"
                   />
                 </div>
               </CardContent>
@@ -271,36 +271,44 @@ export function CustomerDetailsPage({ customer, onBack }: CustomerDetailsPagePro
                 <CardTitle className="text-[#13312A] arabic-text text-lg">القياسات</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <Label className="text-[#13312A] arabic-text">الطول</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">الطول</Label>
                   <Input
                     type="number"
                     defaultValue={customer.measurements.height}
-                    className="bg-white border-[#C69A72] text-right"
+                    className="flex-1 bg-white border-[#C69A72] text-right"
                   />
                 </div>
-                <div>
-                  <Label className="text-[#13312A] arabic-text">الكتف</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">الكتف</Label>
                   <Input
                     type="number"
                     defaultValue={customer.measurements.shoulder}
-                    className="bg-white border-[#C69A72] text-right"
+                    className="flex-1 bg-white border-[#C69A72] text-right"
                   />
                 </div>
-                <div>
-                  <Label className="text-[#13312A] arabic-text">الخصر</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">نصف الصدر</Label>
                   <Input
                     type="number"
                     defaultValue={customer.measurements.waist}
-                    className="bg-white border-[#C69A72] text-right"
+                    className="flex-1 bg-white border-[#C69A72] text-right"
                   />
                 </div>
-                <div>
-                  <Label className="text-[#13312A] arabic-text">الصدر</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">الياخة</Label>
                   <Input
                     type="number"
                     defaultValue={customer.measurements.chest}
-                    className="bg-white border-[#C69A72] text-right"
+                    className="flex-1 bg-white border-[#C69A72] text-right"
+                  />
+                </div>
+                <div className="flex items-center gap-2 md:col-span-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">الردن</Label>
+                  <Input
+                    type="number"
+                    placeholder="سم"
+                    className="flex-1 bg-white border-[#C69A72] text-right"
                   />
                 </div>
               </CardContent>
@@ -311,10 +319,10 @@ export function CustomerDetailsPage({ customer, onBack }: CustomerDetailsPagePro
                 <CardTitle className="text-[#13312A] arabic-text text-lg">تفاصيل الطلب</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-[#13312A] arabic-text">نوع التصميم</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">نوع التصميم</Label>
                   <Select>
-                    <SelectTrigger className="bg-white border-[#C69A72] text-right">
+                    <SelectTrigger className="flex-1 bg-white border-[#C69A72] text-right">
                       <SelectValue placeholder="اختر نوع التصميم" />
                     </SelectTrigger>
                     <SelectContent>
@@ -325,10 +333,10 @@ export function CustomerDetailsPage({ customer, onBack }: CustomerDetailsPagePro
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label className="text-[#13312A] arabic-text">نوع القماش</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">نوع القماش</Label>
                   <Select>
-                    <SelectTrigger className="bg-white border-[#C69A72] text-right">
+                    <SelectTrigger className="flex-1 bg-white border-[#C69A72] text-right">
                       <SelectValue placeholder="اختر نوع القماش" />
                     </SelectTrigger>
                     <SelectContent>
@@ -339,24 +347,24 @@ export function CustomerDetailsPage({ customer, onBack }: CustomerDetailsPagePro
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label className="text-[#13312A] arabic-text">تاريخ التسليم</Label>
-                  <Input type="date" className="bg-white border-[#C69A72] text-right" />
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">تاريخ التسليم</Label>
+                  <Input type="date" className="flex-1 bg-white border-[#C69A72] text-right" />
                 </div>
-                <div>
-                  <Label className="text-[#13312A] arabic-text">التكلفة المتوقعة</Label>
-                  <Input type="number" placeholder="0" className="bg-white border-[#C69A72] text-right" />
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">التكلفة المتوقعة</Label>
+                  <Input type="number" placeholder="0" className="flex-1 bg-white border-[#C69A72] text-right" />
                 </div>
-                <div>
-                  <Label className="text-[#13312A] arabic-text">الدفعة المقدمة</Label>
-                  <Input type="number" placeholder="0" className="bg-white border-[#C69A72] text-right" />
+                <div className="flex items-center gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap">الدفعة المقدمة</Label>
+                  <Input type="number" placeholder="0" className="flex-1 bg-white border-[#C69A72] text-right" />
                 </div>
-                <div className="md:col-span-2">
-                  <Label className="text-[#13312A] arabic-text">ملاحظات إضافية</Label>
+                <div className="md:col-span-2 flex items-start gap-2">
+                  <Label className="text-[#13312A] arabic-text whitespace-nowrap mt-2">ملاحظات إضافية</Label>
                   <Textarea
                     rows={3}
                     placeholder="اكتب أي تفاصيل إضافية حول الطلب"
-                    className="bg-white border-[#C69A72] text-right"
+                    className="flex-1 bg-white border-[#C69A72] text-right"
                   />
                 </div>
               </CardContent>

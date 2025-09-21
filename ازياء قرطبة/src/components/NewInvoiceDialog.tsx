@@ -89,9 +89,9 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
 
   // Bunija (نوع البنيجة)
   const [bunijaOptions] = useState<FabricOption[]>([
-    { id: 'single', label: 'بنايج' },
+    { id: 'single', label: 'بنيجة' },
     { id: 'half', label: 'نصف بنيجة' },
-    { id: 'double', label: 'بنيجتين' },
+    { id: 'none', label: 'بدون بنيجة' },
   ]);
   const [selectedBunijaOptions, setSelectedBunijaOptions] = useState<string[]>([]);
   const [isBunijaPopoverOpen, setIsBunijaPopoverOpen] = useState(false);
@@ -450,22 +450,26 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
               <CardHeader>
                 <CardTitle className="text-[#13312A] arabic-text text-lg">القياسات</CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <CardContent className="grid grid-cols-2 gap-4 md:flex md:flex-row md:flex-nowrap md:items-start md:gap-4">
                 <div>
                   <Label className="text-[#13312A] arabic-text">الطول</Label>
-                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right" />
+                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right w-full md:w-28" />
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">الكتف</Label>
-                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right" />
+                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right w-full md:w-28" />
                 </div>
                 <div>
-                  <Label className="text-[#13312A] arabic-text">الخصر</Label>
-                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right" />
+                  <Label className="text-[#13312A] arabic-text">نصف الصدر</Label>
+                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right w-full md:w-28" />
                 </div>
                 <div>
-                  <Label className="text-[#13312A] arabic-text">الصدر</Label>
-                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right" />
+                  <Label className="text-[#13312A] arabic-text">الردن</Label>
+                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right w-full md:w-28" />
+                </div>
+                <div>
+                  <Label className="text-[#13312A] arabic-text">الياخة</Label>
+                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right w-full md:w-28" />
                 </div>
               </CardContent>
             </Card>
