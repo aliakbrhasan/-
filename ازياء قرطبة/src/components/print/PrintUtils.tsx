@@ -1,5 +1,6 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { receiptStyles } from '../PrintableInvoice';
 
 export const brandPrintStyles = `
   @page {
@@ -335,6 +336,7 @@ export const openPrintWindow = (title: string, content: React.ReactElement) => {
   }
 
   const markup = renderToStaticMarkup(content);
+  const isReceipt = /receipt-wrapper|receipt-container/.test(markup);
 
   printWindow.document.write(`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -345,12 +347,15 @@ export const openPrintWindow = (title: string, content: React.ReactElement) => {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
     <style>${brandPrintStyles}</style>
+    ${isReceipt ? `<style>${receiptStyles}</style>` : ''}
   </head>
   <body>
-    <div class="print-container">
-      <div class="print-inner">${markup}</div>
-      <div class="print-footer">تم إنشاء هذا المستند من خلال نظام إدارة أزياء قرطبة</div>
-    </div>
+    ${isReceipt ? markup : `
+      <div class="print-container">
+        <div class="print-inner">${markup}</div>
+        <div class="print-footer">تم إنشاء هذا المستند من خلال نظام إدارة أزياء قرطبة</div>
+      </div>
+    `}
     <script>
       window.onload = () => {
         window.focus();

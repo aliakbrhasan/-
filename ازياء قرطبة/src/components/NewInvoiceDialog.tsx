@@ -605,7 +605,7 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
                   </Popover>
                 </div>
                 <div>
-                  <Label className="text-[#13312A] arabic-text">نوع الياقة</Label>
+                  <Label className="text-[#13312A] arabic-text">نوع الياخة</Label>
                   <Popover open={isCollarPopoverOpen} onOpenChange={setIsCollarPopoverOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -676,7 +676,7 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
                   </Popover>
                 </div>
                 <div>
-                  <Label className="text-[#13312A] arabic-text">أسلوب الصدر</Label>
+                  <Label className="text-[#13312A] arabic-text">نوع الصدر</Label>
                   <Popover open={isChestStylePopoverOpen} onOpenChange={setIsChestStylePopoverOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -693,7 +693,7 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
                                 .filter((o) => selectedChestStyleOptions.includes(o.id))
                                 .map((o) => o.label)
                                 .join('، ')
-                            : 'اختر أسلوب الصدر'}
+                            : 'اختر نوع الصدر'}
                         </span>
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
                       </Button>
@@ -747,7 +747,7 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
                   </Popover>
                 </div>
                 <div>
-                  <Label className="text-[#13312A] arabic-text">نهاية الكم</Label>
+                  <Label className="text-[#13312A] arabic-text">نوع الردن</Label>
                   <Popover open={isSleeveEndPopoverOpen} onOpenChange={setIsSleeveEndPopoverOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -764,7 +764,7 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
                                 .filter((o) => selectedSleeveEndOptions.includes(o.id))
                                 .map((o) => o.label)
                                 .join('، ')
-                            : 'اختر نهاية الكم'}
+                            : 'اختر نوع الردن'}
                         </span>
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
                       </Button>

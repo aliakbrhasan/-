@@ -28,7 +28,7 @@ export const formatDate = (value: string) =>
 
 export const receiptStyles = `
   @page {
-    size: A5 landscape;
+    size: A7 landscape;
     margin: 0.5cm;
   }
 
@@ -48,20 +48,20 @@ export const receiptStyles = `
     width: 100%;
     display: flex;
     justify-content: center;
-    padding: 0.6cm 0;
+    padding: 0.2cm 0;
   }
 
   .receipt-container {
     width: 100%;
-    max-width: calc(21cm - 1cm);
-    height: calc(14.8cm - 1cm);
+    max-width: calc(10.5cm - 1cm);
+    height: calc(7.4cm - 1cm);
     background: #FDFBF7;
     border: 2px solid #C69A72;
-    border-radius: 16px;
-    padding: 14px 20px;
+    border-radius: 12px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
     box-shadow: 0 12px 28px rgba(19, 49, 42, 0.12);
     position: relative;
     overflow: hidden;
@@ -82,13 +82,13 @@ export const receiptStyles = `
     height: 100%;
     display: grid;
     grid-template-rows: auto 1fr auto;
-    gap: 14px;
+    gap: 10px;
   }
 
   .receipt-header {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    gap: 10px;
     align-items: start;
   }
 
@@ -99,50 +99,50 @@ export const receiptStyles = `
   }
 
   .brand-name {
-    font-size: 22px;
+    font-size: 16px;
     font-weight: 700;
     color: #13312A;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
   }
 
   .brand-tagline {
-    font-size: 12px;
+    font-size: 10px;
     color: #155446;
   }
 
   .header-meta {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     align-items: stretch;
   }
 
   .invoice-meta {
     background: rgba(246, 233, 202, 0.9);
     border: 1px solid rgba(198, 154, 114, 0.6);
-    border-radius: 12px;
-    padding: 9px 12px;
+    border-radius: 10px;
+    padding: 6px 8px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
   }
 
   .meta-item {
-    font-size: 12px;
+    font-size: 10px;
     color: #13312A;
   }
 
   .header-summary {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 6px;
   }
 
   .summary-pill {
-    border-radius: 12px;
+    border-radius: 10px;
     border: 1px solid rgba(198, 154, 114, 0.45);
     background: rgba(246, 233, 202, 0.55);
-    padding: 8px 10px;
+    padding: 6px 8px;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -154,12 +154,12 @@ export const receiptStyles = `
   }
 
   .pill-label {
-    font-size: 10px;
+    font-size: 9px;
     color: #155446;
   }
 
   .pill-value {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
     color: #13312A;
   }
@@ -178,8 +178,8 @@ export const receiptStyles = `
     grid-template-rows: auto 1fr;
     grid-template-areas:
       'customer amounts'
-      'dates notes';
-    gap: 12px 16px;
+      'dates amounts';
+    gap: 8px 10px;
     align-content: stretch;
     align-items: stretch;
     min-height: 0;
@@ -197,19 +197,17 @@ export const receiptStyles = `
     grid-area: dates;
   }
 
-  .notes-section {
-    grid-area: notes;
-  }
+  /* notes section removed for A7 compact layout */
 
   .section {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     min-height: 0;
   }
 
   .section-title {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #155446;
   }
@@ -217,27 +215,27 @@ export const receiptStyles = `
   .info-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 12px;
+    gap: 8px 10px;
   }
 
   .info-item {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
     background: rgba(246, 233, 202, 0.55);
     border: 1px solid rgba(198, 154, 114, 0.4);
-    border-radius: 12px;
-    padding: 8px 10px;
-    min-height: 56px;
+    border-radius: 10px;
+    padding: 6px 8px;
+    min-height: 46px;
   }
 
   .info-label {
-    font-size: 11px;
+    font-size: 10px;
     color: #155446;
   }
 
   .info-value {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     word-break: break-word;
   }
@@ -245,18 +243,18 @@ export const receiptStyles = `
   .amounts-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    gap: 6px;
   }
 
   .amount-card {
-    padding: 10px;
-    border-radius: 14px;
+    padding: 8px;
+    border-radius: 12px;
     border: 1px solid rgba(198, 154, 114, 0.45);
     background: white;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
   }
 
   .amount-card.highlight {
@@ -265,12 +263,12 @@ export const receiptStyles = `
   }
 
   .amount-label {
-    font-size: 12px;
+    font-size: 10px;
     color: #155446;
   }
 
   .amount-value {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 700;
     color: #13312A;
   }
@@ -278,7 +276,7 @@ export const receiptStyles = `
   .dates-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 6px;
   }
 
   .note-box {
@@ -286,34 +284,35 @@ export const receiptStyles = `
     height: 100%;
     flex: 1;
     border: 1.5px dashed rgba(198, 154, 114, 0.65);
-    border-radius: 14px;
-    padding: 10px 12px;
+    border-radius: 12px;
+    padding: 8px 10px;
     background: rgba(246, 233, 202, 0.35);
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 10px;
+    line-height: 1.4;
     color: #13312A;
     display: flex;
     align-items: flex-start;
     word-break: break-word;
+    overflow: hidden;
   }
 
   .receipt-footer {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    gap: 10px;
-    font-size: 11px;
+    gap: 8px;
+    font-size: 9px;
     color: #155446;
-    padding-top: 10px;
+    padding-top: 6px;
     border-top: 1px solid rgba(198, 154, 114, 0.45);
     margin-top: auto;
     flex-wrap: wrap;
   }
 
   .signature-box {
-    min-width: 140px;
+    min-width: 100px;
     border-top: 1.5px solid rgba(198, 154, 114, 0.9);
-    padding-top: 10px;
+    padding-top: 6px;
     text-align: center;
   }
 
@@ -327,7 +326,7 @@ export const receiptStyles = `
       grid-template-columns: 1fr;
       grid-template-rows: none;
       grid-template-areas: none;
-      gap: 14px;
+      gap: 10px;
     }
 
     .customer-section,
@@ -347,7 +346,7 @@ export const receiptStyles = `
 
     .note-box {
       height: auto;
-      min-height: 110px;
+      min-height: 90px;
     }
   }
 
@@ -362,8 +361,8 @@ export const receiptStyles = `
 
     .receipt-container {
       margin: 0 auto;
-      width: calc(21cm - 1cm);
-      height: calc(14.8cm - 1cm);
+      width: calc(10.5cm - 1cm);
+      height: calc(7.4cm - 1cm);
       box-shadow: none;
     }
   }
@@ -405,12 +404,6 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
                   <span className="info-label">رقم الهاتف</span>
                   <span className="info-value">{invoice.phone}</span>
                 </div>
-                {invoice.address ? (
-                  <div className="info-item" style={{ gridColumn: '1 / -1' }}>
-                    <span className="info-label">العنوان</span>
-                    <span className="info-value">{invoice.address}</span>
-                  </div>
-                ) : null}
               </div>
             </section>
 
@@ -446,17 +439,11 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
               </div>
             </section>
 
-            <section className="section notes-section">
-              <h2 className="section-title">ملاحظات</h2>
-              <div className="note-box">{invoice.notes || '—'}</div>
-            </section>
+            {/* notes removed for A7 layout */}
           </div>
 
           <footer className="receipt-footer">
-            <div>
-              <div>نشكر ثقتكم بخدمات أزياء قرطبة.</div>
-              <div>يرجى الاحتفاظ بالوصل للمراجعة.</div>
-            </div>
+            <div>يرجى الاحتفاظ بالوصل للمراجعة.</div>
             <div className="signature-box">توقيع الموظف</div>
           </footer>
         </div>

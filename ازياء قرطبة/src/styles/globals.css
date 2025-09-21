@@ -1,4 +1,4 @@
-@custom-variant dark (&:is(.dark *));
+/* Removed unsupported at-rules for linter compatibility */
 
 :root {
   --font-size: 16px;
@@ -85,7 +85,7 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
-@theme inline {
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -128,11 +128,13 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--color-border);
+    outline-color: color-mix(in oklab, var(--color-ring) 50%, transparent);
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
     direction: rtl;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
@@ -231,3 +233,52 @@
 html {
   font-size: var(--font-size);
 }
+
+/* Modal polish: centered dialog variant (non-breaking) */
+.tm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.tm-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 18, 12, 0.45);
+  -webkit-backdrop-filter: blur(2px) saturate(1.05);
+  backdrop-filter: blur(2px) saturate(1.05);
+}
+
+.tm-modal__panel {
+  position: relative;
+  max-width: min(960px, 92vw);
+  max-height: min(88vh, 100dvh - 48px);
+  width: 100%;
+  overflow: auto;
+  border-radius: 14px;
+  background: var(--surface, #fff);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 640px) {
+  .tm-modal { padding: 16px; }
+  .tm-modal__panel { border-radius: 12px; max-height: calc(100dvh - 32px); }
+}
+
+.tm-modal--sheet .tm-modal__panel {
+  border-radius: 16px 16px 0 0;
+  max-width: 100%;
+  width: 100%;
+  margin-top: auto;
+}
+
+html.tm-has-modal,
+body.tm-has-modal {
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* stylelint-enable at-rule-no-unknown */
