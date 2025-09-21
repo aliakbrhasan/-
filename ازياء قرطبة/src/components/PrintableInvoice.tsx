@@ -28,342 +28,249 @@ export const formatDate = (value: string) =>
 
 export const receiptStyles = `
   @page {
-    size: A7 landscape;
-    margin: 0.5cm;
+    size: 105mm 74mm;
+    margin: 5mm;
+  }
+
+  :root {
+    --brand: var(--primary, #2a6f6a);
+    --brand-600: var(--primary-foreground, #155446);
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --surface: #ffffff;
+    --border: rgba(0, 0, 0, 0.15);
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
 
   body {
     margin: 0;
-    background: #f3ede0;
-    font-family: 'Tajawal', 'Noto Kufi Arabic', sans-serif;
     direction: rtl;
-    color: #13312A;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: 'Cairo', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
   }
 
-  * {
-    box-sizing: border-box;
-  }
-
-  .receipt-wrapper {
-    width: 100%;
+  .invoice-print-wrapper {
+    min-height: 100vh;
     display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 0.2cm 0;
+    padding: 12px;
+    background: var(--surface);
   }
 
-  .receipt-container {
+  .invoice--print {
     width: 100%;
-    max-width: calc(10.5cm - 1cm);
-    height: calc(7.4cm - 1cm);
-    background: #FDFBF7;
-    border: 2px solid #C69A72;
-    border-radius: 12px;
-    padding: 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    box-shadow: 0 12px 28px rgba(19, 49, 42, 0.12);
-    position: relative;
-    overflow: hidden;
+    max-width: calc(105mm - 10mm);
+    min-height: calc(74mm - 10mm);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px;
+    display: grid;
+    gap: 6px;
+    grid-template-areas:
+      'head head head'
+      'client totals notes'
+      'foot foot foot';
+    grid-template-columns: repeat(3, 1fr);
+    align-content: start;
+    font: 600 10pt/1.4 'Cairo', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    color: var(--ink);
+  }
+
+  .invoice--print > * {
+    break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  .receipt-container::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(198, 154, 114, 0.12), rgba(21, 84, 70, 0.08));
-    pointer-events: none;
+  .inv-head,
+  .card,
+  .inv-foot {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
-  .receipt-inner {
-    position: relative;
-    z-index: 1;
-    height: 100%;
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: 10px;
+  .inv-head {
+    grid-area: head;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
   }
 
-  .receipt-header {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    align-items: start;
+  .store {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .brand {
+    margin: 0;
+    font-size: 12pt;
+    color: var(--brand);
+    font-weight: 700;
+  }
+
+  .muted {
+    color: var(--muted);
+    font-size: 9.5pt;
+    font-weight: 500;
+  }
+
+  .meta {
+    display: grid;
+    gap: 4px;
+    text-align: right;
+  }
+
+  .meta-row {
     display: flex;
-    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 9.5pt;
+  }
+
+  .label {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 9.5pt;
+  }
+
+  .value {
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 10pt;
+    min-width: 0;
+  }
+
+  .card {
+    gap: 6px;
+    background: var(--surface);
+  }
+
+  .card h2 {
+    margin: 0;
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: var(--brand);
+  }
+
+  .client {
+    grid-area: client;
+  }
+
+  .totals {
+    grid-area: totals;
+  }
+
+  .notes {
+    grid-area: notes;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 4px;
   }
 
-  .brand-name {
-    font-size: 16px;
-    font-weight: 700;
-    color: #13312A;
-    letter-spacing: 0.5px;
-  }
-
-  .brand-tagline {
-    font-size: 10px;
-    color: #155446;
-  }
-
-  .header-meta {
+  .kpi {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    padding: 4px 6px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    align-items: stretch;
-  }
-
-  .invoice-meta {
-    background: rgba(246, 233, 202, 0.9);
-    border: 1px solid rgba(198, 154, 114, 0.6);
-    border-radius: 10px;
-    padding: 6px 8px;
-    display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 2px;
-  }
-
-  .meta-item {
-    font-size: 10px;
-    color: #13312A;
-  }
-
-  .header-summary {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-  }
-
-  .summary-pill {
-    border-radius: 10px;
-    border: 1px solid rgba(198, 154, 114, 0.45);
-    background: rgba(246, 233, 202, 0.55);
-    padding: 6px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .summary-pill.accent {
-    background: linear-gradient(135deg, rgba(21, 84, 70, 0.92), rgba(19, 49, 42, 0.85));
-    border-color: rgba(21, 84, 70, 0.55);
-  }
-
-  .pill-label {
-    font-size: 9px;
-    color: #155446;
-  }
-
-  .pill-value {
-    font-size: 12px;
-    font-weight: 700;
-    color: #13312A;
-  }
-
-  .summary-pill.accent .pill-label {
-    color: rgba(253, 251, 247, 0.82);
-  }
-
-  .summary-pill.accent .pill-value {
-    color: #F6E9CA;
-  }
-
-  .content-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      'customer amounts'
-      'dates amounts';
-    gap: 8px 10px;
-    align-content: stretch;
-    align-items: stretch;
-    min-height: 0;
-  }
-
-  .customer-section {
-    grid-area: customer;
-  }
-
-  .amounts-section {
-    grid-area: amounts;
-  }
-
-  .dates-section {
-    grid-area: dates;
-  }
-
-  /* notes section removed for A7 compact layout */
-
-  .section {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-height: 0;
-  }
-
-  .section-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: #155446;
-  }
-
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 10px;
-  }
-
-  .info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    background: rgba(246, 233, 202, 0.55);
-    border: 1px solid rgba(198, 154, 114, 0.4);
-    border-radius: 10px;
-    padding: 6px 8px;
-    min-height: 46px;
-  }
-
-  .info-label {
-    font-size: 10px;
-    color: #155446;
-  }
-
-  .info-value {
-    font-size: 12px;
-    font-weight: 600;
-    word-break: break-word;
-  }
-
-  .amounts-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-  }
-
-  .amount-card {
-    padding: 8px;
-    border-radius: 12px;
-    border: 1px solid rgba(198, 154, 114, 0.45);
-    background: white;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .amount-card.highlight {
-    background: rgba(21, 84, 70, 0.08);
-    border-color: rgba(21, 84, 70, 0.35);
-  }
-
-  .amount-label {
-    font-size: 10px;
-    color: #155446;
-  }
-
-  .amount-value {
-    font-size: 13px;
-    font-weight: 700;
-    color: #13312A;
-  }
-
-  .dates-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-  }
-
-  .note-box {
-    min-height: 0;
-    height: 100%;
-    flex: 1;
-    border: 1.5px dashed rgba(198, 154, 114, 0.65);
-    border-radius: 12px;
-    padding: 8px 10px;
-    background: rgba(246, 233, 202, 0.35);
-    font-size: 10px;
-    line-height: 1.4;
-    color: #13312A;
-    display: flex;
-    align-items: flex-start;
-    word-break: break-word;
-    overflow: hidden;
-  }
-
-  .receipt-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 8px;
-    font-size: 9px;
-    color: #155446;
-    padding-top: 6px;
-    border-top: 1px solid rgba(198, 154, 114, 0.45);
-    margin-top: auto;
-    flex-wrap: wrap;
-  }
-
-  .signature-box {
-    min-width: 100px;
-    border-top: 1.5px solid rgba(198, 154, 114, 0.9);
-    padding-top: 6px;
     text-align: center;
   }
 
-  @media screen and (max-width: 900px) {
-    .receipt-container {
-      height: auto;
-      max-width: 100%;
-    }
+  .kpi-value {
+    font-size: 13pt;
+    font-weight: 800;
+    color: var(--ink);
+  }
 
-    .content-grid {
-      grid-template-columns: 1fr;
-      grid-template-rows: none;
-      grid-template-areas: none;
-      gap: 10px;
-    }
+  .kpi-label {
+    font-size: 9.5pt;
+    color: var(--muted);
+  }
 
-    .customer-section,
-    .amounts-section,
-    .dates-section,
-    .notes-section {
-      grid-column: 1 / -1;
-      grid-row: auto;
-      align-self: stretch;
-    }
+  .note-text {
+    font-size: 9.5pt;
+    color: var(--muted);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
-    .info-grid,
-    .amounts-grid,
-    .dates-grid {
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    }
+  .inv-foot {
+    grid-area: foot;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 9.5pt;
+  }
 
-    .note-box {
-      height: auto;
-      min-height: 90px;
-    }
+  .sign {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .thank {
+    color: var(--brand);
+    font-size: 11pt;
+    font-weight: 800;
+  }
+
+  .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   @media print {
     body {
-      background: white;
+      margin: 0;
+      background: var(--surface);
     }
 
-    .receipt-wrapper {
+    .no-print {
+      display: none !important;
+    }
+
+    .invoice-print-wrapper {
       padding: 0;
+      min-height: auto;
     }
 
-    .receipt-container {
-      margin: 0 auto;
-      width: calc(10.5cm - 1cm);
-      height: calc(7.4cm - 1cm);
-      box-shadow: none;
+    .invoice--print {
+      box-shadow: none !important;
+      filter: none !important;
     }
   }
 `;
@@ -376,77 +283,73 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
   const remaining = Math.max(invoice.total - invoice.paid, 0);
 
   return (
-    <div className="receipt-wrapper">
-      <div className="receipt-container">
-        <div className="receipt-inner">
-          <header className="receipt-header">
-            <div className="brand">
-              <span className="brand-name">أزياء قرطبة</span>
-              <span className="brand-tagline">وصل فاتورة - نموذج داخلي</span>
-            </div>
-            <div className="header-meta">
-              <div className="invoice-meta">
-                <span className="meta-item">رقم الفاتورة: {invoice.id}</span>
-                <span className="meta-item">تاريخ الإصدار: {formatDate(invoice.receivedDate)}</span>
-              </div>
-            </div>
-          </header>
-
-          <div className="content-grid">
-            <section className="section customer-section">
-              <h2 className="section-title">بيانات الزبون</h2>
-              <div className="info-grid">
-                <div className="info-item">
-                  <span className="info-label">اسم الزبون</span>
-                  <span className="info-value">{invoice.customerName}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">رقم الهاتف</span>
-                  <span className="info-value">{invoice.phone}</span>
-                </div>
-              </div>
-            </section>
-
-            <section className="section amounts-section">
-              <h2 className="section-title">الحساب المالي</h2>
-              <div className="amounts-grid">
-                <div className="amount-card">
-                  <div className="amount-label">المبلغ الكلي</div>
-                  <div className="amount-value">{formatCurrency(invoice.total)}</div>
-                </div>
-                <div className="amount-card highlight">
-                  <div className="amount-label">المبلغ الواصل</div>
-                  <div className="amount-value">{formatCurrency(invoice.paid)}</div>
-                </div>
-                <div className="amount-card">
-                  <div className="amount-label">المبلغ المتبقي</div>
-                  <div className="amount-value">{formatCurrency(remaining)}</div>
-                </div>
-              </div>
-            </section>
-
-            <section className="section dates-section">
-              <h2 className="section-title">التواريخ</h2>
-              <div className="dates-grid">
-                <div className="info-item">
-                  <span className="info-label">تاريخ الاستلام</span>
-                  <span className="info-value">{formatDate(invoice.receivedDate)}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">تاريخ التسليم</span>
-                  <span className="info-value">{formatDate(invoice.deliveryDate)}</span>
-                </div>
-              </div>
-            </section>
-
-            {/* notes removed for A7 layout */}
+    <div className="invoice-print-wrapper">
+      <div className="invoice--print" dir="rtl">
+        {/* يتم تمرير القيم الديناميكية من كائن invoice في JSX أدناه */}
+        <header className="inv-head">
+          <div className="store">
+            <h1 className="brand">أزياء قرطبة</h1>
+            <small className="muted">وصل فاتورة · نموذج داخلي</small>
           </div>
+          <div className="meta">
+            <div className="meta-row">
+              <span className="label">رقم الفاتورة:</span>
+              <span className="value">{invoice.id}</span>
+            </div>
+            <div className="meta-row">
+              <span className="label">تاريخ الإصدار:</span>
+              <span className="value">{formatDate(invoice.receivedDate)}</span>
+            </div>
+          </div>
+        </header>
 
-          <footer className="receipt-footer">
-            <div>يرجى الاحتفاظ بالوصل للمراجعة.</div>
-            <div className="signature-box">توقيع الموظف</div>
-          </footer>
-        </div>
+        <section className="client card">
+          <h2>بيانات الزبون</h2>
+          <div className="row">
+            <span className="label">الاسم:</span>
+            <span className="value truncate">{invoice.customerName}</span>
+          </div>
+          <div className="row">
+            <span className="label">الهاتف:</span>
+            <span className="value">{invoice.phone}</span>
+          </div>
+          {invoice.address && (
+            <div className="row">
+              <span className="label">العنوان:</span>
+              <span className="value truncate">{invoice.address}</span>
+            </div>
+          )}
+        </section>
+
+        <section className="totals card">
+          <h2>الحساب المالي</h2>
+          <div className="kpis">
+            <div className="kpi">
+              <div className="kpi-value">{formatCurrency(invoice.total)}</div>
+              <div className="kpi-label">المبلغ الكلي</div>
+            </div>
+            <div className="kpi">
+              <div className="kpi-value">{formatCurrency(invoice.paid)}</div>
+              <div className="kpi-label">المبلغ الواصل</div>
+            </div>
+            <div className="kpi">
+              <div className="kpi-value">{formatCurrency(remaining)}</div>
+              <div className="kpi-label">المتبقي</div>
+            </div>
+          </div>
+        </section>
+
+        <section className="notes card">
+          <h2>ملاحظات</h2>
+          <div className="note-text">
+            {invoice.notes?.length ? invoice.notes : 'يرجى الاحتفاظ بوصل الفاتورة للمراجعة.'}
+          </div>
+        </section>
+
+        <footer className="inv-foot">
+          <div className="sign muted">توقيع الموظف: ____________</div>
+          <div className="thank">شكراً لتسوقكم</div>
+        </footer>
       </div>
     </div>
   );
