@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X, UserPlus, Shield, Users, Grid3X3, List } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -9,6 +9,7 @@ import { Badge } from './ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { User } from '../types/user';
+import { databaseService } from '../db/database.service';
 
 const initialUsers: User[] = [
   {
@@ -55,10 +56,11 @@ interface UsersManagementPageProps {
 }
 
 export function UsersManagementPage({ onNavigate }: UsersManagementPageProps) {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [loading, setLoading] = useState(true);
   const [newUser, setNewUser] = useState<Partial<User>>({
     code: '',
     name: '',
@@ -69,30 +71,53 @@ export function UsersManagementPage({ onNavigate }: UsersManagementPageProps) {
     isActive: true
   });
 
-  const handleAddUser = () => {
+  // Load users from database
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        setLoading(true);
+        const usersData = await databaseService.getUsers();
+        setUsers(usersData);
+      } catch (error) {
+        console.error('Error loading users:', error);
+        // Fallback to initial users if database fails
+        setUsers(initialUsers);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, []);
+
+  const handleAddUser = async () => {
     if (newUser.name && newUser.email && newUser.role && newUser.code) {
-      const user: User = {
-        id: Math.max(...users.map(u => u.id)) + 1,
-        code: newUser.code,
-        name: newUser.name,
-        email: newUser.email,
-        phone: newUser.phone || '',
-        status: newUser.status || 'موظف',
-        role: newUser.role,
-        isActive: newUser.isActive || true,
-        createdAt: new Date().toISOString().split('T')[0]
-      };
-      setUsers([...users, user]);
-      setNewUser({
-        code: '',
-        name: '',
-        email: '',
-        phone: '',
-        status: 'موظف',
-        role: '',
-        isActive: true
-      });
-      setIsAddUserDialogOpen(false);
+      try {
+        const userData = {
+          code: newUser.code,
+          name: newUser.name,
+          email: newUser.email,
+          phone: newUser.phone || '',
+          status: newUser.status || 'موظف',
+          role: newUser.role,
+          isActive: newUser.isActive || true
+        };
+        
+        const createdUser = await databaseService.createUser(userData);
+        setUsers([...users, createdUser]);
+        setNewUser({
+          code: '',
+          name: '',
+          email: '',
+          phone: '',
+          status: 'موظف',
+          role: '',
+          isActive: true
+        });
+        setIsAddUserDialogOpen(false);
+      } catch (error) {
+        console.error('Error creating user:', error);
+      }
     }
   };
 
@@ -100,15 +125,25 @@ export function UsersManagementPage({ onNavigate }: UsersManagementPageProps) {
     setEditingUser(user);
   };
 
-  const handleSaveUser = () => {
+  const handleSaveUser = async () => {
     if (editingUser) {
-      setUsers(users.map(u => u.id === editingUser.id ? editingUser : u));
-      setEditingUser(null);
+      try {
+        const updatedUser = await databaseService.updateUser(editingUser.id, editingUser);
+        setUsers(users.map(u => u.id === editingUser.id ? updatedUser : u));
+        setEditingUser(null);
+      } catch (error) {
+        console.error('Error updating user:', error);
+      }
     }
   };
 
-  const handleDeleteUser = (userId: number) => {
-    setUsers(users.filter(u => u.id !== userId));
+  const handleDeleteUser = async (userId: number) => {
+    try {
+      await databaseService.deleteUser(userId);
+      setUsers(users.filter(u => u.id !== userId));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
   };
 
 
@@ -263,7 +298,11 @@ export function UsersManagementPage({ onNavigate }: UsersManagementPageProps) {
       </div>
 
       {/* قائمة المستخدمين */}
-      {viewMode === 'cards' ? (
+      {loading ? (
+        <div className="text-center py-8">
+          <div className="text-[#13312A] arabic-text">جاري تحميل بيانات المستخدمين...</div>
+        </div>
+      ) : viewMode === 'cards' ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 arabic-text">
@@ -276,7 +315,12 @@ export function UsersManagementPage({ onNavigate }: UsersManagementPageProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {users.map((user) => (
+              {users.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-[#13312A] arabic-text">لا توجد مستخدمين مسجلين</div>
+                </div>
+              ) : (
+                users.map((user) => (
                 <div key={user.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-2 border-gray-200 rounded-lg bg-white hover:border-[#13312A] hover:shadow-lg transition-all duration-200">
                   <div className="flex-1 mb-3 sm:mb-0">
                     <div className="flex items-start gap-3">
@@ -320,7 +364,8 @@ export function UsersManagementPage({ onNavigate }: UsersManagementPageProps) {
                     </Button>
                   </div>
                 </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

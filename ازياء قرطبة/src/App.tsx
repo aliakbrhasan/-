@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { LoginPage } from './components/LoginPage';
 import { Dashboard } from './components/Dashboard';
@@ -11,8 +11,12 @@ import { InvoiceDetailsPage } from './components/InvoiceDetailsPage';
 import { NewInvoiceDialog } from './components/NewInvoiceDialog';
 import { UsersManagementPage } from './components/UsersManagementPage';
 import { RolesManagementPage } from './components/RolesManagementPage';
+import { OrdersPage } from './features/orders/OrdersPage';
 import { Toaster } from './components/ui/sonner';
+import { AppProviders } from './app/AppProviders';
 import { Customer } from './types/customer';
+import { databaseService } from './db/database.service';
+import './db/init'; // Initialize database
 
 const customersData: Customer[] = [
   {
@@ -236,6 +240,29 @@ export default function App() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [isNewInvoiceDialogOpen, setIsNewInvoiceDialogOpen] = useState(false);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load customers from database
+  useEffect(() => {
+    const loadCustomers = async () => {
+      try {
+        setLoading(true);
+        const customersData = await databaseService.getCustomers();
+        setCustomers(customersData);
+      } catch (error) {
+        console.error('Error loading customers:', error);
+        // Fallback to hardcoded data if database fails
+        setCustomers(customersData);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isLoggedIn) {
+      loadCustomers();
+    }
+  }, [isLoggedIn]);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -307,8 +334,9 @@ export default function App() {
       case 'customers':
         return (
           <CustomersPage
-            customers={customersData}
+            customers={customers}
             onCustomerSelect={handleCustomerSelect}
+            loading={loading}
           />
         );
       case 'customerDetails':
@@ -322,8 +350,9 @@ export default function App() {
           />
         ) : (
           <CustomersPage
-            customers={customersData}
+            customers={customers}
             onCustomerSelect={handleCustomerSelect}
+            loading={loading}
           />
         );
       case 'invoiceDetails':
@@ -347,6 +376,8 @@ export default function App() {
         return <UsersManagementPage onNavigate={handleNavigate} />;
       case 'roles':
         return <RolesManagementPage onBack={() => setCurrentPage('users')} />;
+      case 'orders':
+        return <OrdersPage />;
       default:
         return (
           <Dashboard
@@ -358,24 +389,26 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen">
-      {!isLoggedIn ? (
-        <LoginPage onLogin={handleLogin} />
-      ) : (
-        <Layout
-          currentPage={currentPage}
-          onNavigate={handleNavigate}
-          isLoggedIn={isLoggedIn}
-          onLogout={handleLogout}
-        >
-          {renderCurrentPage()}
-          <NewInvoiceDialog
-            isOpen={isNewInvoiceDialogOpen}
-            onOpenChange={setIsNewInvoiceDialogOpen}
-          />
-        </Layout>
-      )}
-      <Toaster position="top-center" />
-    </div>
+    <AppProviders>
+      <div className="min-h-screen">
+        {!isLoggedIn ? (
+          <LoginPage onLogin={handleLogin} />
+        ) : (
+          <Layout
+            currentPage={currentPage}
+            onNavigate={handleNavigate}
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+          >
+            {renderCurrentPage()}
+            <NewInvoiceDialog
+              isOpen={isNewInvoiceDialogOpen}
+              onOpenChange={setIsNewInvoiceDialogOpen}
+            />
+          </Layout>
+        )}
+        <Toaster position="top-center" />
+      </div>
+    </AppProviders>
   );
 }

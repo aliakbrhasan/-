@@ -8,6 +8,8 @@ import { Badge } from './ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { Label } from './ui/label';
+import { useInvoices } from '@/hooks/useInvoices';
+import { InvoiceService } from '@/services/invoice.service';
 import {
   Plus,
   Search,
@@ -145,113 +147,37 @@ export function InvoicesPage({ onCreateInvoice, onViewInvoiceDetails, onMarkAsPa
   const [sortBy, setSortBy] = useState('date');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  
+  // Use the database hook
+  const { invoices: dbInvoices, loading, error, markAsPaid: markInvoiceAsPaid } = useInvoices();
 
-  const invoices: Invoice[] = [
-    {
-      id: 'INV-001',
-      customerName: 'أحمد محمد',
-      phone: '07701234567',
-      address: 'بغداد، منطقة الكرخ',
-      total: 250,
-      paid: 250,
-      receivedDate: '2024-01-15',
-      deliveryDate: '2024-01-25',
-      status: 'مدفوع',
-      notes: 'تم الدفع بالكامل مع طلب تجهيز خاص بالياقة.',
-      fabricImage: 'https://images.unsplash.com/photo-1642683497706-77a72ea549bb?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&fit=crop',
-      measurements: {
-        length: 180,
-        shoulder: 45,
-        waist: 90,
-        chest: 100
-      },
-      designDetails: {
-        fabricType: ['قطن', 'حرير'],
-        fabricSource: ['خارج المحل'],
-        collarType: ['صينية'],
-        chestStyle: ['صدر مزدوج'],
-        sleeveEnd: ['كم بحاشية']
-      }
+  // Transform database invoices to match the expected format
+  const invoices: Invoice[] = dbInvoices.map(invoice => ({
+    id: invoice.id,
+    customerName: invoice.customer_name,
+    phone: invoice.customer_phone || '',
+    address: invoice.customer_address || '',
+    total: invoice.total,
+    paid: invoice.paid_amount,
+    receivedDate: invoice.invoice_date,
+    deliveryDate: invoice.due_date || invoice.invoice_date,
+    status: invoice.status,
+    notes: invoice.notes || '',
+    fabricImage: 'https://images.unsplash.com/photo-1642683497706-77a72ea549bb?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&fit=crop',
+    measurements: {
+      length: 180,
+      shoulder: 45,
+      waist: 90,
+      chest: 100
     },
-    {
-      id: 'INV-002',
-      customerName: 'محمد تقي',
-      phone: '07807654321',
-      address: 'البصرة، حي العشار',
-      total: 180,
-      paid: 90,
-      receivedDate: '2024-01-14',
-      deliveryDate: '2024-01-22',
-      status: 'معلق',
-      notes: 'المتبقي يستلم عند التسليم النهائي بعد المعاينة.',
-      fabricImage: 'https://images.unsplash.com/photo-1716541424785-f9746ae08cad?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop',
-      measurements: {
-        length: 175,
-        shoulder: 42,
-        waist: 85,
-        chest: 95
-      },
-      designDetails: {
-        fabricType: ['صوف'],
-        fabricSource: ['داخل المحل'],
-        collarType: ['عادية'],
-        chestStyle: ['صدر واحد'],
-        sleeveEnd: ['كم عادي']
-      }
-    },
-    {
-      id: 'INV-003',
-      customerName: 'محمد خالد',
-      phone: '07909876543',
-      address: 'الموصل، حي الزراعة',
-      total: 420,
-      paid: 220,
-      receivedDate: '2024-01-10',
-      deliveryDate: '2024-01-20',
-      status: 'جزئي',
-      notes: 'إضافة تطريز يدوي في الأكمام.',
-      fabricImage: 'https://images.unsplash.com/photo-1564322955387-0d2def79fb5c?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D=100&h=100&fit=crop',
-      measurements: {
-        length: 185,
-        shoulder: 48,
-        waist: 95,
-        chest: 105
-      },
-      designDetails: {
-        fabricType: ['كتان', 'قطن'],
-        fabricSource: ['خارج المحل'],
-        collarType: ['رسمية'],
-        chestStyle: ['صدر مزدوج'],
-        sleeveEnd: ['كم بحاشية']
-      }
-    },
-    {
-      id: 'INV-004',
-      customerName: 'صالح محمد',
-      phone: '07512345678',
-      address: 'أربيل، حي عينكاوة',
-      total: 320,
-      paid: 320,
-      receivedDate: '2024-01-12',
-      deliveryDate: '2024-01-28',
-      status: 'مدفوع',
-      notes: 'طلب تغليف خاص بالهدية.',
-      fabricImage: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=100&h=100&fit=crop',
-      measurements: {
-        length: 170,
-        shoulder: 44,
-        waist: 88,
-        chest: 98
-      },
-      designDetails: {
-        fabricType: ['حرير'],
-        fabricSource: ['داخل المحل'],
-        collarType: ['صينية'],
-        chestStyle: ['صدر واحد'],
-        sleeveEnd: ['كم عادي']
-      }
+    designDetails: {
+      fabricType: ['قطن'],
+      fabricSource: ['داخل المحل'],
+      collarType: ['عادية'],
+      chestStyle: ['صدر واحد'],
+      sleeveEnd: ['كم عادي']
     }
-  ];
+  }));
 
   const receivedTimes = invoices.map((invoice) => new Date(invoice.receivedDate).getTime());
   const fallbackYear = new Date().getFullYear().toString();
@@ -691,9 +617,14 @@ export function InvoicesPage({ onCreateInvoice, onViewInvoiceDetails, onMarkAsPa
     }
   };
 
-  const handleMarkAsPaid = (invoice: Invoice) => {
-    if (onMarkAsPaid) {
-      onMarkAsPaid(invoice.id);
+  const handleMarkAsPaid = async (invoice: Invoice) => {
+    try {
+      await markInvoiceAsPaid(invoice.id);
+      if (onMarkAsPaid) {
+        onMarkAsPaid(invoice.id);
+      }
+    } catch (error) {
+      console.error('Error marking invoice as paid:', error);
     }
   };
 
@@ -757,10 +688,25 @@ export function InvoicesPage({ onCreateInvoice, onViewInvoiceDetails, onMarkAsPa
         </CardContent>
       </Card>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="text-center py-8">
+          <div className="text-[#13312A] arabic-text">جاري تحميل الفواتير...</div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="text-center py-8">
+          <div className="text-red-600 arabic-text">خطأ في تحميل الفواتير: {error}</div>
+        </div>
+      )}
+
       {/* Invoices Table - Desktop */}
-      <Card className="bg-white border-[#C69A72] hidden md:block">
-        <CardContent className="p-0">
-          <Table>
+      {!loading && !error && (
+        <Card className="bg-white border-[#C69A72] hidden md:block">
+          <CardContent className="p-0">
+            <Table>
             <TableHeader>
               <TableRow className="bg-[#13312A] hover:bg-[#13312A]">
                 <TableHead className="text-[#F6E9CA] arabic-text text-right">رقم الفاتورة</TableHead>
@@ -866,9 +812,11 @@ export function InvoicesPage({ onCreateInvoice, onViewInvoiceDetails, onMarkAsPa
           </Table>
         </CardContent>
       </Card>
+      )}
 
       {/* Invoices Cards - Mobile */}
-      <div className="md:hidden space-y-2">
+      {!loading && !error && (
+        <div className="md:hidden space-y-2">
         {sortedInvoices.map((invoice) => {
           const formattedReceivedDate = formatMobileDate(invoice.receivedDate);
           const formattedDeliveryDate = formatMobileDate(invoice.deliveryDate);
@@ -982,6 +930,7 @@ export function InvoicesPage({ onCreateInvoice, onViewInvoiceDetails, onMarkAsPa
           );
         })}
       </div>
+      )}
 
       <Dialog open={isPrintDialogOpen} onOpenChange={handlePrintDialogOpenChange}>
         <DialogContent className="max-w-3xl bg-[#F6E9CA] border-[#C69A72]">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, FileText, Receipt, Users, Menu, Settings, User, LogOut, DollarSign } from 'lucide-react';
+import { Home, FileText, Receipt, Users, Menu, Settings, User, LogOut, DollarSign, ShoppingCart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
 
@@ -16,6 +16,7 @@ export function Layout({ children, currentPage, onNavigate, isLoggedIn, onLogout
     { id: 'dashboard', label: 'الصفحة الرئيسية', icon: Home },
     { id: 'invoices', label: 'الفواتير', icon: Receipt },
     { id: 'customers', label: 'الزبائن', icon: Users },
+    { id: 'orders', label: 'الطلبات', icon: ShoppingCart },
     { id: 'financial', label: 'المالية', icon: DollarSign },
   ];
   const activePage = currentPage === 'customerDetails' ? 'customers' : currentPage;

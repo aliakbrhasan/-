@@ -10,6 +10,10 @@ import { Upload, Calendar as CalendarIcon, Check, ChevronDown, Pencil, Plus, Tra
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList, CommandSeparator } from './ui/command';
 import { cn } from './ui/utils';
+import { InvoiceService, InvoiceFormData } from '@/services/invoice.service';
+import { useInvoices } from '@/hooks/useInvoices';
+import { ImageUploadWithCrop } from './ui/ImageUploadWithCrop';
+import { ImageService } from '@/services/image.service';
 
 interface NewInvoiceDialogProps {
   isOpen: boolean;
@@ -22,6 +26,30 @@ interface FabricOption {
 }
 
 export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps) {
+  const { createInvoice } = useInvoices();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    customerName: '',
+    customerPhone: '',
+    customerAddress: '',
+    total: '',
+    paidAmount: '',
+    notes: '',
+    measurements: {
+      height: '',
+      shoulder: '',
+      waist: '',
+      chest: ''
+    }
+  });
+
+  // Image state
+  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [deliveryDate, setDeliveryDate] = useState('');
   const [fabricOptions, setFabricOptions] = useState<FabricOption[]>([
     { id: 'cotton', label: 'قطن' },
@@ -120,8 +148,127 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
       setIsCollarQuickAddOpen(false);
       setIsChestStyleQuickAddOpen(false);
       setIsSleeveEndQuickAddOpen(false);
+      // Reset form data
+      setFormData({
+        customerName: '',
+        customerPhone: '',
+        customerAddress: '',
+        total: '',
+        paidAmount: '',
+        notes: '',
+        measurements: {
+          height: '',
+          shoulder: '',
+          waist: '',
+          chest: ''
+        }
+      });
+      setSubmitError(null);
+      // Reset image state
+      setSelectedImage('');
+      setImageFile(null);
     }
   }, [isOpen]);
+
+  // Image handling functions
+  const handleImageSelect = (file: File, imageUrl: string) => {
+    setImageFile(file);
+    setSelectedImage(imageUrl);
+  };
+
+  const handleImageRemove = () => {
+    setImageFile(null);
+    setSelectedImage('');
+  };
+
+  const uploadImageToStorage = async (): Promise<string | null> => {
+    if (!imageFile) return null;
+
+    try {
+      setIsUploadingImage(true);
+      
+      // Compress image if needed
+      let fileToUpload = imageFile;
+      if (ImageService.needsCompression(imageFile)) {
+        fileToUpload = await ImageService.compressImage(imageFile, 0.85, 1200);
+      }
+
+      // Upload to storage
+      const result = await ImageService.uploadImage(fileToUpload, 'fabric-images');
+      return result.publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setSubmitError('فشل في رفع الصورة. يرجى المحاولة مرة أخرى.');
+      return null;
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.customerName.trim() || !formData.customerPhone.trim() || !formData.total) {
+      setSubmitError('يرجى ملء جميع الحقول المطلوبة');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      // Upload image if selected
+      let imageUrl = '';
+      if (imageFile) {
+        const uploadedImageUrl = await uploadImageToStorage();
+        if (uploadedImageUrl) {
+          imageUrl = uploadedImageUrl;
+        } else {
+          return; // Stop if image upload failed
+        }
+      }
+
+      const invoiceData: InvoiceFormData = {
+        customerName: formData.customerName.trim(),
+        customerPhone: formData.customerPhone.trim(),
+        customerAddress: formData.customerAddress.trim(),
+        total: parseFloat(formData.total),
+        paidAmount: parseFloat(formData.paidAmount) || 0,
+        status: parseFloat(formData.paidAmount) >= parseFloat(formData.total) ? 'مدفوع' : 'معلق',
+        deliveryDate: deliveryDate || new Date().toISOString().split('T')[0],
+        notes: formData.notes.trim(),
+        items: [{
+          itemName: 'خدمة خياطة',
+          description: 'خدمة خياطة مخصصة',
+          quantity: 1,
+          unitPrice: parseFloat(formData.total),
+          totalPrice: parseFloat(formData.total)
+        }],
+        measurements: {
+          length: parseFloat(formData.measurements.height) || 0,
+          shoulder: parseFloat(formData.measurements.shoulder) || 0,
+          waist: parseFloat(formData.measurements.waist) || 0,
+          chest: parseFloat(formData.measurements.chest) || 0
+        },
+        designDetails: {
+          fabricType: fabricOptions.filter(opt => selectedFabricOptions.includes(opt.id)).map(opt => opt.label),
+          fabricSource: fabricSourceOptions.filter(opt => selectedFabricSources.includes(opt.id)).map(opt => opt.label),
+          collarType: collarOptions.filter(opt => selectedCollarOptions.includes(opt.id)).map(opt => opt.label),
+          chestStyle: chestStyleOptions.filter(opt => selectedChestStyleOptions.includes(opt.id)).map(opt => opt.label),
+          sleeveEnd: sleeveEndOptions.filter(opt => selectedSleeveEndOptions.includes(opt.id)).map(opt => opt.label)
+        },
+        fabricImageUrl: imageUrl
+      };
+
+      await createInvoice(invoiceData);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error creating invoice:', error);
+      setSubmitError('حدث خطأ في إنشاء الفاتورة. يرجى المحاولة مرة أخرى.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const selectedFabricLabels = fabricOptions
     .filter((option) => selectedFabricOptions.includes(option.id))
@@ -425,7 +572,7 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
             </DialogDescription>
           </DialogHeader>
 
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <Card className="bg-white border-[#C69A72]">
               <CardHeader>
                 <CardTitle className="text-[#13312A] arabic-text text-lg">بيانات الزبون</CardTitle>
@@ -433,15 +580,32 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-[#13312A] arabic-text">اسم الزبون</Label>
-                  <Input placeholder="أدخل اسم الزبون" className="bg-white border-[#C69A72] text-right" />
+                  <Input 
+                    placeholder="أدخل اسم الزبون" 
+                    className="bg-white border-[#C69A72] text-right"
+                    value={formData.customerName}
+                    onChange={(e) => setFormData({...formData, customerName: e.target.value})}
+                    required
+                  />
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">رقم الهاتف</Label>
-                  <Input placeholder="077xxxxxxxx" className="bg-white border-[#C69A72] text-right" />
+                  <Input 
+                    placeholder="077xxxxxxxx" 
+                    className="bg-white border-[#C69A72] text-right"
+                    value={formData.customerPhone}
+                    onChange={(e) => setFormData({...formData, customerPhone: e.target.value})}
+                    required
+                  />
                 </div>
                 <div className="md:col-span-2">
                   <Label className="text-[#13312A] arabic-text">العنوان</Label>
-                  <Input placeholder="أدخل العنوان" className="bg-white border-[#C69A72] text-right" />
+                  <Input 
+                    placeholder="أدخل العنوان" 
+                    className="bg-white border-[#C69A72] text-right"
+                    value={formData.customerAddress}
+                    onChange={(e) => setFormData({...formData, customerAddress: e.target.value})}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -453,19 +617,39 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
               <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <Label className="text-[#13312A] arabic-text">الطول</Label>
-                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right" />
+                  <Input 
+                    placeholder="سم" 
+                    className="bg-white border-[#C69A72] text-right"
+                    value={formData.measurements.height}
+                    onChange={(e) => setFormData({...formData, measurements: {...formData.measurements, height: e.target.value}})}
+                  />
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">الكتف</Label>
-                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right" />
+                  <Input 
+                    placeholder="سم" 
+                    className="bg-white border-[#C69A72] text-right"
+                    value={formData.measurements.shoulder}
+                    onChange={(e) => setFormData({...formData, measurements: {...formData.measurements, shoulder: e.target.value}})}
+                  />
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">الخصر</Label>
-                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right" />
+                  <Input 
+                    placeholder="سم" 
+                    className="bg-white border-[#C69A72] text-right"
+                    value={formData.measurements.waist}
+                    onChange={(e) => setFormData({...formData, measurements: {...formData.measurements, waist: e.target.value}})}
+                  />
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">الصدر</Label>
-                  <Input placeholder="سم" className="bg-white border-[#C69A72] text-right" />
+                  <Input 
+                    placeholder="سم" 
+                    className="bg-white border-[#C69A72] text-right"
+                    value={formData.measurements.chest}
+                    onChange={(e) => setFormData({...formData, measurements: {...formData.measurements, chest: e.target.value}})}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -868,11 +1052,22 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
               <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label className="text-[#13312A] arabic-text">المبلغ الكلي</Label>
-                  <Input placeholder="دينار عراقي" className="bg-white border-[#C69A72] text-right" />
+                  <Input 
+                    placeholder="دينار عراقي" 
+                    className="bg-white border-[#C69A72] text-right"
+                    value={formData.total}
+                    onChange={(e) => setFormData({...formData, total: e.target.value})}
+                    required
+                  />
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">المدفوع</Label>
-                  <Input placeholder="دينار عراقي" className="bg-white border-[#C69A72] text-right" />
+                  <Input 
+                    placeholder="دينار عراقي" 
+                    className="bg-white border-[#C69A72] text-right"
+                    value={formData.paidAmount}
+                    onChange={(e) => setFormData({...formData, paidAmount: e.target.value})}
+                  />
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">تاريخ التسليم</Label>
@@ -896,17 +1091,30 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
               <CardContent className="space-y-4">
                 <div>
                   <Label className="text-[#13312A] arabic-text">ملاحظات إضافية</Label>
-                  <Textarea placeholder="أضف أي ملاحظات خاصة..." className="bg-white border-[#C69A72] text-right min-h-20" />
+                  <Textarea 
+                    placeholder="أضف أي ملاحظات خاصة..." 
+                    className="bg-white border-[#C69A72] text-right min-h-20"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  />
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">صورة القماش</Label>
-                  <div className="border-2 border-dashed border-[#C69A72] rounded-lg p-6 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-[#155446] mb-2" />
-                    <p className="text-[#155446] arabic-text">اضغط لرفع صورة القماش</p>
-                  </div>
+                  <ImageUploadWithCrop
+                    onImageSelect={handleImageSelect}
+                    onImageRemove={handleImageRemove}
+                    selectedImage={selectedImage}
+                    className="mt-2"
+                  />
                 </div>
               </CardContent>
             </Card>
+
+            {submitError && (
+              <div className="text-red-600 arabic-text text-center bg-red-50 border border-red-200 rounded-lg p-3">
+                {submitError}
+              </div>
+            )}
 
             <div className="flex gap-4 justify-end">
               <Button
@@ -914,11 +1122,16 @@ export function NewInvoiceDialog({ isOpen, onOpenChange }: NewInvoiceDialogProps
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]"
+                disabled={isSubmitting}
               >
                 إلغاء
               </Button>
-              <Button className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA]">
-                حفظ الفاتورة
+              <Button 
+                type="submit"
+                className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA]"
+                disabled={isSubmitting || isUploadingImage}
+              >
+                {isUploadingImage ? 'جاري رفع الصورة...' : isSubmitting ? 'جاري الحفظ...' : 'حفظ الفاتورة'}
               </Button>
             </div>
           </form>

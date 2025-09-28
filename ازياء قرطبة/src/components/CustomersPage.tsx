@@ -20,16 +20,25 @@ import {
 import { Customer } from '../types/customer';
 import { openPrintWindow, formatPrintDateTime } from './print/PrintUtils';
 import { formatCurrency, formatDate } from './PrintableInvoice';
+import { databaseService } from '../db/database.service';
 
 interface CustomersPageProps {
   customers: Customer[];
   onCustomerSelect: (customer: Customer) => void;
+  loading?: boolean;
 }
 
-export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProps) {
+export function CustomersPage({ customers, onCustomerSelect, loading = false }: CustomersPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLabel, setFilterLabel] = useState('all');
   const [isNewCustomerOpen, setIsNewCustomerOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    label: 'جديد'
+  });
 
   const getLabelColor = (label: string) => {
     switch (label) {
@@ -80,6 +89,44 @@ export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProp
           color: '#13312A',
           border: '1px solid rgba(198, 154, 114, 0.4)',
         };
+    }
+  };
+
+  const handleCreateCustomer = async () => {
+    if (!newCustomer.name.trim() || !newCustomer.phone.trim()) {
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+      const customerData = {
+        name: newCustomer.name,
+        phone: newCustomer.phone,
+        address: newCustomer.address,
+        label: newCustomer.label,
+        totalSpent: 0,
+        lastOrder: null,
+        measurements: {},
+        notes: ''
+      };
+
+      await databaseService.createCustomer(customerData);
+      
+      // Reset form
+      setNewCustomer({
+        name: '',
+        phone: '',
+        address: '',
+        label: 'جديد'
+      });
+      setIsNewCustomerOpen(false);
+      
+      // Refresh the page to show new customer
+      window.location.reload();
+    } catch (error) {
+      console.error('Error creating customer:', error);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -275,7 +322,7 @@ export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProp
           </DialogDescription>
         </DialogHeader>
         
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleCreateCustomer(); }}>
           <Card className="bg-white border-[#C69A72]">
             <CardHeader>
               <CardTitle className="text-[#13312A] arabic-text text-lg">البيانات الأساسية</CardTitle>
@@ -283,16 +330,31 @@ export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProp
             <CardContent className="space-y-4">
               <div>
                 <Label className="text-[#13312A] arabic-text">الاسم الكامل</Label>
-                <Input placeholder="أدخل الاسم الكامل" className="bg-white border-[#C69A72] text-right" />
+                <Input 
+                  placeholder="أدخل الاسم الكامل" 
+                  className="bg-white border-[#C69A72] text-right"
+                  value={newCustomer.name}
+                  onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
+                  required
+                />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-[#13312A] arabic-text">رقم الهاتف</Label>
-                  <Input placeholder="077xxxxxxxx" className="bg-white border-[#C69A72] text-right" />
+                  <Input 
+                    placeholder="077xxxxxxxx" 
+                    className="bg-white border-[#C69A72] text-right"
+                    value={newCustomer.phone}
+                    onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})}
+                    required
+                  />
                 </div>
                 <div>
                   <Label className="text-[#13312A] arabic-text">تصنيف الزبون</Label>
-                  <Select>
+                  <Select 
+                    value={newCustomer.label}
+                    onValueChange={(value) => setNewCustomer({...newCustomer, label: value})}
+                  >
                     <SelectTrigger className="bg-white border-[#C69A72]">
                       <SelectValue placeholder="اختر التصنيف" />
                     </SelectTrigger>
@@ -307,17 +369,32 @@ export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProp
               </div>
               <div>
                 <Label className="text-[#13312A] arabic-text">العنوان</Label>
-                <Input placeholder="أدخل العنوان الكامل" className="bg-white border-[#C69A72] text-right" />
+                <Input 
+                  placeholder="أدخل العنوان الكامل" 
+                  className="bg-white border-[#C69A72] text-right"
+                  value={newCustomer.address}
+                  onChange={(e) => setNewCustomer({...newCustomer, address: e.target.value})}
+                />
               </div>
             </CardContent>
           </Card>
 
           <div className="flex gap-4 justify-end">
-            <Button variant="outline" onClick={() => setIsNewCustomerOpen(false)} className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]">
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={() => setIsNewCustomerOpen(false)} 
+              className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72]"
+              disabled={isCreating}
+            >
               إلغاء
             </Button>
-            <Button className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA]">
-              حفظ الزبون
+            <Button 
+              type="submit"
+              className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA]"
+              disabled={isCreating}
+            >
+              {isCreating ? 'جاري الحفظ...' : 'حفظ الزبون'}
             </Button>
           </div>
         </form>
@@ -398,7 +475,16 @@ export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProp
 
       {/* Customers List */}
       <div className="grid gap-4">
-        {filteredCustomers.map((customer) => {
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="text-[#13312A] arabic-text">جاري تحميل بيانات الزبائن...</div>
+          </div>
+        ) : filteredCustomers.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="text-[#13312A] arabic-text">لا توجد زبائن مسجلة</div>
+          </div>
+        ) : (
+          filteredCustomers.map((customer) => {
           const ordersCount = customer.orders.length;
           return (
             <Card
@@ -469,7 +555,8 @@ export function CustomersPage({ customers, onCustomerSelect }: CustomersPageProp
               </CardContent>
             </Card>
           );
-        })}
+        })
+        )}
       </div>
 
       <NewCustomerDialog />
