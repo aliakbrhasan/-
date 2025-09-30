@@ -2,16 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { LoginPage } from './components/LoginPage';
 import { Dashboard } from './components/Dashboard';
-import { InvoicesPage } from './components/InvoicesPage';
+import { InvoicesPageWithDB } from './components/InvoicesPageWithDB';
 import { CustomersPage } from './components/CustomersPage';
 import { ReportsPage } from './components/ReportsPage';
 import { FinancialPage } from './components/FinancialPage';
 import { CustomerDetailsPage } from './components/CustomerDetailsPage';
 import { InvoiceDetailsPage } from './components/InvoiceDetailsPage';
-import { NewInvoiceDialog } from './components/NewInvoiceDialog';
+import { NewInvoiceDialogWithDB } from './components/NewInvoiceDialogWithDB';
 import { UsersManagementPage } from './components/UsersManagementPage';
 import { RolesManagementPage } from './components/RolesManagementPage';
-import { OrdersPage } from './features/orders/OrdersPage';
 import { Toaster } from './components/ui/sonner';
 import { AppProviders } from './app/AppProviders';
 import { Customer } from './types/customer';
@@ -330,7 +329,7 @@ export default function App() {
           />
         );
       case 'invoices':
-        return <InvoicesPage onCreateInvoice={handleCreateInvoice} onViewInvoiceDetails={handleViewInvoiceDetails} onMarkAsPaid={handleMarkAsPaid} />;
+        return <InvoicesPageWithDB onCreateInvoice={handleCreateInvoice} onViewInvoiceDetails={handleViewInvoiceDetails} onMarkAsPaid={handleMarkAsPaid} />;
       case 'customers':
         return (
           <CustomersPage
@@ -366,7 +365,7 @@ export default function App() {
             onMarkAsPaid={handleMarkAsPaid}
           />
         ) : (
-          <InvoicesPage onCreateInvoice={handleCreateInvoice} onViewInvoiceDetails={handleViewInvoiceDetails} onMarkAsPaid={handleMarkAsPaid} />
+          <InvoicesPageWithDB onCreateInvoice={handleCreateInvoice} onViewInvoiceDetails={handleViewInvoiceDetails} onMarkAsPaid={handleMarkAsPaid} />
         );
       case 'reports':
         return <ReportsPage />;
@@ -376,8 +375,6 @@ export default function App() {
         return <UsersManagementPage onNavigate={handleNavigate} />;
       case 'roles':
         return <RolesManagementPage onBack={() => setCurrentPage('users')} />;
-      case 'orders':
-        return <OrdersPage />;
       default:
         return (
           <Dashboard
@@ -401,7 +398,7 @@ export default function App() {
             onLogout={handleLogout}
           >
             {renderCurrentPage()}
-            <NewInvoiceDialog
+            <NewInvoiceDialogWithDB
               isOpen={isNewInvoiceDialogOpen}
               onOpenChange={setIsNewInvoiceDialogOpen}
             />

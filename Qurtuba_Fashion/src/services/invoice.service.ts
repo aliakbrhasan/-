@@ -29,6 +29,7 @@ export interface InvoiceFormData {
     collarType: string[];
     chestStyle: string[];
     sleeveEnd: string[];
+    bunijaType?: string;
   };
   fabricImageUrl?: string;
 }

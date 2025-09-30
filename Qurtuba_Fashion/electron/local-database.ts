@@ -174,21 +174,34 @@ export class LocalDatabase {
   async getCustomers(): Promise<LocalCustomer[]> {
     if (!this.db) throw new Error('Database not initialized');
     const all = promisify(this.db.all.bind(this.db));
-    return await all('SELECT * FROM customers ORDER BY created_at DESC');
+    return await all('SELECT * FROM customers ORDER BY created_at DESC') as LocalCustomer[];
   }
 
   async createCustomer(customer: Omit<LocalCustomer, 'id' | 'created_at' | 'updated_at' | 'synced'>): Promise<LocalCustomer> {
     if (!this.db) throw new Error('Database not initialized');
-    const run = promisify(this.db.run.bind(this.db));
     
     const id = this.generateId();
     const now = new Date().toISOString();
     
-    await run(`
-      INSERT INTO customers (id, name, phone, address, total_spent, last_order, label, measurements, notes, created_at, updated_at, synced)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    `, [id, customer.name, customer.phone, customer.address, customer.totalSpent, customer.lastOrder, customer.label, 
-        JSON.stringify(customer.measurements), customer.notes, now, now]);
+    return new Promise((resolve, reject) => {
+      this.db!.run(`
+        INSERT INTO customers (id, name, phone, address, total_spent, last_order, label, measurements, notes, created_at, updated_at, synced)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      `, [id, customer.name, customer.phone, customer.address, customer.totalSpent, customer.lastOrder, customer.label,
+          JSON.stringify(customer.measurements), customer.notes, now, now], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({
+            id,
+            ...customer,
+            created_at: now,
+            updated_at: now,
+            synced: false
+          } as LocalCustomer);
+        }
+      });
+    });
 
     // Log sync action
     await this.logSyncAction('customers', id, 'create');

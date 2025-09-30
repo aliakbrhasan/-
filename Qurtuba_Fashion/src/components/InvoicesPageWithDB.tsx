@@ -23,7 +23,7 @@ import {
   Eye,
   CheckCircle,
 } from 'lucide-react';
-import { NewInvoiceDialog } from './NewInvoiceDialog';
+import { NewInvoiceDialogWithDB } from './NewInvoiceDialogWithDB';
 import { InvoiceDetailsDialog } from './InvoiceDetailsDialog';
 
 interface InvoicesPageProps {
@@ -67,6 +67,12 @@ export function InvoicesPageWithDB({ onCreateInvoice, onViewInvoiceDetails, onMa
     if (onCreateInvoice) {
       onCreateInvoice();
     }
+  };
+
+  // Handle invoice created callback
+  const handleInvoiceCreated = () => {
+    // The useInvoices hook will automatically update the cache
+    // No need to manually refresh
   };
 
   // Filter invoices based on search term
@@ -254,9 +260,10 @@ export function InvoicesPageWithDB({ onCreateInvoice, onViewInvoiceDetails, onMa
       </Card>
 
       {/* New Invoice Dialog */}
-      <NewInvoiceDialog 
+      <NewInvoiceDialogWithDB 
         isOpen={isNewInvoiceOpen} 
-        onOpenChange={setIsNewInvoiceOpen} 
+        onOpenChange={setIsNewInvoiceOpen}
+        onInvoiceCreated={handleInvoiceCreated}
       />
 
       {/* Invoice Details Dialog */}
