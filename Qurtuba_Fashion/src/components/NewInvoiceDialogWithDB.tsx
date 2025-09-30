@@ -939,7 +939,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
                           <Pencil className="h-4 w-4" />
                           تعديل الأنواع
                         </Button>
-                      </div>
+              </div>
                     </Command>
                   </PopoverContent>
                 </Popover>
@@ -1017,7 +1017,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
                           <Pencil className="h-4 w-4" />
                           تعديل المصادر
                         </Button>
-                      </div>
+              </div>
                     </Command>
                   </PopoverContent>
                 </Popover>
@@ -1422,7 +1422,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
 
       {/* Fabric Manager Dialog - Compact */}
       <Dialog open={isFabricManagerOpen} onOpenChange={handleFabricManagerOpenChange}>
-        <DialogOverlay className="fixed inset-0 z-[1001] bg-black/50 backdrop-blur-sm" />
+        <DialogOverlay className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm" />
         <DialogContent className="max-w-md bg-[#F6E9CA] border-[#C69A72] rounded-xl shadow-2xl">
           <DialogHeader className="pb-3">
             <DialogTitle className="text-[#13312A] arabic-text text-lg">تعديل أنواع القماش</DialogTitle>
@@ -1483,8 +1483,8 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
                 </Button>
               </div>
             </div>
-          </form>
-        </DialogContent>
+        </form>
+      </DialogContent>
       </Dialog>
 
       {/* Quick Add Dialog - Compact */}
@@ -1882,7 +1882,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
 
       {/* Source Manager Dialog - Compact */}
       <Dialog open={isSourceManagerOpen} onOpenChange={openSourceManager}>
-        <DialogOverlay className="fixed inset-0 z-[1001] bg-black/50 backdrop-blur-sm" />
+        <DialogOverlay className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm" />
         <DialogContent className="max-w-md bg-[#F6E9CA] border-[#C69A72] rounded-xl shadow-2xl">
           <DialogHeader className="pb-3">
             <DialogTitle className="text-[#13312A] arabic-text text-lg">تعديل مصادر القماش</DialogTitle>
@@ -1949,7 +1949,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
 
       {/* Source Quick Add Dialog - Compact */}
       <Dialog open={isSourceQuickAddOpen} onOpenChange={openSourceQuickAdd}>
-        <DialogOverlay className="fixed inset-0 z-[1001] bg-black/50 backdrop-blur-sm" />
+        <DialogOverlay className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm" />
         <DialogContent className="max-w-sm bg-[#F6E9CA] border-[#C69A72] rounded-xl shadow-2xl">
           <DialogHeader className="pb-3">
             <DialogTitle className="text-[#13312A] arabic-text text-lg">إضافة مصدر قماش جديد</DialogTitle>
@@ -1997,7 +1997,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
 
       {/* Bunija Manager Dialog - Compact */}
       <Dialog open={isBunijaManagerOpen} onOpenChange={openBunijaManager}>
-        <DialogOverlay className="fixed inset-0 z-[1001] bg-black/50 backdrop-blur-sm" />
+        <DialogOverlay className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm" />
         <DialogContent className="max-w-md bg-[#F6E9CA] border-[#C69A72] rounded-xl shadow-2xl">
           <DialogHeader className="pb-3">
             <DialogTitle className="text-[#13312A] arabic-text text-lg">تعديل أنواع البنيجة</DialogTitle>
@@ -2064,7 +2064,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
 
       {/* Bunija Quick Add Dialog - Compact */}
       <Dialog open={isBunijaQuickAddOpen} onOpenChange={openBunijaQuickAdd}>
-        <DialogOverlay className="fixed inset-0 z-[1001] bg-black/50 backdrop-blur-sm" />
+        <DialogOverlay className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm" />
         <DialogContent className="max-w-sm bg-[#F6E9CA] border-[#C69A72] rounded-xl shadow-2xl">
           <DialogHeader className="pb-3">
             <DialogTitle className="text-[#13312A] arabic-text text-lg">إضافة نوع بنيجة جديد</DialogTitle>
