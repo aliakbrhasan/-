@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Scissors, Receipt, FileText, Users, DollarSign, Settings } from 'lucide-react';
+import { Scissors, Receipt, Users, Settings } from 'lucide-react';
 
 interface QuickAction {
   label: string;
@@ -33,24 +33,10 @@ export function QuickActions({ onCreateInvoice, onNavigate }: QuickActionsProps)
       description: 'عرض وإدارة بيانات الزبائن'
     },
     { 
-      label: 'التقارير المالية', 
-      icon: FileText, 
-      action: () => onNavigate('reports'), 
-      color: 'bg-[#C69A72]',
-      description: 'عرض التقارير والإحصائيات'
-    },
-    { 
-      label: 'المالية', 
-      icon: DollarSign, 
-      action: () => onNavigate('financial'), 
-      color: 'bg-[#155446]',
-      description: 'إدارة المالية والأرباح'
-    },
-    { 
       label: 'إدارة المستخدمين', 
       icon: Settings, 
       action: () => onNavigate('users'), 
-      color: 'bg-[#13312A]',
+      color: 'bg-[#C69A72]',
       description: 'إدارة المستخدمين والصلاحيات'
     }
   ];

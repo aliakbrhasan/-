@@ -5,7 +5,7 @@ import { cn } from '../ui/utils';
 
 interface StatCardProps {
   title: string;
-  value: string | number;
+  value: string | number | React.ReactNode;
   icon: LucideIcon;
   color: string;
   trend?: {
@@ -31,9 +31,9 @@ export function StatCard({
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <p className="text-sm text-[#155446] arabic-text mb-1">{title}</p>
-            <p className="text-2xl font-bold text-[#13312A] mb-1">
+            <div className="text-2xl font-bold text-[#13312A] mb-1">
               {typeof value === 'number' ? value.toLocaleString('ar-IQ') : value}
-            </p>
+            </div>
             {subtitle && (
               <p className="text-xs text-[#155446] arabic-text">{subtitle}</p>
             )}
