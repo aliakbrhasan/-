@@ -13,6 +13,12 @@ export const brandPrintStyles = `
     font-family: 'Tajawal', 'Noto Kufi Arabic', sans-serif;
     direction: rtl;
     color: #13312A;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 
   * {

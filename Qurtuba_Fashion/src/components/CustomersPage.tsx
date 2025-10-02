@@ -40,6 +40,32 @@ export function CustomersPage({ customers, onCustomerSelect, loading = false }: 
     label: 'جديد'
   });
 
+  // Lightweight date formatter for human-readable dates
+  const formatHumanDate = (dateString: string | null) => {
+    if (!dateString) return 'لا يوجد طلبات';
+    
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - date.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) return 'أمس';
+      if (diffDays < 7) return `منذ ${diffDays} أيام`;
+      if (diffDays < 30) return `منذ ${Math.ceil(diffDays / 7)} أسابيع`;
+      
+      // Format as MM-YYYY HH:MM for older dates
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return `${month}-${year} ${hours}:${minutes}`;
+    } catch {
+      return 'تاريخ غير صحيح';
+    }
+  };
+
   const getLabelColor = (label: string) => {
     switch (label) {
       case 'جديد': return 'bg-blue-100 text-blue-800';
@@ -353,7 +379,7 @@ export function CustomersPage({ customers, onCustomerSelect, loading = false }: 
                   <Label className="text-[#13312A] arabic-text">تصنيف الزبون</Label>
                   <Select 
                     value={newCustomer.label}
-                    onValueChange={(value) => setNewCustomer({...newCustomer, label: value})}
+                    onValueChange={(value: string) => setNewCustomer({...newCustomer, label: value})}
                   >
                     <SelectTrigger className="bg-white border-[#C69A72]">
                       <SelectValue placeholder="اختر التصنيف" />
@@ -403,160 +429,176 @@ export function CustomersPage({ customers, onCustomerSelect, loading = false }: 
   );
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="text-2xl text-[#13312A] arabic-text">إدارة الزبائن</h1>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={handlePrintCustomers}
-            className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target"
-          >
-            <Printer className="w-4 h-4 ml-2" />
-            <span className="arabic-text">طباعة القائمة</span>
-          </Button>
-          <Button onClick={() => setIsNewCustomerOpen(true)} className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] touch-target">
-            <Plus className="w-4 h-4 ml-2" />
-            <span className="arabic-text">زبون جديد</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <Card className="bg-white border-[#C69A72]">
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#155446] w-4 h-4" />
-              <Input
-                placeholder="بحث عن الزبائن بالاسم، الهاتف، أو العنوان..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10 bg-white border-[#C69A72] text-right"
-              />
-            </div>
-            <div className="flex gap-2">
-              <select
-                value={filterLabel}
-                onChange={(e) => setFilterLabel(e.target.value)}
-                className="px-4 py-2 border border-[#C69A72] rounded-md bg-white text-[#13312A] arabic-text touch-target"
-              >
-                <option value="all">جميع التصنيفات</option>
-                <option value="جديد">جديد</option>
-                <option value="منتظم">منتظم</option>
-                <option value="وفي">وفي</option>
-                <option value="ذهبي">ذهبي</option>
-              </select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Customer Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {['جديد', 'منتظم', 'وفي', 'ذهبي'].map((label) => {
-          const count = customers.filter(c => c.label === label).length;
-          return (
-            <Card key={label} className="bg-white border-[#C69A72]">
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  {getLabelIcon(label)}
-                  <Badge className={getLabelColor(label)}>
-                    {label}
-                  </Badge>
-                </div>
-                <p className="text-2xl text-[#13312A]">{count}</p>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Customers List */}
-      <div className="grid gap-4">
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="text-[#13312A] arabic-text">جاري تحميل بيانات الزبائن...</div>
-          </div>
-        ) : filteredCustomers.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="text-[#13312A] arabic-text">لا توجد زبائن مسجلة</div>
-          </div>
-        ) : (
-          filteredCustomers.map((customer) => {
-          const ordersCount = customer.orders.length;
-          return (
-            <Card
-              key={customer.id}
-              onClick={() => onCustomerSelect(customer)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  onCustomerSelect(customer);
-                }
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={`عرض تفاصيل ${customer.name}`}
-              className="bg-white border-[#C69A72] hover:shadow-lg transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#C69A72]"
+    <div className="min-h-screen bg-[#F6E9CA]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <h1 className="text-3xl font-semibold text-[#13312A] arabic-text">إدارة الزبائن</h1>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              variant="outline"
+              onClick={handlePrintCustomers}
+              className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] hover:border-[#B8886A] h-11 px-6 touch-target focus:ring-2 focus:ring-[#C69A72] focus:ring-offset-2"
             >
-              <CardContent className="p-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg text-[#13312A] arabic-text">{customer.name}</h3>
-                      <Badge className={`${getLabelColor(customer.label)} flex items-center gap-1`}>
-                        {getLabelIcon(customer.label)}
-                        {customer.label}
-                      </Badge>
-                    </div>
+              <Printer className="w-4 h-4 ml-2" aria-hidden="true" />
+              <span className="arabic-text">طباعة القائمة</span>
+            </Button>
+            <Button 
+              onClick={() => setIsNewCustomerOpen(true)} 
+              className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] h-11 px-6 touch-target focus:ring-2 focus:ring-[#155446] focus:ring-offset-2"
+            >
+              <Plus className="w-4 h-4 ml-2" aria-hidden="true" />
+              <span className="arabic-text">زبون جديد</span>
+            </Button>
+          </div>
+        </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-                      <div className="flex items-center gap-2 text-[#155446]">
-                        <Phone className="w-4 h-4" />
-                        <span>{customer.phone}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-[#155446]">
-                        <MapPin className="w-4 h-4" />
-                        <span className="arabic-text">{customer.address}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-[#155446]">
-                        <CreditCard className="w-4 h-4" />
-                        <span className="arabic-text">{customer.totalSpent} دينار عراقي</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-[#155446]">
-                        <Calendar className="w-4 h-4" />
-                        <span className="arabic-text">آخر طلب: {customer.lastOrder}</span>
-                      </div>
-                    </div>
+        {/* Search and Filters */}
+        <Card className="bg-white border border-[#C69A72] rounded-2xl shadow-sm">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#155446] w-5 h-5" aria-hidden="true" />
+                <Input
+                  placeholder="بحث عن الزبائن بالاسم، الهاتف، أو العنوان..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pr-12 h-12 bg-white border-[#C69A72] text-right text-base focus:ring-2 focus:ring-[#155446] focus:border-[#155446] rounded-xl"
+                  aria-label="بحث عن الزبائن"
+                />
+              </div>
+              <div className="lg:w-48">
+                <select
+                  value={filterLabel}
+                  onChange={(e) => setFilterLabel(e.target.value)}
+                  className="w-full h-12 px-4 py-2 border border-[#C69A72] rounded-xl bg-white text-[#13312A] arabic-text touch-target focus:ring-2 focus:ring-[#155446] focus:border-[#155446] text-base"
+                  aria-label="تصفية حسب التصنيف"
+                >
+                  <option value="all">جميع التصنيفات</option>
+                  <option value="جديد">جديد</option>
+                  <option value="منتظم">منتظم</option>
+                  <option value="وفي">وفي</option>
+                  <option value="ذهبي">ذهبي</option>
+                </select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Customer Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          {['جديد', 'منتظم', 'وفي', 'ذهبي'].map((label) => {
+            const count = customers.filter(c => c.label === label).length;
+            return (
+              <Card key={label} className="bg-white border border-[#C69A72] rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-6 text-center h-full flex flex-col justify-center">
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    {getLabelIcon(label)}
+                    <Badge className={`${getLabelColor(label)} px-3 py-1 text-sm font-medium rounded-full`}>
+                      {label}
+                    </Badge>
                   </div>
+                  <p className="text-3xl font-bold text-[#13312A] mb-1">{count}</p>
+                  <p className="text-sm text-[#155446] arabic-text">زبون</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
-                  <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                    <div className="text-center">
-                      <p className="text-2xl text-[#13312A]">{ordersCount}</p>
-                      <p className="text-sm text-[#155446] arabic-text">طلب</p>
-                    </div>
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] touch-target"
-                      onClick={(event) => {
-                        event.stopPropagation();
+        {/* Customers List */}
+        <div className="space-y-6">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="text-lg text-[#13312A] arabic-text">جاري تحميل بيانات الزبائن...</div>
+            </div>
+          ) : filteredCustomers.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-lg text-[#13312A] arabic-text mb-4">لا توجد زبائن مسجلة</div>
+              <Button 
+                onClick={() => setIsNewCustomerOpen(true)} 
+                className="bg-[#155446] hover:bg-[#13312A] text-[#F6E9CA] h-11 px-6"
+              >
+                <Plus className="w-4 h-4 ml-2" />
+                <span className="arabic-text">إضافة زبون جديد</span>
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredCustomers.map((customer) => {
+                const ordersCount = customer.orders.length;
+                return (
+                  <Card
+                    key={customer.id}
+                    onClick={() => onCustomerSelect(customer)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
-                      }}
-                    >
-                      <Edit className="w-4 h-4 ml-1" />
-                      <span className="arabic-text">تعديل</span>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })
-        )}
+                        onCustomerSelect(customer);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`عرض تفاصيل ${customer.name}`}
+                    className="bg-white border border-[#C69A72] rounded-2xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#155446] focus:ring-offset-2"
+                  >
+                    <CardContent className="p-6">
+                      {/* Header with name and badge */}
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-[#13312A] arabic-text truncate flex-1">{customer.name}</h3>
+                        <Badge className={`${getLabelColor(customer.label)} flex items-center gap-1 px-3 py-1 text-sm font-medium rounded-full flex-shrink-0`}>
+                          {getLabelIcon(customer.label)}
+                          {customer.label}
+                        </Badge>
+                      </div>
+
+                      {/* Customer details */}
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-center gap-3 text-[#155446]">
+                          <Phone className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                          <span className="text-sm truncate" title={customer.phone}>{customer.phone}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-[#155446]">
+                          <MapPin className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                          <span className="text-sm truncate arabic-text" title={customer.address}>{customer.address}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-[#155446]">
+                          <Calendar className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                          <span className="text-sm arabic-text">آخر طلب: {formatHumanDate(customer.lastOrder)}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-[#155446]">
+                          <CreditCard className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                          <span className="text-sm arabic-text">{customer.totalSpent} دينار عراقي</span>
+                        </div>
+                      </div>
+
+                      {/* Footer with orders count and edit button */}
+                      <div className="flex items-center justify-between pt-4 border-t border-[#C69A72]/20">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-[#13312A]">{ordersCount}</p>
+                          <p className="text-xs text-[#155446] arabic-text">طلب</p>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-[#C69A72] text-[#13312A] hover:bg-[#C69A72] hover:border-[#B8886A] h-9 px-4 touch-target focus:ring-2 focus:ring-[#C69A72] focus:ring-offset-2"
+                          onClick={(event: React.MouseEvent) => {
+                            event.stopPropagation();
+                            event.preventDefault();
+                          }}
+                        >
+                          <Edit className="w-4 h-4 ml-1" aria-hidden="true" />
+                          <span className="arabic-text">تعديل</span>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       <NewCustomerDialog />

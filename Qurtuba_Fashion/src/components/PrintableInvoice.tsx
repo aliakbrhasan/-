@@ -19,12 +19,22 @@ export const formatCurrency = (value: number) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-export const formatDate = (value: string) =>
-  new Intl.DateTimeFormat('ar-IQ', {
+export const formatDate = (value: string) => {
+  if (!value) {
+    return 'غير محدد';
+  }
+  
+  const date = new Date(value);
+  if (isNaN(date.getTime())) {
+    return 'تاريخ غير صالح';
+  }
+  
+  return new Intl.DateTimeFormat('ar-IQ', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  }).format(new Date(value));
+  }).format(date);
+};
 
 export const receiptStyles = `
   @page {
@@ -38,6 +48,12 @@ export const receiptStyles = `
     font-family: 'Tajawal', 'Noto Kufi Arabic', sans-serif;
     direction: rtl;
     color: #13312A;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 
   * {

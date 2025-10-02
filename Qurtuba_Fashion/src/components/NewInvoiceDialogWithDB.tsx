@@ -6,7 +6,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Button } from './ui/button';
-import { Calendar as CalendarIcon, X, Plus, Pencil, Trash2, Check, ChevronDown } from 'lucide-react';
+import { X, Plus, Pencil, Trash2, Check, ChevronDown } from 'lucide-react';
 import { InvoiceService, InvoiceFormData } from '@/services/invoice.service';
 import { useInvoices } from '@/hooks/useInvoices';
 import { ImageUpload } from './ui/ImageUpload';
@@ -42,13 +42,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
     status: 'معلق',
     deliveryDate: '',
     notes: '',
-    items: [{
-      itemName: 'خدمة خياطة',
-      description: 'خدمة خياطة مخصصة',
-      quantity: 1,
-      unitPrice: 0,
-      totalPrice: 0
-    }],
+    items: [],
     measurements: {
       length: 0,
       shoulder: 0,
@@ -64,6 +58,43 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
       bunijaType: ''
     }
   });
+
+  // Payment calculation states
+  const [remainingAmount, setRemainingAmount] = useState(0);
+  const [paymentDate, setPaymentDate] = useState('');
+
+
+  // Calculate remaining amount and update payment status
+  useEffect(() => {
+    const remaining = formData.total - formData.paidAmount;
+    setRemainingAmount(remaining);
+    
+    // Auto-update payment status
+    let newStatus = 'معلق';
+    if (formData.paidAmount === 0) {
+      newStatus = 'معلق';
+    } else if (formData.paidAmount >= formData.total) {
+      newStatus = 'مدفوع';
+    } else if (formData.paidAmount > 0) {
+      newStatus = 'جزئي';
+    }
+    
+    setFormData(prev => ({ ...prev, status: newStatus }));
+    
+    // Set payment date when payment is made
+    if (formData.paidAmount > 0 && !paymentDate) {
+      const today = new Date().toISOString().split('T')[0];
+      setPaymentDate(today);
+    }
+  }, [formData.total, formData.paidAmount, paymentDate]);
+
+
+  // Handle focus to clear zero values
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (e.target.value === '0') {
+      e.target.select();
+    }
+  };
 
   // Image state
   const [fabricImage, setFabricImage] = useState<string | null>(null);
@@ -175,13 +206,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
         status: 'معلق',
         deliveryDate: '',
         notes: '',
-        items: [{
-          itemName: 'خدمة خياطة',
-          description: 'خدمة خياطة مخصصة',
-          quantity: 1,
-          unitPrice: 0,
-          totalPrice: 0
-        }],
+        items: [],
         measurements: {
           length: 0,
           shoulder: 0,
@@ -200,6 +225,10 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
       setFabricImage(null);
       setUploadedImages([]);
       setSubmitError(null);
+      
+      // Reset payment states
+      setRemainingAmount(0);
+      setPaymentDate('');
       
       // Reset design options
       setSelectedFabricOptions([]);
@@ -244,12 +273,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
         try {
             const fabricFile = uploadedImages.find(f => f.name.includes('fabric'));
             if (fabricFile) {
-              await ImageService.uploadImage(fabricFile, 'invoice', createdInvoice.id, {
-                maxWidth: 800,
-                maxHeight: 600,
-                quality: 0.8,
-                createThumbnail: true
-              });
+              await ImageService.uploadImage(fabricFile, 'invoice');
           }
         } catch (imageError) {
           console.warn('Failed to upload fabric image:', imageError);
@@ -773,10 +797,11 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
                     ...prev,
                     measurements: { ...prev.measurements!, length: Number(e.target.value) }
                   }))}
+                  onFocus={handleFocus}
                 />
               </div>
               <div>
-                <Label className="text-[#13312A] arabic-text">العرض (سم)</Label>
+                <Label className="text-[#13312A] arabic-text">الكتف (سم)</Label>
                 <Input 
                   type="number"
                   placeholder="0"
@@ -786,6 +811,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
                     ...prev,
                     measurements: { ...prev.measurements!, shoulder: Number(e.target.value) }
                   }))}
+                  onFocus={handleFocus}
                 />
               </div>
               <div>
@@ -799,6 +825,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
                     ...prev,
                     measurements: { ...prev.measurements!, waist: Number(e.target.value) }
                   }))}
+                  onFocus={handleFocus}
                 />
               </div>
               <div>
@@ -812,6 +839,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
                     ...prev,
                     measurements: { ...prev.measurements!, chest: Number(e.target.value) }
                   }))}
+                  onFocus={handleFocus}
                 />
               </div>
             </CardContent>
@@ -823,7 +851,7 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
             <CardHeader>
               <CardTitle className="text-[#13312A] arabic-text text-lg">معلومات الدفع</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <Label className="text-[#13312A] arabic-text">المجموع</Label>
                 <Input 
@@ -831,7 +859,8 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
                   placeholder="0"
                   className="bg-white border-[#C69A72] text-right"
                   value={formData.total}
-                  readOnly
+                  onChange={(e) => setFormData(prev => ({ ...prev, total: Number(e.target.value) }))}
+                  onFocus={handleFocus}
                 />
               </div>
               <div>
@@ -842,23 +871,60 @@ export function NewInvoiceDialogWithDB({ isOpen, onOpenChange, onInvoiceCreated 
                   className="bg-white border-[#C69A72] text-right"
                   value={formData.paidAmount}
                   onChange={(e) => setFormData(prev => ({ ...prev, paidAmount: Number(e.target.value) }))}
+                  onFocus={handleFocus}
                 />
               </div>
               <div>
-                <Label className="text-[#13312A] arabic-text">الحالة</Label>
-                <Select 
-                  value={formData.status}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
-                >
-                  <SelectTrigger className="bg-white border-[#C69A72] text-right">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="معلق">معلق</SelectItem>
-                    <SelectItem value="جزئي">جزئي</SelectItem>
-                    <SelectItem value="مدفوع">مدفوع</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label className="text-[#13312A] arabic-text">المتبقي</Label>
+                <Input 
+                  type="number"
+                  placeholder="0"
+                  className="bg-gray-50 border-[#C69A72] text-right"
+                  value={remainingAmount}
+                  readOnly
+                />
+              </div>
+              <div>
+                <Label className="text-[#13312A] arabic-text">تاريخ الدفع</Label>
+                <Input 
+                  type="date"
+                  className="bg-white border-[#C69A72] text-right"
+                  value={paymentDate}
+                  onChange={(e) => setPaymentDate(e.target.value)}
+                />
+              </div>
+            </CardContent>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-[#13312A] arabic-text">الحالة</Label>
+                  <Select 
+                    value={formData.status}
+                    onValueChange={(value: string) => setFormData(prev => ({ ...prev, status: value }))}
+                  >
+                    <SelectTrigger className="bg-white border-[#C69A72] text-right">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="معلق">معلق</SelectItem>
+                      <SelectItem value="جزئي">جزئي</SelectItem>
+                      <SelectItem value="مدفوع">مدفوع</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end">
+                  <div className={`px-3 py-2 rounded-lg text-sm font-medium w-full text-center ${
+                    formData.status === 'مدفوع' 
+                      ? 'bg-green-100 text-green-800 border border-green-200' 
+                      : formData.status === 'جزئي'
+                      ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                      : 'bg-red-100 text-red-800 border border-red-200'
+                  }`}>
+                    {formData.status === 'مدفوع' && '✓ مدفوع بالكامل'}
+                    {formData.status === 'جزئي' && '⚠ مدفوع جزئياً'}
+                    {formData.status === 'معلق' && '✗ غير مدفوع'}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

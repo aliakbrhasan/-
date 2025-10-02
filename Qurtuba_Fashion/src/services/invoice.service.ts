@@ -1,5 +1,5 @@
 import { invoicesAdapter } from '@/adapters/invoices.adapter';
-import type { Invoice, NewInvoice, InvoiceItem } from '@/db/database.service';
+import type { Invoice, NewInvoice } from '@/db/database.service';
 
 export interface InvoiceFormData {
   customerName: string;
@@ -96,13 +96,37 @@ export class InvoiceService {
 
   // Mark invoice as paid
   static async markAsPaid(id: string): Promise<Invoice> {
+    console.log('InvoiceService.markAsPaid called with id:', id);
+    
     try {
-      return await this.updateInvoice(id, { 
+      // Get all invoices to find the one we want to update
+      console.log('Getting all invoices...');
+      const invoices = await this.getInvoices();
+      console.log('Invoices retrieved:', invoices.length);
+      
+      const invoice = invoices.find(inv => inv.id === id);
+      console.log('Found invoice:', invoice);
+      
+      if (!invoice) {
+        throw new Error(`Invoice with id ${id} not found`);
+      }
+      
+      // Update only the necessary fields
+      const updates = {
         status: 'مدفوع',
-        paid_amount: 0 // This will be set to the total amount
-      });
+        paid_amount: invoice.total
+      };
+      
+      console.log('Updating invoice with:', updates);
+      console.log('Calling updateInvoice...');
+      
+      const result = await this.updateInvoice(id, updates);
+      console.log('updateInvoice result:', result);
+      
+      return result;
     } catch (error) {
       console.error('Error marking invoice as paid:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       throw error;
     }
   }
@@ -124,21 +148,8 @@ export class InvoiceService {
       errors.push('رقم الهاتف مطلوب');
     }
 
-    if (data.items.length === 0) {
-      errors.push('يجب إضافة عنصر واحد على الأقل');
-    }
-
-    data.items.forEach((item, index) => {
-      if (!item.itemName.trim()) {
-        errors.push(`اسم العنصر ${index + 1} مطلوب`);
-      }
-      if (item.quantity <= 0) {
-        errors.push(`كمية العنصر ${index + 1} يجب أن تكون أكبر من صفر`);
-      }
-      if (item.unitPrice <= 0) {
-        errors.push(`سعر العنصر ${index + 1} يجب أن يكون أكبر من صفر`);
-      }
-    });
+    // عناصر الفاتورة أصبحت اختيارية؛ لا نفرض وجودها أو تفاصيلها
+    // إن وُجدت عناصر سنقوم فقط بتجاهل التحقق التفصيلي لتبسيط الإدخال
 
     if (data.total <= 0) {
       errors.push('المجموع يجب أن يكون أكبر من صفر');

@@ -300,7 +300,10 @@ export default function App() {
   };
 
   const handleViewInvoiceDetails = (invoice: any) => {
-    setSelectedInvoice(invoice);
+    // إذا كان invoice كائن كامل، نأخذ الـ ID
+    // إذا كان ID فقط، نستخدمه مباشرة
+    const invoiceId = typeof invoice === 'string' ? invoice : invoice.id;
+    setSelectedInvoice({ id: invoiceId });
     setCurrentPage('invoiceDetails');
   };
 
@@ -357,7 +360,7 @@ export default function App() {
       case 'invoiceDetails':
         return selectedInvoice ? (
           <InvoiceDetailsPage
-            invoice={selectedInvoice}
+            invoiceId={selectedInvoice.id}
             onBack={() => {
               setSelectedInvoice(null);
               setCurrentPage('invoices');

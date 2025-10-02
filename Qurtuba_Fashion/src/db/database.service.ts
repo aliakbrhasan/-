@@ -1,6 +1,15 @@
 import { supabase } from './client';
-import type { User, Role, Customer, CustomerOrder } from '@/types/user';
+import type { User, Role } from '@/types/user';
 import type { Order, NewOrder } from '@/ports/orders';
+
+// Customer interface
+export interface Customer {
+  id: string;
+  name: string;
+  phone?: string;
+  address?: string;
+  created_at: string;
+}
 
 // Invoice interfaces
 export interface Invoice {
@@ -478,31 +487,47 @@ export class DatabaseService {
   }
 
   async updateInvoice(id: string, updates: Partial<Invoice>): Promise<Invoice> {
+    console.log('DatabaseService.updateInvoice called with id:', id, 'updates:', updates);
+    
     try {
+      // Only update fields that are provided
+      const updateData: any = {};
+      if (updates.customer_id !== undefined) updateData.customer_id = updates.customer_id;
+      if (updates.customer_name !== undefined) updateData.customer_name = updates.customer_name;
+      if (updates.customer_phone !== undefined) updateData.customer_phone = updates.customer_phone;
+      if (updates.customer_address !== undefined) updateData.customer_address = updates.customer_address;
+      if (updates.total !== undefined) updateData.total = updates.total;
+      if (updates.paid_amount !== undefined) updateData.paid_amount = updates.paid_amount;
+      if (updates.status !== undefined) updateData.status = updates.status;
+      if (updates.due_date !== undefined) updateData.due_date = updates.due_date;
+      if (updates.notes !== undefined) updateData.notes = updates.notes;
+
+      console.log('Updating invoice with data:', updateData);
+      console.log('Calling Supabase update...');
+
       const { data, error } = await supabase
         .from('invoices')
-        .update({
-          customer_id: updates.customer_id,
-          customer_name: updates.customer_name,
-          customer_phone: updates.customer_phone,
-          customer_address: updates.customer_address,
-          total: updates.total,
-          paid_amount: updates.paid_amount,
-          status: updates.status,
-          due_date: updates.due_date,
-          notes: updates.notes
-        })
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
 
-      if (error) throw error;
-      return this.mapSupabaseInvoiceToInvoice(data);
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+      
+      console.log('Supabase update successful, data:', data);
+      const result = this.mapSupabaseInvoiceToInvoice(data);
+      console.log('Mapped result:', result);
+      return result;
     } catch (error) {
       console.warn('Supabase error, using local data:', error);
       const invoiceIndex = this.localData.invoices.findIndex(i => i.id === id);
       if (invoiceIndex !== -1) {
+        console.log('Updating local data...');
         this.localData.invoices[invoiceIndex] = { ...this.localData.invoices[invoiceIndex], ...updates };
+        console.log('Local data updated:', this.localData.invoices[invoiceIndex]);
         return this.localData.invoices[invoiceIndex];
       }
       throw new Error('Invoice not found');
