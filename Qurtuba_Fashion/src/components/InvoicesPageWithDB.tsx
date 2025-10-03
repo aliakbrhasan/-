@@ -272,10 +272,9 @@ export function InvoicesPageWithDB({ onCreateInvoice, onViewInvoiceDetails, onMa
         onMarkAsPaid(invoiceId);
       }
       // Show success message
-      console.log('تم تمييز الفاتورة كمدفوعة بنجاح');
+      alert('تم تمييز الفاتورة كمدفوعة بنجاح!');
     } catch (error) {
       console.error('Error marking invoice as paid:', error);
-      console.error('Error details:', error);
       // Show error message with more details
       alert(`حدث خطأ في تمييز الفاتورة كمدفوعة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
     }

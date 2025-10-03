@@ -420,6 +420,22 @@ export class DatabaseService {
     }
   }
 
+  async getInvoiceById(id: string): Promise<Invoice | null> {
+    try {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return this.mapSupabaseInvoiceToInvoice(data);
+    } catch (error) {
+      console.warn('Supabase error, using local data:', error);
+      return this.localData.invoices.find(invoice => invoice.id === id) || null;
+    }
+  }
+
   async createInvoice(invoice: NewInvoice): Promise<Invoice> {
     try {
       // Sanitize text data to ensure proper UTF-8 encoding

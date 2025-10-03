@@ -38,7 +38,8 @@ export class InvoiceService {
   // Get all invoices
   static async getInvoices(): Promise<Invoice[]> {
     try {
-      return await invoicesAdapter.getInvoices();
+      const { databaseService } = await import('@/db/database.service');
+      return await databaseService.getInvoices();
     } catch (error) {
       console.error('Error fetching invoices:', error);
       throw error;
@@ -77,7 +78,8 @@ export class InvoiceService {
   // Update invoice
   static async updateInvoice(id: string, updates: Partial<Invoice>): Promise<Invoice> {
     try {
-      return await invoicesAdapter.updateInvoice(id, updates);
+      const { databaseService } = await import('@/db/database.service');
+      return await databaseService.updateInvoice(id, updates);
     } catch (error) {
       console.error('Error updating invoice:', error);
       throw error;
@@ -99,13 +101,15 @@ export class InvoiceService {
     console.log('InvoiceService.markAsPaid called with id:', id);
     
     try {
-      // Get all invoices to find the one we want to update
-      console.log('Getting all invoices...');
-      const invoices = await this.getInvoices();
-      console.log('Invoices retrieved:', invoices.length);
+      // Import databaseService dynamically to avoid circular dependency
+      console.log('Importing databaseService...');
+      const { databaseService } = await import('@/db/database.service');
+      console.log('databaseService imported successfully:', !!databaseService);
       
-      const invoice = invoices.find(inv => inv.id === id);
-      console.log('Found invoice:', invoice);
+      // Get the invoice first to get its total amount
+      console.log('Getting invoice by id...');
+      const invoice = await databaseService.getInvoiceById(id);
+      console.log('Invoice found:', invoice);
       
       if (!invoice) {
         throw new Error(`Invoice with id ${id} not found`);
@@ -118,10 +122,8 @@ export class InvoiceService {
       };
       
       console.log('Updating invoice with:', updates);
-      console.log('Calling updateInvoice...');
-      
       const result = await this.updateInvoice(id, updates);
-      console.log('updateInvoice result:', result);
+      console.log('Update result:', result);
       
       return result;
     } catch (error) {
